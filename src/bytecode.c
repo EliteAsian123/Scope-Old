@@ -419,13 +419,13 @@ static void instDump(size_t i) {
 	// clang-format on
 
 	if (insts[i].inst == LOAD && insts[i].type.id == TYPE_STR) {
-		printf("[%d, %d] %s: %s, %s\n", i, insts[i].scope, instName,
+		printf("[%ld, %d] %s: %s, %s\n", i, insts[i].scope, instName,
 			   insts[i].a.v_string.chars, typestr(insts[i].type.id));
 	} else if (isStringArg) {
-		printf("[%d, %d] %s: %s, %s\n", i, insts[i].scope, instName,
+		printf("[%ld, %d] %s: %s, %s\n", i, insts[i].scope, instName,
 			   insts[i].a.v_string.chars, typestr(insts[i].type.id));
 	} else {
-		printf("[%d, %d] %s: %d, %s\n", i, insts[i].scope, instName,
+		printf("[%ld, %d] %s: %d, %s\n", i, insts[i].scope, instName,
 			   insts[i].a.v_int, typestr(insts[i].type.id));
 	}
 }
@@ -842,7 +842,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
 					push((StackElem){.type = type(TYPE_INT), .v.v_int = a.v.v_int % b.v.v_int});
 				} else {
-					ierr("Invalid types for `%`.");
+					ierr("Invalid types for `%%`.");
 				}
 
 				break;
@@ -958,11 +958,11 @@ void bc_end() {
 	// Check for stack leaks
 
 	if (stackCount != 0) {
-		fprintf(stderr, "Stack Error: Stack leak detected. Ending size `%d`.\n", stackCount);
+		fprintf(stderr, "Stack Error: Stack leak detected. Ending size `%ld`.\n", stackCount);
 	}
 
 	if (locstackCount != 0) {
-		fprintf(stderr, "Stack Error: Location stack leak detected. Ending size `%d`.\n", locstackCount);
+		fprintf(stderr, "Stack Error: Location stack leak detected. Ending size `%ld`.\n", locstackCount);
 	}
 
 	// Free StackElems
@@ -976,6 +976,6 @@ void bc_end() {
 	// End
 
 	free(funcs);
-	//free(insts);
-	//malloc_stats();
+	// free(insts);
+	// malloc_stats();
 }
