@@ -1,0 +1,25 @@
+{
+    "name": "scope-language",
+    "displayName": "Scope Language",
+    "description": "Syntax highlighting for the Scope programming language.",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.65.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "scope",
+            "aliases": ["Scope", "scope"],
+            "extensions": [".scope"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "scope",
+            "scopeName": "source.scope",
+            "path": "./syntaxes/scope.tmLanguage.json"
+        }]
+    }
+}

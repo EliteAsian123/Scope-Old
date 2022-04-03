@@ -1,0 +1,9 @@
+#insert Standard/Core.scope
+
+println("What is your name?");
+string name = input();
+
+println("Hello, " + name + ", how you today?");
+string doings = input();
+
+println("I am doing " + doings + " too!");

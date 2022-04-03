@@ -1,0 +1,17 @@
+#insert Standard/Core.scope
+
+for (int i = 0, i <= 15, i++) {
+	string s = "";
+	
+	if (i % 3 == 0) {
+		s = s + "Fizz";
+	}
+	if (i % 5 == 0) {
+		s = s + "Buzz";
+	}
+	if (s == "") {
+		s = (string) i;
+	}
+	
+	println(s);
+}

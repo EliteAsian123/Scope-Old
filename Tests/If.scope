@@ -1,0 +1,33 @@
+#insert Standard/Core.scope
+
+if (true) {
+	println("Yay!");
+} else {
+	println("No...");
+}
+
+if (10 > 4) {
+	println("Yay!");
+} else {
+	println("No...");
+}
+
+if (5 == 5 && 3 != 7) {
+	println("Yay!");
+} else {
+	println("No...");
+}
+
+if (5 != 5 || 6 == 6) {
+	println("Yay!");
+} else {
+	println("No...");
+}
+
+int a = 123;
+int b = 433;
+if (a < b) {
+	println("Yay!");
+} else {
+	println("No...");
+}

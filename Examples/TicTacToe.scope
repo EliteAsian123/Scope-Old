@@ -1,0 +1,152 @@
+#insert Standard/Core.scope
+#insert Standard/ArrayUtils.scope
+
+bool isAgainstBot = false;
+auto turn = "X";
+int turnNum = 0;
+
+auto board = stringArray(9, " ");
+
+func void printBoard() {
+	println("");
+	println(board[0] + "|" + board[1] + "|" + board[2] + "    " + "1|2|3");
+	println("-----    -----");
+	println(board[3] + "|" + board[4] + "|" + board[5] + "    " + "4|5|6");
+	println("-----    -----");
+	println(board[6] + "|" + board[7] + "|" + board[8] + "    " + "7|8|9");
+	println("");
+}
+
+func string getWinner(string[] nboard) {
+	func bool eq(int a, int b, int c) {
+		ret nboard[a] != " " && nboard[a] == nboard[b] && nboard[a] == nboard[c];
+	}
+	
+	// Check rows
+	for (int i = 0, i < 3, i++) {
+		if (eq(i * 3, i * 3 + 1, i * 3 + 2)) {
+			ret nboard[i * 3];
+		}
+	}
+	
+	// Check columns 
+	for (int i = 0, i < 3, i++) {
+		if (eq(i, i + 3, i + 6)) {
+			ret nboard[i];
+		}
+	}
+	
+	// Check diagonals
+	if (eq(0, 4, 8)) {
+		ret nboard[0];
+	}
+	if (eq(2, 4, 6)) {
+		ret nboard[2];
+	}
+	
+	ret " ";
+}
+
+func void doTurn(bool isInvalid) {
+	printBoard();
+	
+	if (isInvalid) {
+		println("Invalid spot!");
+	} else {
+		println("");
+	}
+	print("Where you would you like to go " + turn + "? ");
+	
+	string in = input();
+	int index = atoi(in);
+	
+	if (index >= 1 && index <= 9) {
+		if (board[index - 1] == " ") {
+			board[index - 1] = turn;
+			ret;
+		}
+	}
+	
+	doTurn(true);
+}
+
+func void doBotTurn() {
+	// TODO: Minimax
+	
+	string[][] possiblePositions = new string[][9];
+	int[] possibleScores = new int[9];
+	
+	// Generate possible positions 
+	
+	for (int i = 0, i < 9, i++) {
+		string[] duppedBoard = board;
+		if (duppedBoard[i] == " ") {
+			duppedBoard[i] = turn;
+			possibleScores[i] = 0;
+		} else {
+			possibleScores[i] = -1;
+		}
+		
+		possiblePositions[i] = duppedBoard;
+	}
+	
+	// Gather scores
+	
+	for (int i = 0, i < 9, i++) {
+		if (possibleScores[i] != -1) {
+			if (getWinner(possiblePositions[i]) == turn) {
+				possibleScores[i] = 1;
+			}
+		}
+	}
+	
+	// Choose the highest
+	
+	string[] highestBoard = possiblePositions[0];
+	int highestScore = possibleScores[0];
+	for (int i = 1, i < 9, i++) {
+		if (possibleScores[i] > highestScore) {
+			highestScore = possibleScores[i];
+			highestBoard = possiblePositions[i];
+		}
+	}
+	
+	// Set the board
+	
+	board = highestBoard;
+}
+
+func void gameLoop() {
+	print("Would you like to play against a bot? (y/n) ");
+	if (input() == "y") {
+		isAgainstBot = true;
+	}
+
+	turn = "X";
+	turnNum = 0;
+	while (getWinner(board) == " " && turnNum < 9) {
+		turnNum++;
+		
+		if (turn == "O" && isAgainstBot) {
+			doBotTurn();
+		} else {
+			doTurn(false);
+		}
+		
+		if (turn == "X") {
+			turn = "O";
+		} else {
+			turn = "X";
+		}
+	}
+	
+	auto winner = getWinner(board);
+	printBoard();
+	if (winner == " ") {
+		println("It is a tie!");
+	} else {
+		println(winner + " wins!");
+	}
+}
+
+gameLoop();

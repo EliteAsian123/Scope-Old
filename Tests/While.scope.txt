@@ -1,0 +1,13 @@
+Loop 0
+Loop 1
+Loop 2
+Loop 3
+Loop 4
+End 5
+
+Infinite Loop? 0
+Infinite Loop? 1
+Infinite Loop? 2
+Infinite Loop? 3
+Infinite Loop? 4
+Nope.

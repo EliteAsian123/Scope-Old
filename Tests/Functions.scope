@@ -1,0 +1,27 @@
+#insert Standard/Core.scope
+
+func bool bestBool(int i) {
+	ret i == 123;
+}
+
+func void myFunction() {
+	func int bestNumber() {
+		ret 123;
+	}
+
+	if (bestNumber() == bestNumber()) {
+		println("It is the best number!");
+	}
+	
+	function(int) anotherBest = bestNumber;
+	if (bestNumber == anotherBest) {
+		println("It is the same function!");
+	}
+	
+	if (bestBool(bestNumber())) {
+		println("It is the best boolean!");
+	}
+}
+
+myFunction();
+myFunction();

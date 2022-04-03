@@ -1,0 +1,8 @@
+#insert Standard/Core.scope
+
+string a = "This is";
+println(a);
+
+string b = "awesome!";
+a = a + " " + b;
+println(a);

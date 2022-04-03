@@ -1,0 +1,105 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Scope",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#directives"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#numbers"
+		},
+		{
+			"include": "#boolean"
+		},
+		{
+			"include": "#comments"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.scope",
+					"match": "\\b(extern|if|else|while|ret|break|func|swap|new|for)\\b"
+				}
+			]
+		},
+		"directives": {
+			"patterns": [
+				{
+					"name": "keyword.control.directive.scope",
+					"match": "#\\b(insert)\\b"
+				}
+			]
+		},
+		"numbers": {
+			"patterns": [
+				{
+					"name": "constant.numeric.scope",
+					"match": "-?\\b[0-9]+\\b"
+				},
+				{
+					"name": "constant.numeric.scope",
+					"match": "-?\\b([0-9]*[.])?[0-9]+f\\b"
+				}
+			]
+		},
+		"types": {
+			"patterns": [
+				{
+					"name": "storage.type.built-in.scope",
+					"match": "\\b(auto|void|int|bool|string|float|function)\\b"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.scope",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.scope",
+					"match": "\\\\."
+				}
+			]
+		},
+		"comments": {
+			"patterns": [
+				{
+					"include": "#comment-line"
+				},
+				{
+					"include": "#comment-block"
+				}
+			]
+		},
+		"comment-block": {
+			"name": "comment.block.scope",
+			"begin": "/\\*",
+			"end": "\\*/"
+		},
+		"comment-line": {
+			"name": "comment.single.line.scope",
+			"begin": "//",
+			"end": "$"
+		},
+		"boolean": {
+			"patterns": [
+				{
+					"name": "constant.language.boolean.scope",
+					"match": "\\b(true|false)\\b"
+				}
+			]
+		}
+	},
+	"scopeName": "source.scope"
+}

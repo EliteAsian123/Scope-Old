@@ -1,0 +1,25 @@
+func bool isPrime(int n) {
+	if (n < 2) {
+		ret false;
+	}
+	
+	for (int i = 2, i * i <= n, i++) {
+		if (n % i == 0) {
+			ret false;
+		}
+	}
+	
+	ret true;
+}
+
+func bool isComposite(int n) {
+	ret !isPrime(n);
+}
+
+func int factorial(int n) {
+	if (n <= 1) {
+		ret 1;
+	}
+	
+	ret factorial(n - 1) * n;
+}

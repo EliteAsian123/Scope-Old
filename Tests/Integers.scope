@@ -1,0 +1,13 @@
+#insert Standard/Core.scope
+
+int a = 32 + 64 * 23 - 15;
+println((string) a);
+
+a = INT_MAX % 1000;
+println((string) a);
+
+a = 6000 / 3;
+println((string) a);
+
+int b = 64 * 14;
+println((string) (a + b));

@@ -1,0 +1,6 @@
+It is the best number!
+It is the same function!
+It is the best boolean!
+It is the best number!
+It is the same function!
+It is the best boolean!

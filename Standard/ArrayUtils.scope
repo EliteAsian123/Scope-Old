@@ -1,0 +1,7 @@
+func string[] stringArray(int len, string init) {
+	string[] arr = new string[len];
+	for (int i = 0, i < arr.length, i++) {
+		arr[i] = init;
+	}
+	ret arr;
+}

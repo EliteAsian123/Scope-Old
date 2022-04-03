@@ -1,0 +1,13 @@
+#insert Standard/Core.scope
+
+int na = 450;
+int nb = 123;
+swap(na, nb);
+println((string) na);
+println((string) nb);
+
+string sa = "Hello";
+string sb = "World";
+swap(sa, sb);
+println(sa);
+println(sb);

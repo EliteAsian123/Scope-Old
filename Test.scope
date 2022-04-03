@@ -1,0 +1,3 @@
+#insert Standard/Core.scope
+
+println("Hello, World!");

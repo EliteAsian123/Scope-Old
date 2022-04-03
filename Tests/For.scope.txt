@@ -1,0 +1,13 @@
+Loop 0
+Loop 1
+Loop 2
+Loop 3
+Loop 4
+For loop finished.
+
+Long Loop? 0
+Long Loop? 1
+Long Loop? 2
+Long Loop? 3
+Long Loop? 4
+Nope.

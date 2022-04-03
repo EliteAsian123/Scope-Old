@@ -1,0 +1,15 @@
+func void fFor(int s, int n, function(void, int) f) {
+	int i = s;
+	while (i < n) {
+		f(i);
+		i++;
+	}
+}
+
+func void fRepeat(int n, function(void) f) {
+	int i = 1;
+	while (i < n) {
+		f();
+		i++;
+	}
+}

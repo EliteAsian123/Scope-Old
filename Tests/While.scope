@@ -1,0 +1,20 @@
+#insert Standard/Core.scope
+
+int i = 0;
+while (i < 5) {
+	println("Loop " + (string) i);
+	i++;
+}
+println("End " + (string) i);
+println("");
+
+i = 0;
+while (true) {
+	if (i >= 5) {
+		println("Nope.");
+		break;
+	}
+
+	println("Infinite Loop? " + (string) i);
+	i++;
+}

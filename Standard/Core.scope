@@ -1,0 +1,19 @@
+int INT_MIN = -2147483648;
+int INT_MAX = 2147483647;
+
+func void print(string str) {
+	extern(str, 0);
+}
+
+func void println(string str) {
+	print(str + "\n");
+}
+
+func string input() {
+	ret extern(1);
+}
+
+// TODO: atoi is dangerous. Use something else.
+func int atoi(string str) {
+	ret extern(str, 2);
+}
