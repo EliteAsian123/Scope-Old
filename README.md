@@ -22,7 +22,13 @@ $ sudo apt install bison
 ## Building
 
 ```bash
+# These warnings are normal
 $ sh build.sh
+src/scope.y: warning: 1 shift/reduce conflict [-Wconflicts-sr]
+src/output/scope.tab.c: In function ‘yyparse’:
+src/output/scope.tab.c:1486:16: warning: implicit declaration of function ‘yylex’ [-Wimplicit-function-declaration]
+ 1486 |       yychar = yylex ();
+      |                ^~~~~
 ```
 
 ## Testing
