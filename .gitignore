@@ -2,3 +2,4 @@ scope
 src/output/scope.tab.c
 src/output/scope.tab.h
 src/output/scope.yy.c
+Test.scope
