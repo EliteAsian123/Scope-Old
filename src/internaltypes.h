@@ -46,6 +46,7 @@ typedef struct {
 	char* name;
 	void* ptr;
 	bool fromArgs;
+	size_t referenceId;
 } Object;
 
 typedef struct {

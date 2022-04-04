@@ -75,7 +75,7 @@ static ValueHolder strToValueHolder(TypeInfo type, const void* ptr) {
 		.chars = malloc(str.len),
 	};
 	memcpy(v.v_string.chars, str.chars, str.len);
-	
+
 	return v;
 }
 
@@ -131,6 +131,19 @@ static ValueHolder createDefaultArray(TypeInfo type) {
 	return (ValueHolder){.v_array = a};
 }
 
+static void disposeString(const TypeInfo type, const void* ptr) {
+	String str = *(String*) ptr;
+	free(str.chars);
+}
+
+static void disposeArray(const TypeInfo type, const void* ptr) {
+	Array arr = *(Array*) ptr;
+	for (size_t i = 0; i < arr.len; i++) {
+		dispose(type.args[0], &arr.arr[i]);
+	}
+	free(arr.arr);
+}
+
 const Type types[] = {
 	{
 		.displayName = "void",
@@ -156,6 +169,8 @@ const Type types[] = {
 		.fromStackElem = strFromStackElem,
 		.toValueHolder = strToValueHolder,
 		.createDefault = createDefaultStr,
+		.disposable = true,
+		.dispose = disposeString,
 	},
 	{
 		.displayName = "float",
@@ -177,6 +192,8 @@ const Type types[] = {
 		.fromStackElem = arrayFromStackElem,
 		.toValueHolder = arrayToValueHolder,
 		.createDefault = createDefaultArray,
+		.disposable = true,
+		.dispose = disposeArray,
 	},
 };
 static_assert(sizeof(types) / sizeof(Type) == _TYPES_ENUM_LEN, "Update enum or type array.");
@@ -215,4 +232,10 @@ void* typedup(int id, const void* ptr) {
 	void* p = malloc(size);
 	memcpy(p, ptr, size);
 	return p;
+}
+
+void dispose(const TypeInfo type, const void* ptr) {
+	if (types[type.id].disposable) {
+		types[type.id].dispose(type, ptr);
+	}
 }

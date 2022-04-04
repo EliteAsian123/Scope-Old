@@ -62,6 +62,11 @@ typedef struct {
 	size_t instsCount;
 } InstBuffer;
 
+typedef struct {
+	Object obj;
+	size_t uses;
+} Referenceable;
+
 // Interpret stage
 static CallFrame frames[STACK_SIZE];
 static size_t framesCount;
@@ -181,7 +186,8 @@ static int pushFunc(int loc, TypeInfo type) {
 }
 
 static void delVarAtIndex(ObjectList* o, size_t i) {
-	// TODO: Free
+	// Free
+	dispose(o->vars[i].type, o->vars[i].ptr);
 	free(o->vars[i].name);
 	free(o->vars[i].ptr);
 	freeTypeInfo(o->vars[i].type);

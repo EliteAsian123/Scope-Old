@@ -15,6 +15,8 @@ typedef struct {
 	void* (*fromStackElem)(StackElem e);
 	ValueHolder (*toValueHolder)(TypeInfo type, const void* ptr);
 	ValueHolder (*createDefault)(TypeInfo type);
+	bool disposable;
+	void (*dispose)(TypeInfo type, const void* ptr);
 } Type;
 
 enum Types {
@@ -37,5 +39,6 @@ StackElem ptrToStackElem(TypeInfo type, const void* ptr);
 ValueHolder ptrToValueHolder(TypeInfo type, const void* ptr);
 ValueHolder createDefaultType(TypeInfo type);
 void* typedup(int id, const void* ptr);
+void dispose(TypeInfo type, const void* ptr);
 
 #endif
