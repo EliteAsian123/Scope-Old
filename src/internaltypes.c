@@ -54,3 +54,17 @@ char* strToCstr(const String str) {
 
 	return cstr;
 }
+
+StackElem objectToStackElem(Object obj) {
+	return (StackElem){
+		.type = obj.type,
+		.v = obj.v,
+	};
+}
+
+Object stackElemToObject(StackElem elem) {
+	return (Object){
+		.type = elem.type,
+		.v = elem.v,
+	};
+}

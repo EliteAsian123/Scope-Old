@@ -42,11 +42,11 @@ typedef struct {
 
 typedef struct {
 	int scope;
+	int referenceScope;
 	TypeInfo type;
 	char* name;
-	void* ptr;
+	ValueHolder v;
 	bool fromArgs;
-	size_t referenceId;
 } Object;
 
 typedef struct {
@@ -61,5 +61,7 @@ void freeTypeInfo(TypeInfo a);
 TypeInfo dupTypeInfo(TypeInfo a);
 String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
+StackElem objectToStackElem(Object obj);
+Object stackElemToObject(StackElem elem);
 
 #endif

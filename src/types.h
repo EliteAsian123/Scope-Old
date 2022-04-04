@@ -12,11 +12,9 @@
 typedef struct {
 	const char* displayName;
 	size_t (*size)(const void* ptr);
-	void* (*fromStackElem)(StackElem e);
-	ValueHolder (*toValueHolder)(TypeInfo type, const void* ptr);
 	ValueHolder (*createDefault)(TypeInfo type);
 	bool disposable;
-	void (*dispose)(TypeInfo type, const void* ptr);
+	void (*dispose)(TypeInfo type, ValueHolder v);
 } Type;
 
 enum Types {
@@ -34,11 +32,8 @@ enum Types {
 extern const Type types[];
 
 const char* typestr(int id);
-void* stackElemToPtr(StackElem e);
-StackElem ptrToStackElem(TypeInfo type, const void* ptr);
-ValueHolder ptrToValueHolder(TypeInfo type, const void* ptr);
 ValueHolder createDefaultType(TypeInfo type);
 void* typedup(int id, const void* ptr);
-void dispose(TypeInfo type, const void* ptr);
+void dispose(TypeInfo type, ValueHolder v);
 
 #endif

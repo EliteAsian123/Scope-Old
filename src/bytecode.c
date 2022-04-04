@@ -187,9 +187,8 @@ static int pushFunc(int loc, TypeInfo type) {
 
 static void delVarAtIndex(ObjectList* o, size_t i) {
 	// Free
-	dispose(o->vars[i].type, o->vars[i].ptr);
+	dispose(o->vars[i].type, o->vars[i].v);
 	free(o->vars[i].name);
-	free(o->vars[i].ptr);
 	freeTypeInfo(o->vars[i].type);
 
 	// Ripple down
@@ -222,7 +221,7 @@ static void dupVar(ObjectList* o, Object obj) {
 	Object d = obj;
 	d.name = strdup(obj.name);
 	d.type = dupTypeInfo(obj.type);
-	d.ptr = typedup(d.type.id, obj.ptr);
+	d.v = obj.v;
 
 	setVar(o, d);
 }
@@ -250,11 +249,8 @@ static bool isVar(ObjectList* o, const char* n) {
 
 static void disposeVar(ObjectList* o) {
 	for (size_t i = 0; i < o->varsCount; i++) {
-		if (o->vars[i].ptr != NULL) {
-			free(o->vars[i].name);
-			free(o->vars[i].ptr);
-			freeTypeInfo(o->vars[i].type);
-		}
+		free(o->vars[i].name);
+		freeTypeInfo(o->vars[i].type);
 	}
 	free(o->vars);
 }
@@ -495,7 +491,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					ierr("Functions from arguments can only be called.");
 				}
 
-				push(ptrToStackElem(obj.type, obj.ptr));
+				push(objectToStackElem(obj));
 				break;
 			case LOADA:
 				pushArg(strdup(insts[i].a.v_ptr));
@@ -513,8 +509,9 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				obj = (Object){
 					.name = strdup(insts[i].a.v_ptr),
 					.type = dupTypeInfo(b.type),
-					.ptr = stackElemToPtr(b),
+					.v = b.v,
 					.scope = curScope,
+					.referenceScope = curScope,
 				};
 				setVar(frame.o, obj);
 				break;
@@ -533,8 +530,9 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				obj = (Object){
 					.name = strdup(insts[i].a.v_ptr),
 					.type = dupTypeInfo(a.type),
-					.ptr = stackElemToPtr(a),
+					.v = a.v,
 					.scope = obj.scope,
+					.scope = obj.referenceScope,
 				};
 				setVar(frame.o, obj);
 				break;
@@ -555,7 +553,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					ierr("Invoke statement cannot be referencing a non-void function.");
 				}
 
-				FuncPointer f = funcs[*(int*) obj.ptr];
+				FuncPointer f = funcs[obj.v.v_int];
 				s = insts[f.location].scope;
 
 				ObjectList fo;
@@ -586,8 +584,9 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					Object vo = (Object){
 						.name = strdup(f.args[v]),
 						.type = dupTypeInfo(e.type),
-						.ptr = stackElemToPtr(e),
+						.v = e.v,
 						.scope = s,
+						// TODO: .referenceScope =
 						.fromArgs = true,
 					};
 					setVar(&fo, vo);
@@ -708,7 +707,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = *(Array*) obj.ptr;
+				arr = obj.v.v_array;
 
 				if (a.v.v_int >= arr.len) {
 					ierr("Index must be less than the length.");
@@ -738,7 +737,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = *(Array*) obj.ptr;
+				arr = obj.v.v_array;
 
 				if (a.v.v_int >= arr.len) {
 					ierr("Index must be less than the length.");
@@ -757,7 +756,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = *(Array*) obj.ptr;
+				arr = obj.v.v_array;
 
 				push((StackElem){
 					.type = type(TYPE_INT),
