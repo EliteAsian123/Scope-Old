@@ -2,7 +2,9 @@
 #define S_INTERNALTYPES_H
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define type(...) \
 	(TypeInfo) { .id = __VA_ARGS__ }
@@ -56,5 +58,7 @@ typedef struct {
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 void freeTypeInfo(TypeInfo a);
 TypeInfo dupTypeInfo(TypeInfo a);
+String cstrToStr(const char* cstr);
+char* strToCstr(const String str);
 
 #endif

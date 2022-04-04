@@ -12,19 +12,23 @@ static void input() {
 	char in[INPUT_BUFFER_SIZE];
 	fgets(in, INPUT_BUFFER_SIZE, stdin);
 
-	// Get rid of the new line
-	int size = strlen(in) - 1;
-	char* str = calloc(size, sizeof(char));
-	strncpy(str, in, size);
-	str[size] = '\0';
+	// Convert to String (also get rid of new line)
+	int len = strlen(in) - 1;
+	String str;
+	str.len = len;
+	str.chars = malloc(len);
+	memcpy(str.chars, in, len);
 
-	// Push
-	push((StackElem){.type = type(TYPE_STR), .v.v_ptr = str});
+	push((StackElem){.type = type(TYPE_STR), .v.v_string = str});
 }
 
 static void stringToInt() {
 	StackElem a = pop();
-	push((StackElem){.type = type(TYPE_INT), .v.v_int = atoi(a.v.v_ptr)});
+
+	// Convert str to cstr then use atoi
+	char* str = strToCstr(a.v.v_string);
+	push((StackElem){.type = type(TYPE_INT), .v.v_int = atoi(str)});
+	free(str);
 }
 
 const ExternPtr externs[] = {

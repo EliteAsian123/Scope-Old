@@ -70,9 +70,12 @@ static ValueHolder strToValueHolder(TypeInfo type, const void* ptr) {
 	String str = *(String*) ptr;
 
 	ValueHolder v;
-	v.v_string.len = v.v_string.len;
+	v.v_string = (String){
+		.len = str.len,
+		.chars = malloc(str.len),
+	};
 	memcpy(v.v_string.chars, str.chars, str.len);
-
+	
 	return v;
 }
 

@@ -31,11 +31,12 @@
 		ierr("Invalid types for `" #op "`.");                                              \
 	}
 
-#define toStr(x, s)                           \
-	int length = snprintf(NULL, 0, s, x) + 1; \
-	char* str = malloc(length);               \
-	snprintf(str, length, s, x);              \
-	push((StackElem){.type = type(TYPE_STR), .v.v_string = cstrToStr(str)});
+#define toStr(x, s)                                                          \
+	int length = snprintf(NULL, 0, s, x) + 1;                                \
+	char* str = malloc(length);                                              \
+	snprintf(str, length, s, x);                                             \
+	push((StackElem){.type = type(TYPE_STR), .v.v_string = cstrToStr(str)}); \
+	free(str);
 
 #define ierr(...)                                          \
 	fprintf(stderr, "Interpret Error: " __VA_ARGS__ "\n"); \
@@ -341,15 +342,6 @@ void putMoveBuffer(int scope) {
 	instbufferCount--;
 }
 
-static String cstrToStr(const char* ptr) {
-	String str = (String){
-		.len = strlen(ptr),
-	};
-	memcpy(str.chars, ptr, str.len);
-
-	return str;
-}
-
 static bool stringEqual(String a, String b) {
 	if (a.len != b.len) {
 		return false;
@@ -381,7 +373,10 @@ static void instDump(size_t i) {
 	// clang-format off
 	static_assert(_INSTS_ENUM_LEN == 34, "Update bytecode strings.");
 	switch (insts[i].inst) {
-		case LOAD: 		instName = "load"; 							break;
+		case LOAD:
+			instName = "load";
+			isStringArg = insts[i].type.id == TYPE_STR;
+			break;
 		case LOADT: 	instName = "loadt"; 						break;
 		case LOADV: 	instName = "loadv"; 	isStringArg = true; break;
 		case LOADA: 	instName = "loada"; 	isStringArg = true; break;
@@ -411,19 +406,16 @@ static void instDump(size_t i) {
 		case LT: 		instName = "lt"; 							break;
 		case GTE: 		instName = "gte"; 							break;
 		case LTE: 		instName = "lte"; 							break;
-		case CSTR: 		instName = "cstr"; 							break;
+		case CASTS: 	instName = "casts"; 						break;
 		case GOTO: 		instName = "goto"; 							break;
 		case IFN:	 	instName = "ifn"; 							break;
 		default: 		instName = "?"; 							break;
 	}
 	// clang-format on
 
-	if (insts[i].inst == LOAD && insts[i].type.id == TYPE_STR) {
-		printf("[%ld, %d] %s: %s, %s\n", i, insts[i].scope, instName,
-			   insts[i].a.v_string.chars, typestr(insts[i].type.id));
-	} else if (isStringArg) {
-		printf("[%ld, %d] %s: %s, %s\n", i, insts[i].scope, instName,
-			   insts[i].a.v_string.chars, typestr(insts[i].type.id));
+	if (isStringArg) {
+		printf("[%ld, %d] %s: \"%s\", %s\n", i, insts[i].scope, instName,
+			   (char*) insts[i].a.v_ptr, typestr(insts[i].type.id));
 	} else {
 		printf("[%ld, %d] %s: %d, %s\n", i, insts[i].scope, instName,
 			   insts[i].a.v_int, typestr(insts[i].type.id));
@@ -479,7 +471,13 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 		static_assert(_INSTS_ENUM_LEN == 34, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD:
-				push((StackElem){.type = insts[i].type, .v = insts[i].a});
+				if (insts[i].type.id == TYPE_STR) {
+					// We must convert string literals because they are c-strings
+					push((StackElem){.type = insts[i].type, .v.v_string = cstrToStr(insts[i].a.v_ptr)});
+				} else {
+					push((StackElem){.type = insts[i].type, .v = insts[i].a});
+				}
+
 				break;
 			case LOADT:
 				push((StackElem){.type = dupTypeInfo(insts[i].type)});
@@ -818,7 +816,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 
 					// Combine the two strings
 					memcpy(s.chars, a.v.v_string.chars, a.v.v_string.len);
-					memcpy(s.chars + a.v.v_string.len - 1, b.v.v_string.chars, b.v.v_string.len);
+					memcpy(s.chars + a.v.v_string.len, b.v.v_string.chars, b.v.v_string.len);
 
 					// Push onto stack
 					push((StackElem){.type = type(TYPE_STR), .v.v_string = s});
@@ -883,7 +881,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 			case LTE:
 				boolOperation(<=);
 				break;
-			case CSTR:
+			case CASTS:
 				a = pop();
 
 				if (a.type.id == TYPE_INT) {
@@ -898,7 +896,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					}
 				} else {
 					printf("Cannot cast type %d.\n", a.type.id);
-					ierr("Invalid type for `cstr`.");
+					ierr("Invalid type for `casts`.");
 				}
 
 				break;

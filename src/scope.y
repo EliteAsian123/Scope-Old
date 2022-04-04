@@ -137,16 +137,7 @@ statement	: declare
 
 expr		: '(' expr ')'
 			| L_NUMBER { pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = $1}); }
-			| L_STRING {
-					String str = (String){
-						.len = strlen($1),
-					};
-
-					str.chars = malloc(str.len);
-					memcpy(str.chars, $1, str.len);
-					
-					pushi({.inst = LOAD, .type = type(TYPE_STR), .a.v_string = str}); 
-				}
+			| L_STRING { pushi({.inst = LOAD, .type = type(TYPE_STR), .a.v_ptr = $1}); }
 			| L_BOOL { pushi({.inst = LOAD, .type = type(TYPE_BOOL), .a.v_int = $1}); }
 			| L_FLOAT { pushi({.inst = LOAD, .type = type(TYPE_FLOAT), .a.v_float = $1}); }
 			| IDENTIFIER { pushi({.inst = LOADV, .a.v_ptr = $1}); }
@@ -263,7 +254,7 @@ bool_op		: expr T_EQ expr { pushi({.inst = EQ}); }
 			| expr T_OR expr { pushi({.inst = OR}); }
 			;
 
-cast		: '(' T_STR ')' expr { pushi({.inst = CSTR}); } %prec O_CAST
+cast		: '(' T_STR ')' expr { pushi({.inst = CASTS}); } %prec O_CAST
 			;
 
 arr_init	: E_NEW type '[' expr ']' {

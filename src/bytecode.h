@@ -53,7 +53,7 @@ enum Insts {
 	LT,
 	GTE,
 	LTE,
-	CSTR,
+	CASTS,
 	GOTO,
 	IFN,
 	_INSTS_ENUM_LEN
