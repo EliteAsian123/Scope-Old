@@ -4,7 +4,9 @@
 
 static void print() {
 	StackElem a = pop();
-	printf("%s", a.v.v_string.chars);
+	char* cstr = strToCstr(a.v.v_string);
+	printf("%s", cstr);
+	free(cstr);
 }
 
 static void input() {
