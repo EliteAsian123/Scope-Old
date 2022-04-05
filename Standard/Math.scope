@@ -23,3 +23,16 @@ func int factorial(int n) {
 	
 	ret factorial(n - 1) * n;
 }
+
+func float abs(float n) {
+	if (n < 0f) {
+		ret 0f - n;
+	}
+
+	ret n;
+}
+
+func bool approximately(float a, float b, float error) {
+	float diff = abs(a - b);
+	ret diff <= error;
+}

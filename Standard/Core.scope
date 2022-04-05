@@ -13,7 +13,7 @@ func string input() {
 	ret extern(1);
 }
 
-// TODO: atoi is dangerous. Use something else.
+// DEPRECATED
 func int atoi(string str) {
 	ret extern(str, 2);
 }
