@@ -36,18 +36,17 @@ struct TypeInfo {
 typedef struct TypeInfo TypeInfo;
 
 typedef struct {
-	TypeInfo type;
-	ValueHolder v;
-} StackElem;
-
-typedef struct {
-	int scope;
 	int referenceScope;
 	TypeInfo type;
-	char* name;
 	ValueHolder v;
 	bool fromArgs;
 } Object;
+
+typedef struct {
+	char* name;
+	int scope;
+	Object o;
+} NamedObject;
 
 typedef struct {
 	int location;
@@ -61,7 +60,7 @@ void freeTypeInfo(TypeInfo a);
 TypeInfo dupTypeInfo(TypeInfo a);
 String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
-StackElem objectToStackElem(Object obj);
-Object stackElemToObject(StackElem elem);
+NamedObject unnamedToNamed(Object obj, char* name, int scope);
+Object objdup(Object obj);
 
 #endif

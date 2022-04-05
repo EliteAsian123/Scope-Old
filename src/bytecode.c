@@ -9,33 +9,33 @@
 // TODO: size_t for goto and stuff
 // TODO: static checking
 
-#define basicOperation(op)                                                                    \
-	b = pop();                                                                                \
-	a = pop();                                                                                \
-	if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {                                     \
-		push((StackElem){.type = type(TYPE_INT), .v.v_int = a.v.v_int op b.v.v_int});         \
-	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                          \
-		push((StackElem){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float op b.v.v_float}); \
-	} else {                                                                                  \
-		ierr("Invalid types for `" #op "`.");                                                 \
-	}
-
-#define boolOperation(op)                                                                  \
+#define basicOperation(op)                                                                 \
 	b = pop();                                                                             \
 	a = pop();                                                                             \
 	if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {                                  \
-		push((StackElem){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int op b.v.v_int});     \
+		push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int op b.v.v_int});         \
 	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                       \
-		push((StackElem){.type = type(TYPE_BOOL), .v.v_int = a.v.v_float op b.v.v_float}); \
+		push((Object){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float op b.v.v_float}); \
 	} else {                                                                               \
 		ierr("Invalid types for `" #op "`.");                                              \
 	}
 
-#define toStr(x, s)                                                          \
-	int length = snprintf(NULL, 0, s, x) + 1;                                \
-	char* str = malloc(length);                                              \
-	snprintf(str, length, s, x);                                             \
-	push((StackElem){.type = type(TYPE_STR), .v.v_string = cstrToStr(str)}); \
+#define boolOperation(op)                                                               \
+	b = pop();                                                                          \
+	a = pop();                                                                          \
+	if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {                               \
+		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int op b.v.v_int});     \
+	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                    \
+		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_float op b.v.v_float}); \
+	} else {                                                                            \
+		ierr("Invalid types for `" #op "`.");                                           \
+	}
+
+#define toStr(x, s)                                                       \
+	int length = snprintf(NULL, 0, s, x) + 1;                             \
+	char* str = malloc(length);                                           \
+	snprintf(str, length, s, x);                                          \
+	push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr(str)}); \
 	free(str);
 
 #define ierr(...)                                          \
@@ -49,7 +49,7 @@
 #define curInstBuf instbuffer[instbufferCount - 1]
 
 typedef struct {
-	Object* vars;
+	NamedObject* vars;
 	size_t varsCount;
 } ObjectList;
 
@@ -62,17 +62,12 @@ typedef struct {
 	size_t instsCount;
 } InstBuffer;
 
-typedef struct {
-	Object obj;
-	size_t uses;
-} Referenceable;
-
 // Interpret stage
 static CallFrame frames[STACK_SIZE];
 static size_t framesCount;
 
 // Interpret stage
-static StackElem stack[STACK_SIZE];
+static Object stack[STACK_SIZE];
 static size_t stackCount;
 
 // Parse stage
@@ -108,15 +103,15 @@ CallFrame popFrame() {
 	return frames[--framesCount];
 }
 
-void push(StackElem elem) {
-	stack[stackCount++] = elem;
+void push(Object obj) {
+	stack[stackCount++] = obj;
 
 	if (stackCount >= STACK_SIZE) {
 		ierr("Internal stack size exceeded.");
 	}
 }
 
-StackElem pop() {
+Object pop() {
 	return stack[--stackCount];
 }
 
@@ -187,9 +182,9 @@ static int pushFunc(int loc, TypeInfo type) {
 
 static void delVarAtIndex(ObjectList* o, size_t i) {
 	// Free
-	dispose(o->vars[i].type, o->vars[i].v);
+	// dispose(o->vars[i].o.type, o->vars[i].o.v);
 	free(o->vars[i].name);
-	freeTypeInfo(o->vars[i].type);
+	freeTypeInfo(o->vars[i].o.type);
 
 	// Ripple down
 	for (int j = i; j < o->varsCount - 1; j++) {
@@ -198,7 +193,7 @@ static void delVarAtIndex(ObjectList* o, size_t i) {
 
 	// Resize
 	o->varsCount--;
-	o->vars = (Object*) realloc(o->vars, sizeof(Object) * o->varsCount);
+	o->vars = (NamedObject*) realloc(o->vars, sizeof(NamedObject) * o->varsCount);
 }
 
 static void delVar(ObjectList* o, const char* n) {
@@ -209,24 +204,23 @@ static void delVar(ObjectList* o, const char* n) {
 	}
 }
 
-static void setVar(ObjectList* o, Object obj) {
+static void setVar(ObjectList* o, NamedObject obj) {
 	delVar(o, obj.name);
 
 	o->varsCount++;
-	o->vars = realloc(o->vars, sizeof(Object) * o->varsCount);
+	o->vars = realloc(o->vars, sizeof(NamedObject) * o->varsCount);
 	o->vars[o->varsCount - 1] = obj;
 }
 
-static void dupVar(ObjectList* o, Object obj) {
-	Object d = obj;
+static void dupVar(ObjectList* o, NamedObject obj) {
+	NamedObject d = obj;
 	d.name = strdup(obj.name);
-	d.type = dupTypeInfo(obj.type);
-	d.v = obj.v;
+	d.o.type = dupTypeInfo(obj.o.type);
 
 	setVar(o, d);
 }
 
-static Object getVar(ObjectList* o, const char* n) {
+static NamedObject getVar(ObjectList* o, const char* n) {
 	for (size_t i = 0; i < o->varsCount; i++) {
 		if (strcmp(o->vars[i].name, n) == 0) {
 			return o->vars[i];
@@ -250,7 +244,7 @@ static bool isVar(ObjectList* o, const char* n) {
 static void disposeVar(ObjectList* o) {
 	for (size_t i = 0; i < o->varsCount; i++) {
 		free(o->vars[i].name);
-		freeTypeInfo(o->vars[i].type);
+		freeTypeInfo(o->vars[i].o.type);
 	}
 	free(o->vars);
 }
@@ -461,11 +455,11 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 			lastKnownScope = curScope;
 		}
 
-		Object obj;
+		NamedObject obj;
 		Array arr;
 		int s;
 
-		StackElem a, b, c;
+		Object a, b, c;
 		a.type = type(TYPE_VOID);
 		b.type = type(TYPE_VOID);
 		c.type = type(TYPE_VOID);
@@ -475,23 +469,23 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 			case LOAD:
 				if (insts[i].type.id == TYPE_STR) {
 					// We must convert string literals because they are c-strings
-					push((StackElem){.type = insts[i].type, .v.v_string = cstrToStr(insts[i].a.v_ptr)});
+					push((Object){.type = insts[i].type, .v.v_string = cstrToStr(insts[i].a.v_ptr)});
 				} else {
-					push((StackElem){.type = insts[i].type, .v = insts[i].a});
+					push((Object){.type = insts[i].type, .v = insts[i].a});
 				}
 
 				break;
 			case LOADT:
-				push((StackElem){.type = dupTypeInfo(insts[i].type)});
+				push((Object){.type = dupTypeInfo(insts[i].type)});
 				break;
 			case LOADV:
 				obj = getVar(frame.o, insts[i].a.v_ptr);
 
-				if (obj.fromArgs && obj.type.id == TYPE_FUNC) {
+				if (obj.o.fromArgs && obj.o.type.id == TYPE_FUNC) {
 					ierr("Functions from arguments can only be called.");
 				}
 
-				push(objectToStackElem(obj));
+				push(obj.o);
 				break;
 			case LOADA:
 				pushArg(strdup(insts[i].a.v_ptr));
@@ -506,12 +500,10 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					}
 				}
 
-				obj = (Object){
+				obj = (NamedObject){
 					.name = strdup(insts[i].a.v_ptr),
-					.type = dupTypeInfo(b.type),
-					.v = b.v,
 					.scope = curScope,
-					.referenceScope = curScope,
+					.o = objdup(b),
 				};
 				setVar(frame.o, obj);
 				break;
@@ -519,48 +511,46 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				a = pop();
 
 				obj = getVar(frame.o, insts[i].a.v_ptr);
-				if (obj.fromArgs) {
+				if (obj.o.fromArgs) {
 					ierr("Cannot assign to an argument.");
 				}
 
-				if (!typeInfoEqual(a.type, obj.type)) {
+				if (!typeInfoEqual(a.type, obj.o.type)) {
 					ierr("Assignment type doesn't match expression.");
 				}
 
-				obj = (Object){
+				obj = (NamedObject){
 					.name = strdup(insts[i].a.v_ptr),
-					.type = dupTypeInfo(a.type),
-					.v = a.v,
 					.scope = obj.scope,
-					.scope = obj.referenceScope,
+					.o = objdup(a),
 				};
 				setVar(frame.o, obj);
 				break;
 			case SAVEF:
 				a = pop();
 
-				push((StackElem){.type = dupTypeInfo(a.type), .v.v_int = pushFunc(i + 1, a.type)});
+				push((Object){.type = dupTypeInfo(a.type), .v.v_int = pushFunc(i + 1, a.type)});
 				jump(insts[i].a.v_int);
 
 				break;
 			case CALLF:
 				obj = getVar(frame.o, (char*) insts[i].a.v_ptr);
 				if (insts[i].type.id == TYPE_UNKNOWN &&
-					obj.type.args[0].id == TYPE_VOID) {
+					obj.o.type.args[0].id == TYPE_VOID) {
 					ierr("Invoke expression cannot be referencing a void function.");
 				} else if (insts[i].type.id == TYPE_VOID &&
-						   obj.type.args[0].id != TYPE_VOID) {
+						   obj.o.type.args[0].id != TYPE_VOID) {
 					ierr("Invoke statement cannot be referencing a non-void function.");
 				}
 
-				FuncPointer f = funcs[obj.v.v_int];
+				FuncPointer f = funcs[obj.o.v.v_int];
 				s = insts[f.location].scope;
 
 				ObjectList fo;
 				fo.vars = malloc(0);
 				fo.varsCount = 0;
 
-				if (obj.fromArgs) {
+				if (obj.o.fromArgs) {
 					popFrame();
 				}
 				CallFrame funcFrame = frames[framesCount - 1];
@@ -568,26 +558,23 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				// Duping may not even be required?
 				// TODO: Optimize
 				for (size_t v = 0; v < funcFrame.o->varsCount; v++) {
-					Object vobj = funcFrame.o->vars[v];
+					NamedObject vobj = funcFrame.o->vars[v];
 					if (vobj.scope < s) {
 						dupVar(&fo, vobj);
 					}
 				}
 
 				for (int v = f.argsLen - 1; v >= 0; v--) {
-					StackElem e = pop();
+					Object e = pop();
 
 					if (!typeInfoEqual(f.type.args[v + 1], e.type)) {
 						ierr("Type mismatch in function arguments.");
 					}
 
-					Object vo = (Object){
+					NamedObject vo = (NamedObject){
 						.name = strdup(f.args[v]),
-						.type = dupTypeInfo(e.type),
-						.v = e.v,
 						.scope = s,
-						// TODO: .referenceScope =
-						.fromArgs = true,
+						.o = objdup(e),
 					};
 					setVar(&fo, vo);
 				}
@@ -598,7 +585,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 
 				// TODO: Optimize
 				for (size_t v = 0; v < fo.varsCount; v++) {
-					Object vobj = fo.vars[v];
+					NamedObject vobj = fo.vars[v];
 
 					// Skip if it is a local variable
 					if (vobj.scope >= s) {
@@ -611,25 +598,25 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					}
 
 					// Skip if the variable is an argument
-					if (obj.fromArgs) {
+					if (obj.o.fromArgs) {
 						continue;
 					}
 
 					// Get the var in the frame
-					Object oobj = getVar(funcFrame.o, vobj.name);
+					NamedObject oobj = getVar(funcFrame.o, vobj.name);
 
 					// Skip if the scopes don't match
 					if (vobj.scope != oobj.scope) {
 						continue;
 					}
 
-					// Dup to the frame
+					// Update the variable outside of the frame
 					dupVar(funcFrame.o, vobj);
 				}
 
 				disposeVar(&fo);
 
-				if (obj.fromArgs) {
+				if (obj.o.fromArgs) {
 					pushFrame(frame);
 				}
 
@@ -667,7 +654,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				}
 
 				// Initilize the new stack element
-				c = (StackElem){
+				c = (Object){
 					.type = type(TYPE_ARRAY),
 				};
 
@@ -703,17 +690,17 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 
 				obj = getVar(frame.o, insts[i].a.v_ptr);
 
-				if (obj.type.id != TYPE_ARRAY) {
+				if (obj.o.type.id != TYPE_ARRAY) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = obj.v.v_array;
+				arr = obj.o.v.v_array;
 
 				if (a.v.v_int >= arr.len) {
 					ierr("Index must be less than the length.");
 				}
 
-				if (!typeInfoEqual(b.type, obj.type.args[0])) {
+				if (!typeInfoEqual(b.type, obj.o.type.args[0])) {
 					ierr("Set type doens't match expression.");
 				}
 
@@ -733,18 +720,18 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 
 				obj = getVar(frame.o, insts[i].a.v_ptr);
 
-				if (obj.type.id != TYPE_ARRAY) {
+				if (obj.o.type.id != TYPE_ARRAY) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = obj.v.v_array;
+				arr = obj.o.v.v_array;
 
 				if (a.v.v_int >= arr.len) {
 					ierr("Index must be less than the length.");
 				}
 
-				push((StackElem){
-					.type = dupTypeInfo(obj.type.args[0]),
+				push((Object){
+					.type = dupTypeInfo(obj.o.type.args[0]),
 					.v = arr.arr[a.v.v_int],
 				});
 
@@ -752,13 +739,13 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 			case ARRAYL:
 				obj = getVar(frame.o, insts[i].a.v_ptr);
 
-				if (obj.type.id != TYPE_ARRAY) {
+				if (obj.o.type.id != TYPE_ARRAY) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = obj.v.v_array;
+				arr = obj.o.v.v_array;
 
-				push((StackElem){
+				push((Object){
 					.type = type(TYPE_INT),
 					.v.v_int = arr.len,
 				});
@@ -776,7 +763,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				a = pop();
 
 				if (a.type.id == TYPE_BOOL) {
-					push((StackElem){.type = type(TYPE_BOOL), .v.v_int = !a.v.v_int});
+					push((Object){.type = type(TYPE_BOOL), .v.v_int = !a.v.v_int});
 				} else {
 					ierr("Invalid type for `not`.");
 				}
@@ -787,7 +774,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				a = pop();
 
 				if (a.type.id == TYPE_BOOL && b.type.id == TYPE_BOOL) {
-					push((StackElem){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int && b.v.v_int});
+					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int && b.v.v_int});
 				} else {
 					ierr("Invalid types for `and`.");
 				}
@@ -798,7 +785,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				a = pop();
 
 				if (a.type.id == TYPE_BOOL && b.type.id == TYPE_BOOL) {
-					push((StackElem){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int || b.v.v_int});
+					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int || b.v.v_int});
 				} else {
 					ierr("Invalid types for `and`.");
 				}
@@ -809,9 +796,9 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				a = pop();
 
 				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
-					push((StackElem){.type = type(TYPE_INT), .v.v_int = a.v.v_int + b.v.v_int});
+					push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int + b.v.v_int});
 				} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {
-					push((StackElem){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float + b.v.v_float});
+					push((Object){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float + b.v.v_float});
 				} else if (a.type.id == TYPE_STR && b.type.id == TYPE_STR) {
 					// Create string
 					String s = (String){
@@ -824,7 +811,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					memcpy(s.chars + a.v.v_string.len, b.v.v_string.chars, b.v.v_string.len);
 
 					// Push onto stack
-					push((StackElem){.type = type(TYPE_STR), .v.v_string = s});
+					push((Object){.type = type(TYPE_STR), .v.v_string = s});
 				} else {
 					ierr("Invalid types for `add`.");
 				}
@@ -843,7 +830,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				b = pop();
 				a = pop();
 				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
-					push((StackElem){.type = type(TYPE_INT), .v.v_int = a.v.v_int % b.v.v_int});
+					push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int % b.v.v_int});
 				} else {
 					ierr("Invalid types for `%%`.");
 				}
@@ -851,7 +838,13 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				break;
 			case NEG:
 				a = pop();
-				push((StackElem){.type = type(TYPE_INT), .v.v_int = -a.v.v_int});
+				if (a.type.id == TYPE_INT) {
+					push((Object){.type = type(TYPE_INT), .v.v_int = -a.v.v_int});
+				} else if (a.type.id == TYPE_FLOAT) {
+					push((Object){.type = type(TYPE_FLOAT), .v.v_float = -a.v.v_float});
+				} else {
+					ierr("Invalid types for `neg`");
+				}
 
 				break;
 			case EQ:
@@ -860,12 +853,12 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 
 				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT ||
 					a.type.id == TYPE_FUNC && b.type.id == TYPE_FUNC) {
-					push((StackElem){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int == b.v.v_int});
+					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int == b.v.v_int});
 				} else if (a.type.id == TYPE_BOOL && b.type.id == TYPE_BOOL) {
 					iwarn("Operation can be simplified for `eq`.");
-					push((StackElem){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int == b.v.v_int});
+					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int == b.v.v_int});
 				} else if (a.type.id == TYPE_STR && a.type.id == TYPE_STR) {
-					push((StackElem){
+					push((Object){
 						.type = type(TYPE_BOOL),
 						.v.v_int = stringEqual(a.v.v_string, b.v.v_string),
 					});
@@ -895,9 +888,9 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					toStr(a.v.v_float, "%.9g");
 				} else if (a.type.id == TYPE_BOOL) {
 					if (a.v.v_int) {
-						push((StackElem){.type = type(TYPE_STR), .v.v_string = cstrToStr("true")});
+						push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr("true")});
 					} else {
-						push((StackElem){.type = type(TYPE_STR), .v.v_string = cstrToStr("false")});
+						push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr("false")});
 					}
 				} else {
 					printf("Cannot cast type %d.\n", a.type.id);

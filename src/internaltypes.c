@@ -55,16 +55,17 @@ char* strToCstr(const String str) {
 	return cstr;
 }
 
-StackElem objectToStackElem(Object obj) {
-	return (StackElem){
-		.type = obj.type,
-		.v = obj.v,
+NamedObject unnamedToNamed(Object obj, char* name, int scope) {
+	return (NamedObject){
+		.name = name,
+		.scope = scope,
+		.o = obj,
 	};
 }
 
-Object stackElemToObject(StackElem elem) {
-	return (Object){
-		.type = elem.type,
-		.v = elem.v,
-	};
+Object objdup(Object obj) {
+	Object out = obj;
+	out.type = dupTypeInfo(obj.type);
+
+	return out;
 }

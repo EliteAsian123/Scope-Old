@@ -65,8 +65,8 @@ size_t instsCount;
 void initTypeArgs(TypeInfo* i, TypeInfo args[], size_t len);
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 
-void push(StackElem elem);
-StackElem pop();
+void push(Object elem);
+Object pop();
 
 void pushLoc();
 void pushSLoc();
