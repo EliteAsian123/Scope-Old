@@ -19,13 +19,15 @@ bool typeInfoEqual(TypeInfo a, TypeInfo b) {
 }
 
 void freeTypeInfo(TypeInfo a) {
-	if (a.args == NULL || a.argsLen <= 0) {
+	if (a.args == NULL) {
 		return;
 	}
 
 	for (size_t i = 0; i < a.argsLen; i++) {
 		freeTypeInfo(a.args[i]);
 	}
+
+	free(a.args);
 }
 
 TypeInfo dupTypeInfo(TypeInfo a) {

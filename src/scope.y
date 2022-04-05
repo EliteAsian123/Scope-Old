@@ -189,6 +189,7 @@ for			: S_FOR '(' {
 					scope++;
 				} declare ',' {
 					pushLoc();
+					scope++;
 				} expr ',' {
 					pushLoc();
 					pushLoop();
@@ -200,6 +201,7 @@ for			: S_FOR '(' {
 					putMoveBuffer(scope);
 					popLoop();
 					setInst((Inst){.inst = IFN, .a.v_int = instsCount + 1}, popLoc(), scope);
+					scope--;
 					pushi({.inst = GOTO, .a.v_int = popLoc()});
 					scope--;
 				}

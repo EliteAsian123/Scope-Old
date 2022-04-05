@@ -445,7 +445,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					if (frame.o->vars[v].o.referenceScope > lastKnownScope) {
 						dispose(frame.o->vars[v].o.type, frame.o->vars[v].o.v);
 					}
-					
+
 					delVarAtIndex(frame.o, v);
 					v--;
 				}
@@ -469,13 +469,13 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				if (insts[i].type.id == TYPE_STR) {
 					// We must convert string literals because they are c-strings
 					push((Object){
-						.type = insts[i].type,
+						.type = dupTypeInfo(insts[i].type),
 						.v.v_string = cstrToStr(insts[i].a.v_ptr),
 						.referenceScope = curScope,
 					});
 				} else {
 					push((Object){
-						.type = insts[i].type,
+						.type = dupTypeInfo(insts[i].type),
 						.v = insts[i].a,
 						.referenceScope = curScope,
 					});
@@ -492,6 +492,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					ierr("Functions from arguments can only be called.");
 				}
 
+				obj.o.type = dupTypeInfo(obj.o.type);
 				push(obj.o);
 				break;
 			case LOADA:
@@ -641,7 +642,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				a = pop();
 
 				a.type.argsLen++;
-				if (a.type.argsLen == 0 && a.type.args == NULL) {
+				if (a.type.args == NULL) {
 					a.type.args = malloc(sizeof(TypeInfo));
 					a.type.args[0] = dupTypeInfo(b.type);
 				} else {
@@ -650,6 +651,9 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				}
 
 				push(a);
+
+				// We don't want this to get freed
+				a.type = type(TYPE_VOID);
 
 				break;
 			case ARRAYI:  // `new a[b]`
@@ -663,6 +667,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				// Initilize the new stack element
 				c = (Object){
 					.type = type(TYPE_ARRAY),
+					.referenceScope = curScope,
 				};
 
 				// Convert type into array type
@@ -740,6 +745,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				push((Object){
 					.type = dupTypeInfo(obj.o.type.args[0]),
 					.v = arr.arr[a.v.v_int],
+					.referenceScope = obj.o.referenceScope,
 				});
 
 				break;
@@ -818,7 +824,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					memcpy(s.chars + a.v.v_string.len, b.v.v_string.chars, b.v.v_string.len);
 
 					// Push onto stack
-					push((Object){.type = type(TYPE_STR), .v.v_string = s});
+					push((Object){.type = type(TYPE_STR), .v.v_string = s, .referenceScope = curScope});
 				} else {
 					ierr("Invalid types for `add`.");
 				}
@@ -895,9 +901,9 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					toStr(a.v.v_float, "%.9g");
 				} else if (a.type.id == TYPE_BOOL) {
 					if (a.v.v_int) {
-						push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr("true")});
+						push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr("true"), .referenceScope = curScope});
 					} else {
-						push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr("false")});
+						push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr("false"), .referenceScope = curScope});
 					}
 				} else {
 					printf("Cannot cast type %d.\n", a.type.id);
@@ -982,10 +988,10 @@ void bc_end() {
 		// TODO: Free strings
 	}
 
-	free(insts);
+	// free(insts);
 
 	// End
 
 	free(funcs);
-	//malloc_stats();
+	// malloc_stats();
 }
