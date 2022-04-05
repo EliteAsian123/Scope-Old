@@ -961,7 +961,7 @@ void bc_end() {
 		fprintf(stderr, "Stack Error: Location stack leak detected. Ending size `%ld`.\n", locstackCount);
 	}
 
-	// Free StackElems
+	// Free Objects
 
 	for (size_t i = 0; i < stackCount; i++) {
 		if (stack[i].type.args != NULL) {

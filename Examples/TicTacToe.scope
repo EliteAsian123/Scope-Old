@@ -119,7 +119,8 @@ func void doBotTurn() {
 func void gameLoop() {
 	print("Would you like to play against a bot? (y/n) ");
 	if (input() == "y") {
-		isAgainstBot = true;
+		print("Currently broken. Sorry.");
+		// isAgainstBot = true;
 	}
 
 	turn = "X";
