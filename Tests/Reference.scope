@@ -6,4 +6,4 @@ arr[0] = 450;
 int[] dup = arr;
 dup[0] = 123;
 
-println((string) dup[0]);
+println((string) arr[0]);
