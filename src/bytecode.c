@@ -182,7 +182,6 @@ static int pushFunc(int loc, TypeInfo type) {
 
 static void delVarAtIndex(ObjectList* o, size_t i) {
 	// Free
-	// dispose(o->vars[i].o.type, o->vars[i].o.v);
 	free(o->vars[i].name);
 	freeTypeInfo(o->vars[i].o.type);
 
@@ -425,7 +424,6 @@ static void bc_dump() {
 }
 
 static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
-	int funcScope = -1;
 	int lastKnownScope = 0;
 	CallFrame frame = frames[frameIndex];
 
@@ -437,9 +435,6 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 		// Adjust scope
 
 		int curScope = insts[i].scope;
-		if (funcScope > -1) {
-			curScope += funcScope;
-		}
 
 		if (curScope < lastKnownScope) {
 			lastKnownScope = curScope;
@@ -447,6 +442,10 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 			// Delete all variables that are now outside of scope
 			for (size_t v = 0; v < frame.o->varsCount; v++) {
 				if (frame.o->vars[v].scope > lastKnownScope) {
+					if (frame.o->vars[v].o.referenceScope > lastKnownScope) {
+						dispose(frame.o->vars[v].o.type, frame.o->vars[v].o.v);
+					}
+					
 					delVarAtIndex(frame.o, v);
 					v--;
 				}
@@ -469,9 +468,17 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 			case LOAD:
 				if (insts[i].type.id == TYPE_STR) {
 					// We must convert string literals because they are c-strings
-					push((Object){.type = insts[i].type, .v.v_string = cstrToStr(insts[i].a.v_ptr)});
+					push((Object){
+						.type = insts[i].type,
+						.v.v_string = cstrToStr(insts[i].a.v_ptr),
+						.referenceScope = curScope,
+					});
 				} else {
-					push((Object){.type = insts[i].type, .v = insts[i].a});
+					push((Object){
+						.type = insts[i].type,
+						.v = insts[i].a,
+						.referenceScope = curScope,
+					});
 				}
 
 				break;
@@ -961,17 +968,24 @@ void bc_end() {
 		fprintf(stderr, "Stack Error: Location stack leak detected. Ending size `%ld`.\n", locstackCount);
 	}
 
-	// Free Objects
-
-	for (size_t i = 0; i < stackCount; i++) {
-		if (stack[i].type.args != NULL) {
-			freeTypeInfo(stack[i].type);
-		}
+	if (framesCount != 0) {
+		fprintf(stderr, "Stack Error: CallFrame stack leak detected. Ending size `%ld`.\n", framesCount);
 	}
+
+	// Free instructions
+
+	for (size_t i = 0; i < instsCount; i++) {
+		if (insts[i].type.args != NULL) {
+			freeTypeInfo(insts[i].type);
+		}
+
+		// TODO: Free strings
+	}
+
+	free(insts);
 
 	// End
 
 	free(funcs);
-	// free(insts);
-	// malloc_stats();
+	//malloc_stats();
 }

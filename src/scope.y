@@ -385,8 +385,6 @@ else_block	: if_cond block {
 
 %%
 
-#undef pushi
-
 int main(int argc, char** argv) {
 	// Check args
 	if (argc <= 1) {
@@ -411,9 +409,16 @@ int main(int argc, char** argv) {
 	
 	// Start parser
 	bc_init();
+	
+	// Actually lex/parse
 	int result = yyparse();
+	pushInst((Inst){}, -1); // "end" instruction
+
+	// Interpret
 	bc_run(showByteCode, showCount);
 	bc_end();
 	
 	return result;
 }
+
+#undef pushi
