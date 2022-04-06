@@ -437,13 +437,19 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 		int curScope = insts[i].scope;
 
 		if (curScope < lastKnownScope) {
+			int highestScope = lastKnownScope;
 			lastKnownScope = curScope;
 
 			// Delete all variables that are now outside of scope
-			// we need to delete the higher scoped vars first.
-			for (int v = frame.o->varsCount; v > 0; v--) {
-				if (frame.o->vars[v].scope > lastKnownScope) {
-					if (frame.o->vars[v].o.referenceScope > lastKnownScope) {
+			// We need to delete the higher scoped vars first to
+			// prevent unwanted reference disposing
+			for (int scope = highestScope; scope > lastKnownScope; scope--) {
+				for (size_t v = 0; v < frame.o->varsCount; v++) {
+					if (frame.o->vars[v].scope != scope) {
+						continue;
+					}
+
+					if (frame.o->vars[v].o.referenceScope >= scope) {
 						dispose(frame.o->vars[v].o.type, frame.o->vars[v].o.v);
 					}
 
@@ -505,6 +511,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 
 				if (a.type.id != TYPE_UNKNOWN) {
 					if (!typeInfoEqual(b.type, a.type)) {
+						//printf("`%d`, `%d`\n", a.type.id, b.type.id);
 						ierr("Declaration type doesn't match expression.");
 					}
 				}
