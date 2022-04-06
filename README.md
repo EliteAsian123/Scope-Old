@@ -1,5 +1,4 @@
 ![Scope Logo](logo.svg)
-# Scope Programming Language
 
 *Scope* is an interpreted, object oriented programming language that I am in the process of creating. So far, it isn't even object oriented, but I am working on it. I promise.
 
