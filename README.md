@@ -1,10 +1,68 @@
-# Scope
-Scope is an object oriented programming language that I am in the process of creating. So far, it isn't even object oriented, but I am working on it. I promise.
+![Scope Logo](logo.svg)
+# Scope Programming Language
+
+*Scope* is an interpreted, object oriented programming language that I am in the process of creating. So far, it isn't even object oriented, but I am working on it. I promise.
 
 ```cpp
 #insert Standard/Core.scope
 
 println("Hello, World!");
+```
+
+## Cool Features
+
+*Temporary variables are boring...*
+```cpp
+int a = 512;
+int b = 256;
+swap(a, b); // Swap them around!
+
+println((string) a); // Prints "256"
+println((string) b); // Prints "512"
+```
+
+*Function bloat...*
+```cpp
+func void funcWithinFunc() {
+    // Only acessible within this function!
+    func void theFunc() {
+        println("Hello, World!");
+    }
+    
+    theFunc();
+    theFunc();
+}
+
+funcWithinFunc(); // Prints "Hello, World!" twice!
+```
+
+*I don't need `i`... (Not implemented yet)*
+```cpp
+// No more i!
+repeat(5) {
+    println("Hello, World!");
+}
+```
+
+*Static classes are barely classes... (Not implemented yet)*
+
+```cpp
+// They aren't!
+
+utility Wow {
+    func void wow() {
+        println("Wow!");
+    }
+}
+
+utility {
+    func void hello() {
+        println("Hello, World!");
+    }
+}
+
+Wow.wow(); // "Wow!"
+hello(); // "Hello, World!"
 ```
 
 ## Installation
