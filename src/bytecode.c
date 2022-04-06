@@ -440,7 +440,8 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 			lastKnownScope = curScope;
 
 			// Delete all variables that are now outside of scope
-			for (size_t v = 0; v < frame.o->varsCount; v++) {
+			// we need to delete the higher scoped vars first.
+			for (int v = frame.o->varsCount; v > 0; v--) {
 				if (frame.o->vars[v].scope > lastKnownScope) {
 					if (frame.o->vars[v].o.referenceScope > lastKnownScope) {
 						dispose(frame.o->vars[v].o.type, frame.o->vars[v].o.v);
