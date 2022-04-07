@@ -35,10 +35,6 @@ static void disposeString(const TypeInfo type, ValueHolder v) {
 }
 
 static void disposeArray(const TypeInfo type, ValueHolder v) {
-	/*Array arr = *(Array*) ptr;
-	for (size_t i = 0; i < arr.len; i++) {
-		dispose(type.args[0], arr.arr[i]);
-	}*/
 	free(v.v_array.arr);
 }
 

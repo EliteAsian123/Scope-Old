@@ -90,7 +90,7 @@ size_t createReference(ReferenceInfo info);
 void removeReference(size_t id);
 
 void bc_init();
-void bc_run(bool showByteCode, bool showCount);
+void bc_run(bool _showByteCode, bool _showCount, bool _showDisposeInfo);
 void bc_end();
 
 #endif

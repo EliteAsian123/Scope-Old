@@ -1,6 +1,6 @@
 #include "bytecode.h"
 
-// TODO: Get rid of pointer types
+// TODO: Arrays don't properly dispose their elements
 
 // TODO: Proper accessors `.`
 // TODO: Array indexers as accessors
@@ -61,6 +61,10 @@ typedef struct {
 	Inst* insts;
 	size_t instsCount;
 } InstBuffer;
+
+// Flags
+static bool showCount = false;
+static bool showDisposeInfo = false;
 
 // Interpret stage
 static CallFrame frames[STACK_SIZE];
@@ -191,10 +195,10 @@ static void delVarAtIndex(ObjectList* o, size_t i) {
 
 	// Change ref counter
 	if (isDisposable(o->vars[i].o.type.id)) {
-		refs[o->vars[i].o.referenceId].counter++;
+		refs[o->vars[i].o.referenceId].counter--;
 	}
 
-	// Ripple downa
+	// Ripple down
 	for (int j = i; j < o->varsCount - 1; j++) {
 		o->vars[j] = o->vars[j + 1];
 	}
@@ -447,7 +451,7 @@ static void bc_dump() {
 	}
 }
 
-static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
+static void readByteCode(size_t frameIndex, size_t start) {
 	int lastKnownScope = 0;
 	CallFrame frame = frames[frameIndex];
 
@@ -461,26 +465,33 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 		int curScope = insts[i].scope;
 
 		if (curScope < lastKnownScope) {
-			int highestScope = lastKnownScope;
-			lastKnownScope = curScope;
-
 			for (size_t v = 0; v < frame.o->varsCount; v++) {
 				NamedObject obj = frame.o->vars[v];
 
-				if (isDisposable(obj.o.type.id)) {
-					if (refs[obj.o.referenceId].counter <= 0) {
-						dispose(obj.o.type, obj.o.v);
-					} else {
-						refs[obj.o.referenceId].counter--;
-					}
+				if (obj.scope <= curScope) {
+					continue;
+				}
+
+				if (showDisposeInfo) {
+					printf("Deleting : (%d > %d) `%s`\n", obj.scope, curScope, obj.name);
 				}
 
 				delVarAtIndex(frame.o, v);
+
+				if (isDisposable(obj.o.type.id)) {
+					if (refs[obj.o.referenceId].counter <= 0) {
+						if (showDisposeInfo) {
+							printf("Disposing: `%ld`\n", obj.o.referenceId);
+						}
+
+						dispose(obj.o.type, obj.o.v);
+					}
+				}
+
 				v--;
 			}
-		} else {
-			lastKnownScope = curScope;
 		}
+		lastKnownScope = curScope;
 
 		NamedObject obj;
 		Object sobj;
@@ -620,7 +631,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				}
 
 				pushFrame((CallFrame){.o = &fo});
-				readByteCode(framesCount - 1, f.location, showCount);
+				readByteCode(framesCount - 1, f.location);
 				popFrame();
 
 				// TODO: Optimize
@@ -802,6 +813,10 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 
 				stack[stackCount - 2] = b;
 				stack[stackCount - 1] = a;
+
+				// We don't want this to get freed
+				a = (Object){0};
+				b = (Object){0};
 
 				break;
 			case NOT:
@@ -988,11 +1003,16 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 	}
 }
 
-void bc_run(bool showByteCode, bool showCount) {
+void bc_run(bool showByteCode, bool _showCount, bool _showDisposeInfo) {
 	if (showByteCode) {
 		bc_dump();
 		return;
 	}
+
+	// Set flags
+
+	showCount = _showCount;
+	showDisposeInfo = _showDisposeInfo;
 
 	// Read byte code
 
@@ -1001,7 +1021,7 @@ void bc_run(bool showByteCode, bool showCount) {
 	o.varsCount = 0;
 	pushFrame((CallFrame){.o = &o});
 
-	readByteCode(framesCount - 1, 0, showCount);
+	readByteCode(framesCount - 1, 0);
 
 	popFrame();
 	disposeVar(&o);
