@@ -21,7 +21,11 @@ static void input() {
 	str.chars = malloc(len);
 	memcpy(str.chars, in, len);
 
-	push((Object){.type = type(TYPE_STR), .v.v_string = str});
+	push((Object){
+		.type = type(TYPE_STR),
+		.v.v_string = str,
+		.referenceId = basicReference,
+	});
 }
 
 static void stringToInt() {
@@ -29,7 +33,11 @@ static void stringToInt() {
 
 	// Convert str to cstr then use atoi
 	char* str = strToCstr(a.v.v_string);
-	push((Object){.type = type(TYPE_INT), .v.v_int = atoi(str)});
+	push((Object){
+		.type = type(TYPE_INT),
+		.v.v_int = atoi(str),
+		.referenceId = basicReference,
+	});
 	free(str);
 }
 

@@ -91,6 +91,10 @@ static InstBuffer instbuffer[STACK_SIZE];
 static size_t instbufferCount;
 static bool isInBuffer;
 
+// Interpret stage
+static ReferenceInfo* refs;
+static size_t refsCount;
+
 void pushFrame(CallFrame frame) {
 	frames[framesCount++] = frame;
 
@@ -185,7 +189,12 @@ static void delVarAtIndex(ObjectList* o, size_t i) {
 	free(o->vars[i].name);
 	freeTypeInfo(o->vars[i].o.type);
 
-	// Ripple down
+	// Change ref counter
+	if (isDisposable(o->vars[i].o.type.id)) {
+		refs[o->vars[i].o.referenceId].counter++;
+	}
+
+	// Ripple downa
 	for (int j = i; j < o->varsCount - 1; j++) {
 		o->vars[j] = o->vars[j + 1];
 	}
@@ -205,6 +214,10 @@ static void delVar(ObjectList* o, const char* n) {
 
 static void setVar(ObjectList* o, NamedObject obj) {
 	delVar(o, obj.name);
+
+	if (isDisposable(obj.o.type.id)) {
+		refs[obj.o.referenceId].counter++;
+	}
 
 	o->varsCount++;
 	o->vars = realloc(o->vars, sizeof(NamedObject) * o->varsCount);
@@ -337,6 +350,17 @@ void putMoveBuffer(int scope) {
 	instbufferCount--;
 }
 
+size_t createReference(ReferenceInfo info) {
+	refsCount++;
+	refs = realloc(refs, sizeof(ReferenceInfo) * refsCount);
+	refs[refsCount - 1] = info;
+	return refsCount - 1;
+}
+
+void removeReference(size_t id) {
+	// TODO
+}
+
 static bool stringEqual(String a, String b) {
 	if (a.len != b.len) {
 		return false;
@@ -440,28 +464,26 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 			int highestScope = lastKnownScope;
 			lastKnownScope = curScope;
 
-			// Delete all variables that are now outside of scope
-			// We need to delete the higher scoped vars first to
-			// prevent unwanted reference disposing
-			for (int scope = highestScope; scope > lastKnownScope; scope--) {
-				for (size_t v = 0; v < frame.o->varsCount; v++) {
-					if (frame.o->vars[v].scope != scope) {
-						continue;
-					}
+			for (size_t v = 0; v < frame.o->varsCount; v++) {
+				NamedObject obj = frame.o->vars[v];
 
-					if (frame.o->vars[v].o.referenceScope >= scope) {
-						dispose(frame.o->vars[v].o.type, frame.o->vars[v].o.v);
+				if (isDisposable(obj.o.type.id)) {
+					if (refs[obj.o.referenceId].counter <= 0) {
+						dispose(obj.o.type, obj.o.v);
+					} else {
+						refs[obj.o.referenceId].counter--;
 					}
-
-					delVarAtIndex(frame.o, v);
-					v--;
 				}
+
+				delVarAtIndex(frame.o, v);
+				v--;
 			}
 		} else {
 			lastKnownScope = curScope;
 		}
 
 		NamedObject obj;
+		Object sobj;
 		Array arr;
 		int s;
 
@@ -473,20 +495,22 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 		static_assert(_INSTS_ENUM_LEN == 34, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD:
+				sobj = (Object){
+					.type = dupTypeInfo(insts[i].type),
+				};
+
 				if (insts[i].type.id == TYPE_STR) {
 					// We must convert string literals because they are c-strings
-					push((Object){
-						.type = dupTypeInfo(insts[i].type),
-						.v.v_string = cstrToStr(insts[i].a.v_ptr),
-						.referenceScope = curScope,
-					});
+					sobj.v.v_string = cstrToStr(insts[i].a.v_ptr);
 				} else {
-					push((Object){
-						.type = dupTypeInfo(insts[i].type),
-						.v = insts[i].a,
-						.referenceScope = curScope,
-					});
+					sobj.v = insts[i].a;
 				}
+
+				if (isDisposable(insts[i].type.id)) {
+					sobj.referenceId = basicReference;
+				}
+
+				push(sobj);
 
 				break;
 			case LOADT:
@@ -511,7 +535,6 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 
 				if (a.type.id != TYPE_UNKNOWN) {
 					if (!typeInfoEqual(b.type, a.type)) {
-						//printf("`%d`, `%d`\n", a.type.id, b.type.id);
 						ierr("Declaration type doesn't match expression.");
 					}
 				}
@@ -521,6 +544,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					.scope = curScope,
 					.o = objdup(b),
 				};
+
 				setVar(frame.o, obj);
 				break;
 			case RESAVEV:
@@ -673,27 +697,27 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				}
 
 				// Initilize the new stack element
-				c = (Object){
+				sobj = (Object){
 					.type = type(TYPE_ARRAY),
-					.referenceScope = curScope,
+					.referenceId = basicReference,
 				};
 
 				// Convert type into array type
-				c.type.argsLen = 1;
-				c.type.args = malloc(sizeof(TypeInfo));
-				c.type.args[0] = dupTypeInfo(a.type);
+				sobj.type.argsLen = 1;
+				sobj.type.args = malloc(sizeof(TypeInfo));
+				sobj.type.args[0] = dupTypeInfo(a.type);
 
 				// Initilize the array
-				c.v.v_array.arr = malloc(sizeof(ValueHolder) * b.v.v_int);
-				c.v.v_array.len = b.v.v_int;
+				sobj.v.v_array.arr = malloc(sizeof(ValueHolder) * b.v.v_int);
+				sobj.v.v_array.len = b.v.v_int;
 
 				// Populate array
 				for (int i = 0; i < b.v.v_int; i++) {
-					c.v.v_array.arr[i] = createDefaultType(a.type);
+					sobj.v.v_array.arr[i] = createDefaultType(a.type);
 				}
 
 				// Push
-				push(c);
+				push(sobj);
 
 				break;
 			case ARRAYS:  // `$[a] = b`
@@ -753,7 +777,7 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 				push((Object){
 					.type = dupTypeInfo(obj.o.type.args[0]),
 					.v = arr.arr[a.v.v_int],
-					.referenceScope = obj.o.referenceScope,
+					.referenceId = obj.o.referenceId,
 				});
 
 				break;
@@ -832,7 +856,11 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					memcpy(s.chars + a.v.v_string.len, b.v.v_string.chars, b.v.v_string.len);
 
 					// Push onto stack
-					push((Object){.type = type(TYPE_STR), .v.v_string = s, .referenceScope = curScope});
+					push((Object){
+						.type = type(TYPE_STR),
+						.v.v_string = s,
+						.referenceId = basicReference,
+					});
 				} else {
 					ierr("Invalid types for `add`.");
 				}
@@ -909,9 +937,17 @@ static void readByteCode(size_t frameIndex, size_t start, bool showCount) {
 					toStr(a.v.v_float, "%.9g");
 				} else if (a.type.id == TYPE_BOOL) {
 					if (a.v.v_int) {
-						push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr("true"), .referenceScope = curScope});
+						push((Object){
+							.type = type(TYPE_STR),
+							.v.v_string = cstrToStr("true"),
+							.referenceId = basicReference,
+						});
 					} else {
-						push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr("false"), .referenceScope = curScope});
+						push((Object){
+							.type = type(TYPE_STR),
+							.v.v_string = cstrToStr("false"),
+							.referenceId = basicReference,
+						});
 					}
 				} else {
 					printf("Cannot cast type %d.\n", a.type.id);

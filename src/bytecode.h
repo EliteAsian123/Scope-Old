@@ -86,6 +86,9 @@ void startMoveBuffer();
 void endMoveBuffer();
 void putMoveBuffer(int scope);
 
+size_t createReference(ReferenceInfo info);
+void removeReference(size_t id);
+
 void bc_init();
 void bc_run(bool showByteCode, bool showCount);
 void bc_end();

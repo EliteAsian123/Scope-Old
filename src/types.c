@@ -103,3 +103,7 @@ void dispose(const TypeInfo type, ValueHolder v) {
 		types[type.id].dispose(type, v);
 	}
 }
+
+bool isDisposable(int id) {
+	return types[id].disposable;
+}

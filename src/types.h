@@ -35,5 +35,6 @@ const char* typestr(int id);
 ValueHolder createDefaultType(TypeInfo type);
 void* typedup(int id, const void* ptr);
 void dispose(TypeInfo type, ValueHolder v);
+bool isDisposable(int id);
 
 #endif
