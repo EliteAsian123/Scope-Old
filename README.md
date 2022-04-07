@@ -98,3 +98,10 @@ Testing `Tests/For.scope`
 ...
 Done!
 ```
+
+
+## Credits
+
+- [`unescape.c`](https://github.com/yasuoka/unescape/blob/master/unescape.c): Copyright (c) 2019 YASUOKA Masahiko <yasuoka@yasuoka.net>
+
+
