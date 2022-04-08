@@ -189,14 +189,20 @@ static int pushFunc(int loc, TypeInfo type) {
 }
 
 static void delVarAtIndex(ObjectList* o, size_t i) {
-	// Free
-	free(o->vars[i].name);
-	freeTypeInfo(o->vars[i].o.type);
+	NamedObject var = o->vars[i];
 
 	// Change ref counter
-	if (isDisposable(o->vars[i].o.type.id)) {
-		refs[o->vars[i].o.referenceId].counter--;
+	if (isDisposable(var.o.type.id)) {
+		refs[var.o.referenceId].counter--;
+
+		if (showDisposeInfo) {
+			printf("(-) %s: %d\n", var.name, refs[var.o.referenceId].counter);
+		}
 	}
+
+	// Free
+	free(var.name);
+	freeTypeInfo(var.o.type);
 
 	// Ripple down
 	for (int j = i; j < o->varsCount - 1; j++) {
@@ -221,6 +227,10 @@ static void setVar(ObjectList* o, NamedObject obj) {
 
 	if (isDisposable(obj.o.type.id)) {
 		refs[obj.o.referenceId].counter++;
+
+		if (showDisposeInfo) {
+			printf("(+) %s: %d\n", obj.name, refs[obj.o.referenceId].counter);
+		}
 	}
 
 	o->varsCount++;
@@ -612,6 +622,12 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					NamedObject vobj = funcFrame.o->vars[v];
 					if (vobj.scope < s) {
 						dupVar(&fo, vobj);
+
+						// Dup causes the counter to go up
+						// and we don't want it too
+						if (isDisposable(vobj.o.type.id)) {
+							refs[vobj.o.referenceId].counter--;
+						}
 					}
 				}
 
@@ -634,23 +650,28 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				readByteCode(framesCount - 1, f.location);
 				popFrame();
 
+#define skipdelete         \
+	delVarAtIndex(&fo, v); \
+	v--;                   \
+	continue
+
 				// TODO: Optimize
 				for (size_t v = 0; v < fo.varsCount; v++) {
 					NamedObject vobj = fo.vars[v];
 
 					// Skip if it is a local variable
 					if (vobj.scope >= s) {
-						continue;
+						skipdelete;
 					}
 
 					// Skip if the current frame doesn't contain the variable
 					if (!isVar(funcFrame.o, vobj.name)) {
-						continue;
+						skipdelete;
 					}
 
-					// Skip if the variable is an argument
+					// Skip and delete if the variable is an argument
 					if (obj.o.fromArgs) {
-						continue;
+						skipdelete;
 					}
 
 					// Get the var in the frame
@@ -658,12 +679,14 @@ static void readByteCode(size_t frameIndex, size_t start) {
 
 					// Skip if the scopes don't match
 					if (vobj.scope != oobj.scope) {
-						continue;
+						skipdelete;
 					}
 
 					// Update the variable outside of the frame
 					dupVar(funcFrame.o, vobj);
 				}
+
+#undef skipdelete
 
 				disposeVar(&fo);
 
