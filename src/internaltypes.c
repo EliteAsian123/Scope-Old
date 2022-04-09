@@ -32,10 +32,14 @@ void freeTypeInfo(TypeInfo a) {
 
 TypeInfo dupTypeInfo(TypeInfo a) {
 	TypeInfo b = a;
-	b.args = malloc(sizeof(TypeInfo) * a.argsLen);
-	for (size_t i = 0; i < b.argsLen; i++) {
-		b.args[i] = dupTypeInfo(a.args[i]);
+
+	if (b.args != NULL) {
+		b.args = malloc(sizeof(TypeInfo) * a.argsLen);
+		for (size_t i = 0; i < b.argsLen; i++) {
+			b.args[i] = dupTypeInfo(a.args[i]);
+		}
 	}
+
 	return b;
 }
 

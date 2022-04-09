@@ -31,11 +31,11 @@
 		ierr("Invalid types for `" #op "`.");                                           \
 	}
 
-#define toStr(x, s)                                                       \
-	int length = snprintf(NULL, 0, s, x) + 1;                             \
-	char* str = malloc(length);                                           \
-	snprintf(str, length, s, x);                                          \
-	push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr(str)}); \
+#define toStr(x, s)                                                                                      \
+	int length = snprintf(NULL, 0, s, x) + 1;                                                            \
+	char* str = malloc(length);                                                                          \
+	snprintf(str, length, s, x);                                                                         \
+	push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr(str), .referenceId = basicReference}); \
 	free(str);
 
 #define ierr(...)                                          \
@@ -267,7 +267,7 @@ static bool isVar(ObjectList* o, const char* n) {
 	return false;
 }
 
-static void disposeVar(ObjectList* o) {
+static void disposeObjectList(ObjectList* o) {
 	for (size_t i = 0; i < o->varsCount; i++) {
 		free(o->vars[i].name);
 		freeTypeInfo(o->vars[i].o.type);
@@ -622,12 +622,6 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					NamedObject vobj = funcFrame.o->vars[v];
 					if (vobj.scope < s) {
 						dupVar(&fo, vobj);
-
-						// Dup causes the counter to go up
-						// and we don't want it too
-						if (isDisposable(vobj.o.type.id)) {
-							refs[vobj.o.referenceId].counter--;
-						}
 					}
 				}
 
@@ -635,6 +629,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					Object e = pop();
 
 					if (!typeInfoEqual(f.type.args[v + 1], e.type)) {
+						printf("`%d` != `%d` in `%s`\n", e.type.id, f.type.args[v + 1].id, (char*) insts[i].a.v_ptr);
 						ierr("Type mismatch in function arguments.");
 					}
 
@@ -688,7 +683,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 
 #undef skipdelete
 
-				disposeVar(&fo);
+				disposeObjectList(&fo);
 
 				if (obj.o.fromArgs) {
 					pushFrame(frame);
@@ -1047,7 +1042,7 @@ void bc_run(bool showByteCode, bool _showCount, bool _showDisposeInfo) {
 	readByteCode(framesCount - 1, 0);
 
 	popFrame();
-	disposeVar(&o);
+	disposeObjectList(&o);
 }
 
 void bc_end() {
@@ -1063,6 +1058,14 @@ void bc_end() {
 
 	if (framesCount != 0) {
 		fprintf(stderr, "Stack Error: CallFrame stack leak detected. Ending size `%ld`.\n", framesCount);
+	}
+
+	// Check for reference leaks
+
+	for (size_t i = 0; i < refsCount; i++) {
+		if (refs[i].counter > 0) {
+			// fprintf(stderr, "Reference Warning: Reference `%ld` was not freed. It will be leaked.\n", i);
+		}
 	}
 
 	// Free instructions
