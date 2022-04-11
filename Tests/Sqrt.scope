@@ -1,0 +1,8 @@
+#insert Standard/Core.scope
+#insert Standard/Math.scope
+
+println((string) sqrt(5f));
+println((string) sqrt(4f));
+println((string) sqrt(3f));
+println((string) sqrt(2f));
+println((string) sqrt(1f));
