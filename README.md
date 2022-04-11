@@ -43,25 +43,21 @@ repeat(5) {
 }
 ```
 
-*Static classes are barely classes... (Not implemented yet)*
+*Initilizing an array is annoying... (Not implemented yet)*
 
 ```cpp
-// They aren't!
+// with?
 
-utility Wow {
-    func void wow() {
-        println("Wow!");
-    }
-}
+int[] arr = new int[100] with 1;
+string[] helloWorlds = new string[5] with "Hello, World!";
 
-utility {
-    func void hello() {
-        println("Hello, World!");
-    }
-}
+// with.
 
-Wow.wow(); // "Wow!"
-hello(); // "Hello, World!"
+float[] floats = new float[100] with {
+    return index * 0.1f;
+};
+
+// with!
 ```
 
 ## Installation
