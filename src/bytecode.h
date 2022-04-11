@@ -56,6 +56,7 @@ enum Insts {
 	CASTS,
 	GOTO,
 	IFN,
+	THROW,
 	_INSTS_ENUM_LEN
 };
 

@@ -404,7 +404,7 @@ static void instDump(size_t i) {
 	bool isStringArg = false;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 34, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 35, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case LOAD:
 			instName = "load";
@@ -442,6 +442,7 @@ static void instDump(size_t i) {
 		case CASTS: 	instName = "casts"; 						break;
 		case GOTO: 		instName = "goto"; 							break;
 		case IFN:	 	instName = "ifn"; 							break;
+		case THROW:	 	instName = "throw";		isStringArg = true;	break;
 		default: 		instName = "?"; 							break;
 	}
 	// clang-format on
@@ -513,7 +514,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 		b.type = type(TYPE_VOID);
 		c.type = type(TYPE_VOID);
 
-		static_assert(_INSTS_ENUM_LEN == 34, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 35, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD:
 				sobj = (Object){
@@ -1008,6 +1009,11 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				}
 
 				break;
+			case THROW:
+				fprintf(stderr, "%s\n", insts[i].a.v_ptr);
+				ierr("An error has been thrown, and execution has been aborted.");
+
+				return;
 			default:
 				break;
 		}

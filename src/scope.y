@@ -37,7 +37,7 @@
 %token<v_str> IDENTIFIER
 
 /* Statement keywords */
-%token S_EXTERN S_IF S_ELSE S_WHILE S_RETURN S_BREAK S_FUNC S_SWAP S_FOR
+%token S_EXTERN S_IF S_ELSE S_WHILE S_RETURN S_BREAK S_FUNC S_SWAP S_FOR S_THROW
 
 /* Expression keywords */
 %token E_NEW
@@ -133,6 +133,7 @@ statement	: declare
 			| swap
 			| inc_dec
 			| arr_save
+			| throw
 			;
 
 expr		: '(' expr ')'
@@ -232,6 +233,11 @@ inc_dec		: IDENTIFIER '+' '+' {
 					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
 					pushi({.inst = SUB});
 					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+				}
+			;
+
+throw		: S_THROW L_STRING {
+					pushi({.inst = THROW, .a.v_ptr = $2});
 				}
 			;
 

@@ -41,6 +41,7 @@
 "func"			{ return S_FUNC; }
 "swap"			{ return S_SWAP; }
 "for"			{ return S_FOR; }
+"throw"			{ return S_THROW; }
 
 "new"			{ return E_NEW; }
 

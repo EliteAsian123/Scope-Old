@@ -38,5 +38,9 @@ func bool approximately(float a, float b, float error) {
 }
 
 func float sqrt(float n) {
+	if (n < 0f) {
+		throw "Math Error: Cannot get the root of a negative number.";
+	}
+	
 	ret extern(n, 3);
 }
