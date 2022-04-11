@@ -65,8 +65,8 @@ size_t instsCount;
 void initTypeArgs(TypeInfo* i, TypeInfo args[], size_t len);
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 
-void push(StackElem elem);
-StackElem pop();
+void push(Object elem);
+Object pop();
 
 void pushLoc();
 void pushSLoc();
@@ -86,8 +86,11 @@ void startMoveBuffer();
 void endMoveBuffer();
 void putMoveBuffer(int scope);
 
+size_t createReference(ReferenceInfo info);
+void removeReference(size_t id);
+
 void bc_init();
-void bc_run(bool showByteCode, bool showCount);
+void bc_run(bool _showByteCode, bool _showCount, bool _showDisposeInfo);
 void bc_end();
 
 #endif

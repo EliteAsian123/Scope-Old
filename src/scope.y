@@ -189,6 +189,7 @@ for			: S_FOR '(' {
 					scope++;
 				} declare ',' {
 					pushLoc();
+					scope++;
 				} expr ',' {
 					pushLoc();
 					pushLoop();
@@ -200,6 +201,7 @@ for			: S_FOR '(' {
 					putMoveBuffer(scope);
 					popLoop();
 					setInst((Inst){.inst = IFN, .a.v_int = instsCount + 1}, popLoc(), scope);
+					scope--;
 					pushi({.inst = GOTO, .a.v_int = popLoc()});
 					scope--;
 				}
@@ -385,8 +387,6 @@ else_block	: if_cond block {
 
 %%
 
-#undef pushi
-
 int main(int argc, char** argv) {
 	// Check args
 	if (argc <= 1) {
@@ -404,16 +404,25 @@ int main(int argc, char** argv) {
 	// Check for flags
 	bool showByteCode = false;
 	bool showCount = false;
+	bool showDisposeInfo = false;
 	if (argc >= 3) {
 		showByteCode = strcmp(argv[2], "-b") == 0;
 		showCount = strcmp(argv[2], "-c") == 0;
+		showDisposeInfo = strcmp(argv[2], "-d") == 0;
 	}
 	
 	// Start parser
 	bc_init();
+	
+	// Actually lex/parse
 	int result = yyparse();
-	bc_run(showByteCode, showCount);
+	pushInst((Inst){}, -1); // "end" instruction
+
+	// Interpret
+	bc_run(showByteCode, showCount, showDisposeInfo);
 	bc_end();
 	
 	return result;
 }
+
+#undef pushi

@@ -1,0 +1,33 @@
+string a = "Hello World";
+int b = 123;
+
+int[] c = new int[6];
+c[0] = 2;
+c[1] = 7;
+c[2] = 1;
+c[3] = 8;
+c[4] = 2;
+c[5] = 8;
+
+string[] d = new string[4];
+d[0] = "Hello";
+d[1] = "World";
+d[2] = "Again";
+d[3] = "Goodbye";
+
+for (int i = 0, i < 100, i++) {
+	string _a = a;
+	int _b = b;
+	
+	int[] _c = c;
+	string[] _d = d;
+
+	string _e = "Hello World";
+	int _f = 123;
+
+	string[] _g = new string[4];
+	_g[0] = "Hello";
+	_g[1] = "World";
+	_g[2] = "Again";
+	_g[3] = "Goodbye";
+}

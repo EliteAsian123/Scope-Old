@@ -3,7 +3,7 @@
 #define INPUT_BUFFER_SIZE 256
 
 static void print() {
-	StackElem a = pop();
+	Object a = pop();
 	char* cstr = strToCstr(a.v.v_string);
 	printf("%s", cstr);
 	free(cstr);
@@ -21,15 +21,23 @@ static void input() {
 	str.chars = malloc(len);
 	memcpy(str.chars, in, len);
 
-	push((StackElem){.type = type(TYPE_STR), .v.v_string = str});
+	push((Object){
+		.type = type(TYPE_STR),
+		.v.v_string = str,
+		.referenceId = basicReference,
+	});
 }
 
 static void stringToInt() {
-	StackElem a = pop();
+	Object a = pop();
 
 	// Convert str to cstr then use atoi
 	char* str = strToCstr(a.v.v_string);
-	push((StackElem){.type = type(TYPE_INT), .v.v_int = atoi(str)});
+	push((Object){
+		.type = type(TYPE_INT),
+		.v.v_int = atoi(str),
+		.referenceId = basicReference,
+	});
 	free(str);
 }
 

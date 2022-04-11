@@ -19,20 +19,27 @@ bool typeInfoEqual(TypeInfo a, TypeInfo b) {
 }
 
 void freeTypeInfo(TypeInfo a) {
-	if (a.args == NULL || a.argsLen <= 0) {
+	if (a.args == NULL) {
 		return;
 	}
 
 	for (size_t i = 0; i < a.argsLen; i++) {
 		freeTypeInfo(a.args[i]);
 	}
+
+	free(a.args);
 }
 
 TypeInfo dupTypeInfo(TypeInfo a) {
 	TypeInfo b = a;
-	for (size_t i = 0; i < b.argsLen; i++) {
-		b.args[i] = dupTypeInfo(a.args[i]);
+
+	if (b.args != NULL) {
+		b.args = malloc(sizeof(TypeInfo) * a.argsLen);
+		for (size_t i = 0; i < b.argsLen; i++) {
+			b.args[i] = dupTypeInfo(a.args[i]);
+		}
 	}
+
 	return b;
 }
 
@@ -53,4 +60,19 @@ char* strToCstr(const String str) {
 	cstr[str.len] = '\0';
 
 	return cstr;
+}
+
+NamedObject unnamedToNamed(Object obj, char* name, int scope) {
+	return (NamedObject){
+		.name = name,
+		.scope = scope,
+		.o = obj,
+	};
+}
+
+Object objdup(Object obj) {
+	Object out = obj;
+	out.type = dupTypeInfo(obj.type);
+
+	return out;
 }

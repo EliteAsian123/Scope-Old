@@ -9,6 +9,10 @@
 #define type(...) \
 	(TypeInfo) { .id = __VA_ARGS__ }
 
+#define basicReference createReference((ReferenceInfo){ \
+	.counter = 0,                                       \
+})
+
 typedef struct {
 	char* chars;
 	size_t len;
@@ -36,17 +40,17 @@ struct TypeInfo {
 typedef struct TypeInfo TypeInfo;
 
 typedef struct {
+	size_t referenceId;
 	TypeInfo type;
 	ValueHolder v;
-} StackElem;
-
-typedef struct {
-	int scope;
-	TypeInfo type;
-	char* name;
-	void* ptr;
 	bool fromArgs;
 } Object;
+
+typedef struct {
+	char* name;
+	int scope;
+	Object o;
+} NamedObject;
 
 typedef struct {
 	int location;
@@ -55,10 +59,16 @@ typedef struct {
 	size_t argsLen;
 } FuncPointer;
 
+typedef struct {
+	int counter;
+} ReferenceInfo;
+
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 void freeTypeInfo(TypeInfo a);
 TypeInfo dupTypeInfo(TypeInfo a);
 String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
+NamedObject unnamedToNamed(Object obj, char* name, int scope);
+Object objdup(Object obj);
 
 #endif
