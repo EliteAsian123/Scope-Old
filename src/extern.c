@@ -36,13 +36,22 @@ static void stringToInt() {
 	push((Object){
 		.type = type(TYPE_INT),
 		.v.v_int = atoi(str),
-		.referenceId = basicReference,
 	});
 	free(str);
+}
+
+static void floatSqrt() {
+	Object a = pop();
+
+	push((Object){
+		.type = type(TYPE_FLOAT),
+		.v.v_float = sqrtf(a.v.v_float),
+	});
 }
 
 const ExternPtr externs[] = {
 	print,
 	input,
 	stringToInt,
+	floatSqrt,
 };

@@ -26,13 +26,17 @@ func int factorial(int n) {
 
 func float abs(float n) {
 	if (n < 0f) {
-		ret 0f - n;
+		ret -n;
 	}
-
+	
 	ret n;
 }
 
 func bool approximately(float a, float b, float error) {
 	float diff = abs(a - b);
 	ret diff <= error;
+}
+
+func float sqrt(float n) {
+	ret extern(n, 3);
 }
