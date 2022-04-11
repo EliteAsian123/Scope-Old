@@ -68,6 +68,7 @@ bool typeInfoEqual(TypeInfo a, TypeInfo b);
 
 void push(Object elem);
 Object pop();
+Object stackRead();
 
 void pushLoc();
 void pushSLoc();

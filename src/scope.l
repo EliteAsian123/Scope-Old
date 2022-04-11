@@ -42,6 +42,7 @@
 "swap"			{ return S_SWAP; }
 "for"			{ return S_FOR; }
 "throw"			{ return S_THROW; }
+"repeat"		{ return S_REPEAT; }
 
 "new"			{ return E_NEW; }
 

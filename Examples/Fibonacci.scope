@@ -2,7 +2,7 @@
 
 int a = 0;
 int b = 1;
-for (int i = 0, i < 15, i++) {
+repeat(15) {
 	println((string) a);
 	
 	a = a + b;

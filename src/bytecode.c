@@ -70,7 +70,7 @@ static bool showDisposeInfo = false;
 static CallFrame frames[STACK_SIZE];
 static size_t framesCount;
 
-// Interpret stage
+// Interpret & Parse stage
 static Object stack[STACK_SIZE];
 static size_t stackCount;
 
@@ -121,6 +121,10 @@ void push(Object obj) {
 
 Object pop() {
 	return stack[--stackCount];
+}
+
+Object stackRead() {
+	return stack[stackCount - 1];
 }
 
 void pushLoc() {

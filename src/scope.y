@@ -9,9 +9,12 @@
 	
 	FILE* yyin;
 	int scope = 0;
+	int internalVarId = 0;
 	
 	#define pushi(...) pushInst((Inst) __VA_ARGS__, scope);
 	
+	#define repVarName strdup((char*) stackRead().v.v_ptr)
+
 	int yywrap() {
 		return 1;
 	}
@@ -38,6 +41,7 @@
 
 /* Statement keywords */
 %token S_EXTERN S_IF S_ELSE S_WHILE S_RETURN S_BREAK S_FUNC S_SWAP S_FOR S_THROW
+%token S_REPEAT
 
 /* Expression keywords */
 %token E_NEW
@@ -122,6 +126,7 @@ estatement	: if
 			| while
 			| declaref
 			| for
+			| repeat
 			;
 
 statement	: declare
@@ -205,6 +210,51 @@ for			: S_FOR '(' {
 					scope--;
 					pushi({.inst = GOTO, .a.v_int = popLoc()});
 					scope--;
+				}
+			;
+
+repeat		: S_REPEAT '(' {
+					// Generate variable name
+					int length = snprintf(NULL, 0, "_$_repeatIndex_%d", internalVarId++) + 1;
+					char* str = malloc(length);
+					snprintf(str, length, "_$_repeatIndex_%d", internalVarId);
+					push((Object) {.v.v_ptr = str});
+
+					// Create an internal index
+					scope++;
+					pushi({.inst = LOADT, .type = type(TYPE_INT)});
+					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 0});
+					pushi({.inst = SAVEV, .a.v_ptr = repVarName});
+					
+					pushLoc();
+					scope++;
+					
+					// Create the compare expression
+					pushi({.inst = LOADV, .a.v_ptr = repVarName});
+				} expr ')' {
+					pushi({.inst = LT});
+					
+					// Start the loop
+					pushLoc();
+					pushLoop();
+					pushi({});
+
+				} s_block {
+					// Increment the internal index
+					pushi({.inst = LOADV, .a.v_ptr = repVarName});
+					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
+					pushi({.inst = ADD});
+					pushi({.inst = RESAVEV, .a.v_ptr = repVarName});
+					
+					// End the loop
+					popLoop();
+					setInst((Inst){.inst = IFN, .a.v_int = instsCount + 1}, popLoc(), scope);
+					scope--;
+					pushi({.inst = GOTO, .a.v_int = popLoc()});
+					scope--;
+
+					// Clean up
+					free(pop().v.v_ptr);
 				}
 			;
 
