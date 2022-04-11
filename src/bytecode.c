@@ -672,6 +672,11 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					// Get the var in the frame
 					NamedObject oobj = getVar(funcFrame.o, vobj.name);
 
+					// Skip if the types are not equal
+					if (typeInfoEqual(vobj.o.type, oobj.o.type)) {
+						skipdelete;
+					}
+
 					// Skip if the scopes don't match
 					if (vobj.scope != oobj.scope) {
 						skipdelete;
