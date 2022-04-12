@@ -563,6 +563,12 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				b = pop();
 				a = pop();
 
+				if (isVar(frame.o, insts[i].a.v_ptr)) {
+					if (getVar(frame.o, insts[i].a.v_ptr).scope == curScope) {
+						ierr("Redefinition of existing variable in the same scope.");
+					}
+				}
+
 				if (a.type.id != TYPE_UNKNOWN) {
 					if (!typeInfoEqual(b.type, a.type)) {
 						ierr("Declaration type doesn't match expression.");
@@ -579,6 +585,10 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				break;
 			case RESAVEV:
 				a = pop();
+
+				if (a.type.id == TYPE_FUNC) {
+					ierr("Functions can't be reassigned at the moment.");
+				}
 
 				obj = getVar(frame.o, insts[i].a.v_ptr);
 				if (obj.o.fromArgs) {
@@ -663,6 +673,11 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				for (size_t v = 0; v < fo.varsCount; v++) {
 					NamedObject vobj = fo.vars[v];
 
+					// Temporary for now
+					if (vobj.o.type.id == TYPE_FUNC) {
+						skipdelete;
+					}
+
 					// Skip if it is a local variable
 					if (vobj.scope >= s) {
 						skipdelete;
@@ -682,7 +697,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					NamedObject oobj = getVar(funcFrame.o, vobj.name);
 
 					// Skip if the types are not equal
-					if (typeInfoEqual(vobj.o.type, oobj.o.type)) {
+					if (!typeInfoEqual(vobj.o.type, oobj.o.type)) {
 						skipdelete;
 					}
 

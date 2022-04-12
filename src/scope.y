@@ -233,6 +233,9 @@ for			: S_FOR '(' {
 					scope--;
 					pushi({.inst = GOTO, .a.v_int = popLoc()});
 					scope--;
+					
+					// Push padding to dispose variables
+					pushi({});
 				}
 			;
 
@@ -275,6 +278,9 @@ repeat		: S_REPEAT '(' {
 					scope--;
 					pushi({.inst = GOTO, .a.v_int = popLoc()});
 					scope--;
+					
+					// Push padding to dispose variables
+					pushi({});
 
 					// Clean up
 					free(pop().v.v_ptr);
