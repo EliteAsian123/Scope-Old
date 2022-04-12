@@ -35,6 +35,7 @@ enum Insts {
 	EXTERN,
 	APPENDT,
 	ARRAYI,
+	ARRAYIL,
 	ARRAYS,
 	ARRAYG,
 	ARRAYL,

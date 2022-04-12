@@ -1,5 +1,6 @@
 #include "bytecode.h"
 
+// TODO: Arrays shouldn't use ValueHolders
 // TODO: Arrays don't properly dispose their elements
 
 // TODO: Proper accessors `.`
@@ -408,7 +409,7 @@ static void instDump(size_t i) {
 	bool isStringArg = false;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 35, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 36, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case LOAD:
 			instName = "load";
@@ -425,6 +426,7 @@ static void instDump(size_t i) {
 		case EXTERN: 	instName = "extern"; 						break;
 		case APPENDT: 	instName = "appendt"; 						break;
 		case ARRAYI: 	instName = "arrayi"; 						break;
+		case ARRAYIL: 	instName = "arrayil"; 						break;
 		case ARRAYS: 	instName = "arrays"; 	isStringArg = true; break;
 		case ARRAYG: 	instName = "arrayg"; 	isStringArg = true; break;
 		case ARRAYL: 	instName = "arrayl"; 						break;
@@ -518,7 +520,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 		b.type = type(TYPE_VOID);
 		c.type = type(TYPE_VOID);
 
-		static_assert(_INSTS_ENUM_LEN == 35, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 36, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD:
 				sobj = (Object){
@@ -757,6 +759,48 @@ static void readByteCode(size_t frameIndex, size_t start) {
 
 				// Push
 				push(sobj);
+
+				break;
+			case ARRAYIL:;	// `new a[] { n0, n1, n2, ... }`
+				Object* arrayList = malloc(sizeof(Object) * insts[i].a.v_int);
+				for (int j = 0; j < insts[i].a.v_int; j++) {
+					arrayList[j] = pop();
+				}
+
+				a = pop();
+
+				// Check types
+				for (int j = 0; j < insts[i].a.v_int; j++) {
+					if (!typeInfoEqual(arrayList[j].type, a.type)) {
+						ierr("An element in the array initialization does not match the array type.");
+					}
+				}
+
+				// Initilize the new stack element
+				sobj = (Object){
+					.type = type(TYPE_ARRAY),
+					.referenceId = basicReference,
+				};
+
+				// Convert type into array type
+				sobj.type.argsLen = 1;
+				sobj.type.args = malloc(sizeof(TypeInfo));
+				sobj.type.args[0] = dupTypeInfo(a.type);
+
+				// Convert the object list to a ValueHolder list
+				sobj.v.v_array.arr = malloc(sizeof(ValueHolder) * insts[i].a.v_int);
+				sobj.v.v_array.len = insts[i].a.v_int;
+
+				// Populate
+				for (int j = 0; j < insts[i].a.v_int; j++) {
+					sobj.v.v_array.arr[j] = arrayList[insts[i].a.v_int - j - 1].v;
+				}
+
+				// Push
+				push(sobj);
+
+				// Free
+				free(arrayList);
 
 				break;
 			case ARRAYS:  // `$[a] = b`

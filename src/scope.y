@@ -173,11 +173,6 @@ assign		: IDENTIFIER '=' expr {
 				}
 			;
 
-arr_save	: IDENTIFIER '[' expr ']' '=' expr {
-					pushi({.inst = ARRAYS, .a.v_ptr = $1});
-				}
-			;
-
 while		: S_WHILE {
 					pushLoc();
 				} '(' expr ')' {
@@ -315,8 +310,31 @@ bool_op		: expr T_EQ expr { pushi({.inst = EQ}); }
 cast		: '(' T_STR ')' expr { pushi({.inst = CASTS}); } %prec O_CAST
 			;
 
+/* Arrays */
+
+arr_init_list		: /* Nothing */
+					| expr arr_init_list_elem {
+							Object obj = pop();
+							obj.v.v_int++;
+							push(obj);
+						}
+					;
+
+arr_init_list_elem	: /* Nothing */
+					| ',' expr arr_init_list_elem {
+							Object obj = pop();
+							obj.v.v_int++;
+							push(obj);
+						}
+					;
+
 arr_init	: E_NEW type '[' expr ']' {
 					pushi({.inst = ARRAYI});
+				}
+			| E_NEW type '[' ']' {
+					push((Object) {.v.v_int = 0});
+				} '{' arr_init_list '}' {
+					pushi({.inst = ARRAYIL, .a.v_int = pop().v.v_int});
 				}
 			;
 
@@ -331,6 +349,11 @@ arr_length	: IDENTIFIER '.' IDENTIFIER {
 					}
 
 					pushi({.inst = ARRAYL, .a.v_ptr = $1});
+				}
+			;
+
+arr_save	: IDENTIFIER '[' expr ']' '=' expr {
+					pushi({.inst = ARRAYS, .a.v_ptr = $1});
 				}
 			;
 
