@@ -1,5 +1,7 @@
 #include "bytecode.h"
 
+// TODO: Redo identifiers. Parse time variables as "array.5", "class.array.3", etc.
+
 // TODO: Arrays shouldn't use ValueHolders
 // TODO: Arrays don't properly dispose their elements
 

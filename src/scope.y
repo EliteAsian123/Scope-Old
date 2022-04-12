@@ -48,9 +48,9 @@
 
 /* Built-in types & literals */
 %token T_AUTO T_VOID T_STR T_INT T_BOOL T_FLOAT T_FUNC
-%token <v_int> L_NUMBER L_BOOL
-%token <v_str> L_STRING 
-%token <v_float> L_FLOAT
+%token<v_int> L_NUMBER L_BOOL
+%token<v_str> L_STRING 
+%token<v_float> L_FLOAT
 
 /* Operators */
 %token T_EQ T_NE T_AND T_OR T_GTE T_LTE
@@ -58,8 +58,9 @@
 %left '>' '<' T_EQ T_NE T_GTE T_LTE
 %left '+' '-'
 %left '*' '/' '%'
-%left '!' O_UMINUS
-%left O_CAST
+%left '!' O_UMINUS O_CAST
+%left O_ARR_GET
+%left '.'
 
 %%
 
@@ -340,7 +341,7 @@ arr_init	: E_NEW type '[' expr ']' {
 
 arr_get		: IDENTIFIER '[' expr ']' {
 					pushi({.inst = ARRAYG, .a.v_ptr = $1});
-				}
+				} %prec O_ARR_GET
 			;
 
 arr_length	: IDENTIFIER '.' IDENTIFIER {
