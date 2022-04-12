@@ -140,6 +140,7 @@ statement	: declare
 			| inc_dec
 			| arr_save
 			| throw
+			| op_assign
 			;
 
 expr		: '(' expr ')'
@@ -148,7 +149,7 @@ expr		: '(' expr ')'
 			| L_BOOL { pushi({.inst = LOAD, .type = type(TYPE_BOOL), .a.v_int = $1}); }
 			| L_FLOAT { pushi({.inst = LOAD, .type = type(TYPE_FLOAT), .a.v_float = $1}); }
 			| IDENTIFIER { pushi({.inst = LOADV, .a.v_ptr = $1}); }
-			| int_op
+			| num_op
 			| bool_op
 			| cast
 			| elambda /* Explict Lambda */
@@ -171,6 +172,32 @@ declare		: type IDENTIFIER '=' expr { pushi({.inst = SAVEV, .a.v_ptr = $2}); }
 
 assign		: IDENTIFIER '=' expr { 
 					pushi({.inst = RESAVEV, .a.v_ptr = $1}); 
+				}
+			;
+
+op_assign	: IDENTIFIER '+' '=' {
+					pushi({.inst = LOADV, .a.v_ptr = $1});
+				} expr {
+					pushi({.inst = ADD});
+					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+				}
+			| IDENTIFIER '-' '=' {
+					pushi({.inst = LOADV, .a.v_ptr = $1});
+				} expr {
+					pushi({.inst = SUB});
+					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+				}
+			| IDENTIFIER '*' '=' {
+					pushi({.inst = LOADV, .a.v_ptr = $1});
+				} expr {
+					pushi({.inst = MUL});
+					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+				}
+			| IDENTIFIER '/' '=' {
+					pushi({.inst = LOADV, .a.v_ptr = $1});
+				} expr {
+					pushi({.inst = DIV});
+					pushi({.inst = RESAVEV, .a.v_ptr = $1});
 				}
 			;
 
@@ -289,7 +316,7 @@ throw		: S_THROW L_STRING {
 
 /* Basic Expressions */
 
-int_op		: expr '+' expr { pushi({.inst = ADD}); }
+num_op		: expr '+' expr { pushi({.inst = ADD}); }
 			| expr '-' expr { pushi({.inst = SUB}); }
 			| expr '*' expr { pushi({.inst = MUL}); }
 			| expr '/' expr { pushi({.inst = DIV}); }
