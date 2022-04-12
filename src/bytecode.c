@@ -1058,7 +1058,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 
 				break;
 			case THROW:
-				fprintf(stderr, "%s\n", insts[i].a.v_ptr);
+				fprintf(stderr, "%s\n", (char*) insts[i].a.v_ptr);
 				ierr("An error has been thrown, and execution has been aborted.");
 
 				return;
