@@ -1,11 +1,12 @@
 #insert Standard/Core.scope
 
-int[] intArray = new int[5];
-intArray[0] = 12;
-intArray[1] = -3523;
-intArray[2] = -48600843;
-intArray[3] = 0;
-intArray[4] = 234246;
+int[] intArray = new int[] {
+	12,
+	-3523,
+	-48600843,
+	0,
+	234246
+};
 
 for (int i = 0, i < intArray.length, i++) {
 	println((string) intArray[i]);

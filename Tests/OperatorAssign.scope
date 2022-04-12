@@ -1,0 +1,19 @@
+#insert Standard/Core.scope
+
+int a = 0;
+int b = 0;
+
+a += 5;
+b = b + 5;
+
+a *= 100;
+b = b * 100;
+
+a /= 5;
+b = b / 5;
+
+a -= 50;
+b = b - 50;
+
+println((string) a);
+println((string) b);
