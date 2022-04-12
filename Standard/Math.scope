@@ -16,6 +16,33 @@ func bool isComposite(int n) {
 	ret !isPrime(n);
 }
 
+func int[] factorsOf(int n) {
+	int[] out = new int[0];
+	
+	// Temporary
+	func void append(int arg) {
+		int[] temp = out;
+		out = new int[temp.length + 1];
+		for (int i = 0, i < temp.length, i++) {
+			out[i] = temp[i];
+		}
+		
+		out[temp.length] = arg;
+	}
+	
+	for (int i = 1, i * i <= n, i++) {
+		if (n % i == 0) {
+			append(i);
+		
+			if (n / i != i) {
+				append(n / i);
+			}
+		}
+	}
+	
+	ret out;
+}
+
 func int factorial(int n) {
 	if (n <= 1) {
 		ret 1;
