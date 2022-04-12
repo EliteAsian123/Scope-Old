@@ -1,0 +1,16 @@
+#insert Standard/Core.scope
+
+int total = 0;
+
+int a = 0;
+int b = 1;
+while (a < 4000000) {
+	if (a % 2 == 0) {
+		total = total + a;
+	}
+	
+	a = a + b;
+	swap(a, b);
+}
+
+println((string) total);
