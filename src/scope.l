@@ -4,6 +4,7 @@
 %}
 
 %x BIG_COMMENT
+%x DOC_COMMENT
 %x COMMENT
 %x INSERT
 
@@ -13,6 +14,11 @@
 <BIG_COMMENT>"*/"	{ BEGIN(INITIAL); }
 <BIG_COMMENT>\n		{ }
 <BIG_COMMENT>.		{ }
+
+"/%"				{ BEGIN(DOC_COMMENT); }
+<DOC_COMMENT>"%/"	{ BEGIN(INITIAL); }
+<DOC_COMMENT>\n		{ }
+<DOC_COMMENT>.		{ }
 
 "//"			{ BEGIN(COMMENT); }
 <COMMENT>\n 	{ BEGIN(INITIAL); }

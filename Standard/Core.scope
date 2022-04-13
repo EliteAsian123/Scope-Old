@@ -4,19 +4,34 @@ int INT_MIN = INT_MAX + 1;
 long LONG_MAX = 9223372036854775807l;
 long LONG_MIN = LONG_MAX + 1l;
 
+/%
+Prints @"str" out into `stdout`.
+%/
 func void print(string str) {
 	extern(str, 0);
 }
 
+/%
+Prints @"str" + `\n` out into `stdout`.
+%/
 func void println(string str) {
 	print(str + "\n");
 }
 
+/%
+@bug: The maximum input size is currently 256.
+
+Takes the input from `stdout`.
+%/
 func string input() {
 	ret extern(1);
 }
 
-// DEPRECATED
+/%
+@bug: Returns 0 if the input isn't valid.
+
+Ascii to int. Converts @"str" into an integer and returns it.
+%/
 func int atoi(string str) {
 	ret extern(str, 2);
 }

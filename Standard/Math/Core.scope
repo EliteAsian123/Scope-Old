@@ -1,3 +1,6 @@
+/%
+Returns the factorial of @"n".
+%/
 func long factorial(long n) {
 	// if n <= 1, the answer is 1 (in this case)
 	if (n <= 1l) {
@@ -8,6 +11,9 @@ func long factorial(long n) {
 	ret factorial(n - 1l) * n;
 }
 
+/%
+Returns the absolute value of @"n".
+%/
 func float abs(float n) {
 	if (n < 0f) {
 		ret -n;
@@ -16,11 +22,21 @@ func float abs(float n) {
 	ret n;
 }
 
+/%
+Returns whether or not the distance between @"a" and @"b" are within @"error".
+
+@"error": The maximum distance between @"a" and @"b".
+%/
 func bool approximately(float a, float b, float error) {
 	float diff = abs(a - b);
 	ret diff <= error;
 }
 
+/%
+@unoptimized: Square root can be unoptimized. Consider other options.
+
+Returns the square root of @"n".
+%/
 func float sqrt(float n) {
 	if (n < 0f) {
 		throw "Math Error: Cannot get the root of a negative number.";

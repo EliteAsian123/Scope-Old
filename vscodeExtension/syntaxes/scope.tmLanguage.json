@@ -79,6 +79,9 @@
 				},
 				{
 					"include": "#comment-block"
+				},
+				{
+					"include": "#comment-doc"
 				}
 			]
 		},
@@ -91,6 +94,11 @@
 			"name": "comment.single.line.scope",
 			"begin": "//",
 			"end": "$"
+		},
+		"comment-doc": {
+			"name": "comment.block.documentation.scope",
+			"begin": "/\\%",
+			"end": "\\%/"
 		},
 		"boolean": {
 			"patterns": [

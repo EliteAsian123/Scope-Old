@@ -1,3 +1,8 @@
+/%
+@optimized
+
+Returns whether or not @"n" is prime. 
+%/
 func bool isPrime(long n) {
 	// If the number is less than 2, it is not prime
 	if (n < 2l) {
@@ -16,11 +21,21 @@ func bool isPrime(long n) {
 	ret true;
 }
 
+/%
+@optimized
+
+Returns whether or not @"n" is composite.
+In other words, it is just returns the opposite of @"isPrime".
+%/
 func bool isComposite(long n) {
 	// A composite number is just a number that isn't prime
 	ret !isPrime(n);
 }
 
+/%
+Returns an array of all of numbers which evenly divide into @"n" without leaving a remainder.
+This is also known as the factors or the divisors of @"n".
+%/
 func long[] factorsOf(long n) {
 	// Create the output array
 	long[] out = new long[0];
@@ -53,4 +68,17 @@ func long[] factorsOf(long n) {
 	}
 	
 	ret out;
+}
+
+/%
+@optimized
+
+Returns the greatest common divisor (a.k.a. GCD, HCD, GCF, HCF) of the two given numbers @"a" and @"b".
+%/
+func long gcd(long a, long b) {
+	if (number2 == 0) {
+		ret a;
+	}
+	
+	ret gcd(b, a % b);
 }
