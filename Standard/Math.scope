@@ -1,25 +1,31 @@
 func bool isPrime(long n) {
+	// If the number is less than 2, it is not prime
 	if (n < 2l) {
 		ret false;
 	}
 	
+	// Starting at 2 and while i <= sqrt(n) (or i * i <= n)
 	for (long i = 2l, i * i <= n, i += 1l) {
+		// If n is divisible by i, than it is not prime
 		if (n % i == 0l) {
 			ret false;
 		}
 	}
 	
+	// If the loop passed without returning, it is a prime
 	ret true;
 }
 
 func bool isComposite(long n) {
+	// A composite number is just a number that isn't prime
 	ret !isPrime(n);
 }
 
 func long[] factorsOf(long n) {
+	// Create the output array
 	long[] out = new long[0];
 	
-	// Temporary
+	// This is temporary since we cannot append to arrays yet
 	func void append(long arg) {
 		long[] temp = out;
 		out = new long[temp.length + 1];
@@ -30,10 +36,16 @@ func long[] factorsOf(long n) {
 		out[temp.length] = arg;
 	}
 	
+	// Starting at 1 and while i <= sqrt(n) (or i * i <= n)
 	for (long i = 1l, i * i <= n, i += 1l) {
+		// If i is divisible by n, it is a factor
 		if (n % i == 0l) {
 			append(i);
 		
+			// If n / i is not equal to n, it is also a factor
+			// e.g. n = 10, i = 2
+			// we append i which is 2, and n / i which is 5
+			// we don't reach i = 5 because it is more than sqrt(n)
 			if (n / i != i) {
 				append(n / i);
 			}
@@ -44,10 +56,12 @@ func long[] factorsOf(long n) {
 }
 
 func long factorial(long n) {
+	// if n <= 1, the answer is 1 (in this case)
 	if (n <= 1l) {
 		ret 1l;
 	}
 	
+	// Simple recursion
 	ret factorial(n - 1l) * n;
 }
 
