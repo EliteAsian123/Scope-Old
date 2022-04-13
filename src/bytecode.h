@@ -54,7 +54,7 @@ enum Insts {
 	LT,
 	GTE,
 	LTE,
-	CASTS,
+	CAST,
 	GOTO,
 	IFN,
 	THROW,

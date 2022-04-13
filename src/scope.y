@@ -347,7 +347,9 @@ bool_op		: expr T_EQ expr { pushi({.inst = EQ}); }
 			| expr T_OR expr { pushi({.inst = OR}); }
 			;
 
-cast		: '(' T_STR ')' expr { pushi({.inst = CASTS}); } %prec O_CAST
+cast		: '(' T_STR ')' expr { pushi({.inst = CAST, .type = type(TYPE_STR)}); } %prec O_CAST
+			| '(' T_INT ')' expr { pushi({.inst = CAST, .type = type(TYPE_INT)}); } %prec O_CAST
+			| '(' T_LONG ')' expr { pushi({.inst = CAST, .type = type(TYPE_LONG)}); } %prec O_CAST
 			;
 
 /* Arrays */

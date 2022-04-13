@@ -449,7 +449,7 @@ static void instDump(size_t i) {
 		case LT: 		instName = "lt"; 							break;
 		case GTE: 		instName = "gte"; 							break;
 		case LTE: 		instName = "lte"; 							break;
-		case CASTS: 	instName = "casts"; 						break;
+		case CAST: 		instName = "cast"; 							break;
 		case GOTO: 		instName = "goto"; 							break;
 		case IFN:	 	instName = "ifn"; 							break;
 		case THROW:	 	instName = "throw";		isStringArg = true;	break;
@@ -1040,32 +1040,54 @@ static void readByteCode(size_t frameIndex, size_t start) {
 			case LTE:
 				boolOperation(<=);
 				break;
-			case CASTS:
+			case CAST:
 				a = pop();
 
-				if (a.type.id == TYPE_INT) {
-					toStr(a.v.v_int, "%d");
-				} else if (a.type.id == TYPE_FLOAT) {
-					toStr(a.v.v_float, "%.9g");
-				} else if (a.type.id == TYPE_LONG) {
-					toStr(a.v.v_long, "%ld");
-				} else if (a.type.id == TYPE_BOOL) {
-					if (a.v.v_int) {
+				if (insts[i].type.id == TYPE_STR) {
+					if (a.type.id == TYPE_INT) {
+						toStr(a.v.v_int, "%d");
+					} else if (a.type.id == TYPE_FLOAT) {
+						toStr(a.v.v_float, "%.9g");
+					} else if (a.type.id == TYPE_LONG) {
+						toStr(a.v.v_long, "%ld");
+					} else if (a.type.id == TYPE_BOOL) {
+						if (a.v.v_int) {
+							push((Object){
+								.type = type(TYPE_STR),
+								.v.v_string = cstrToStr("true"),
+								.referenceId = basicReference,
+							});
+						} else {
+							push((Object){
+								.type = type(TYPE_STR),
+								.v.v_string = cstrToStr("false"),
+								.referenceId = basicReference,
+							});
+						}
+					} else {
+						printf("Cannot cast type %d.\n", a.type.id);
+						ierr("Invalid type for `cast` to `string`.");
+					}
+				} else if (insts[i].type.id == TYPE_INT) {
+					if (a.type.id == TYPE_LONG) {
 						push((Object){
-							.type = type(TYPE_STR),
-							.v.v_string = cstrToStr("true"),
-							.referenceId = basicReference,
+							.type = type(TYPE_INT),
+							.v.v_int = (int) a.v.v_long,
 						});
 					} else {
-						push((Object){
-							.type = type(TYPE_STR),
-							.v.v_string = cstrToStr("false"),
-							.referenceId = basicReference,
-						});
+						printf("Cannot cast type %d.\n", a.type.id);
+						ierr("Invalid type for `cast` to `int`.");
 					}
-				} else {
-					printf("Cannot cast type %d.\n", a.type.id);
-					ierr("Invalid type for `casts`.");
+				} else if (insts[i].type.id == TYPE_LONG) {
+					if (a.type.id == TYPE_INT) {
+						push((Object){
+							.type = type(TYPE_LONG),
+							.v.v_long = (long) a.v.v_int,
+						});
+					} else {
+						printf("Cannot cast type %d.\n", a.type.id);
+						ierr("Invalid type for `cast` to `long`.");
+					}
 				}
 
 				break;

@@ -1,0 +1,10 @@
+#insert Standard/Core.scope
+
+int a = (int) 123l;
+long b = (long) -532;
+float c = 532.5f;
+
+println((string) a);
+println((string) b);
+println((string) true);
+println((string) c);
