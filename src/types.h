@@ -26,6 +26,7 @@ enum Types {
 	TYPE_FLOAT,
 	TYPE_FUNC,
 	TYPE_ARRAY,
+	TYPE_LONG,
 	_TYPES_ENUM_LEN
 };
 

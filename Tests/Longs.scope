@@ -1,0 +1,13 @@
+#insert Standard/Core.scope
+
+long a = 32l + 64l * 23l - 15l;
+println((string) a);
+
+a = LONG_MAX % 1000l;
+println((string) a);
+
+a = 6000l / 3l;
+println((string) a);
+
+long b = 64l * 14l;
+println((string) (a + b));

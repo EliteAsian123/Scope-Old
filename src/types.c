@@ -30,6 +30,10 @@ static ValueHolder createDefaultArray(TypeInfo type) {
 	return (ValueHolder){.v_array = a};
 }
 
+static ValueHolder createDefaultLong(TypeInfo type) {
+	return (ValueHolder){.v_long = 0};
+}
+
 static void disposeString(const TypeInfo type, ValueHolder v) {
 	free(v.v_string.chars);
 }
@@ -69,6 +73,10 @@ const Type types[] = {
 		.createDefault = createDefaultArray,
 		.disposable = true,
 		.dispose = disposeArray,
+	},
+	{
+		.displayName = "long",
+		.createDefault = createDefaultLong,
 	},
 };
 static_assert(sizeof(types) / sizeof(Type) == _TYPES_ENUM_LEN, "Update enum or type array.");

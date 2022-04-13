@@ -53,6 +53,7 @@
 "string"		{ return T_STR; }
 "float"			{ return T_FLOAT; }
 "function"		{ return T_FUNC; }
+"long"			{ return T_LONG; }
 
 "=="			{ return T_EQ; }
 "!="			{ return T_NE; }
@@ -85,6 +86,10 @@
 [0-9]* {
 	yylval.v_int = atoi(yytext);
 	return L_NUMBER;
+}
+[0-9]*l {
+	yylval.v_long = atol(yytext);
+	return L_LONG;
 }
 ([0-9]*[.])?[0-9]+f {
 	char* str = strndup(yytext, strlen(yytext));

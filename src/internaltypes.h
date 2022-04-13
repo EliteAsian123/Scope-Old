@@ -28,6 +28,7 @@ typedef union ValueHolder {
 	void* v_ptr;
 	int v_int;
 	float v_float;
+	long v_long;
 	Array v_array;
 	String v_string;
 } ValueHolder;

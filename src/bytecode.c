@@ -19,6 +19,8 @@
 		push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int op b.v.v_int});         \
 	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                       \
 		push((Object){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float op b.v.v_float}); \
+	} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {                         \
+		push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long op b.v.v_long});     \
 	} else {                                                                               \
 		ierr("Invalid types for `" #op "`.");                                              \
 	}
@@ -948,6 +950,8 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int + b.v.v_int});
 				} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {
 					push((Object){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float + b.v.v_float});
+				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
+					push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long + b.v.v_long});
 				} else if (a.type.id == TYPE_STR && b.type.id == TYPE_STR) {
 					// Create string
 					String s = (String){
@@ -984,6 +988,8 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				a = pop();
 				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
 					push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int % b.v.v_int});
+				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
+					push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long % b.v.v_long});
 				} else {
 					ierr("Invalid types for `%%`.");
 				}
@@ -995,6 +1001,8 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					push((Object){.type = type(TYPE_INT), .v.v_int = -a.v.v_int});
 				} else if (a.type.id == TYPE_FLOAT) {
 					push((Object){.type = type(TYPE_FLOAT), .v.v_float = -a.v.v_float});
+				} else if (a.type.id == TYPE_LONG) {
+					push((Object){.type = type(TYPE_LONG), .v.v_long = -a.v.v_long});
 				} else {
 					ierr("Invalid types for `neg`");
 				}
@@ -1039,6 +1047,8 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					toStr(a.v.v_int, "%d");
 				} else if (a.type.id == TYPE_FLOAT) {
 					toStr(a.v.v_float, "%.9g");
+				} else if (a.type.id == TYPE_LONG) {
+					toStr(a.v.v_long, "%ld");
 				} else if (a.type.id == TYPE_BOOL) {
 					if (a.v.v_int) {
 						push((Object){

@@ -33,6 +33,7 @@
 	char* v_str;
 	int v_int;
 	float v_float;
+	long v_long;
 }
 
 /* Important */
@@ -47,10 +48,11 @@
 %token E_NEW
 
 /* Built-in types & literals */
-%token T_AUTO T_VOID T_STR T_INT T_BOOL T_FLOAT T_FUNC
+%token T_AUTO T_VOID T_STR T_INT T_BOOL T_FLOAT T_FUNC T_LONG
 %token<v_int> L_NUMBER L_BOOL
 %token<v_str> L_STRING 
 %token<v_float> L_FLOAT
+%token<v_long> L_LONG
 
 /* Operators */
 %token T_EQ T_NE T_AND T_OR T_GTE T_LTE
@@ -100,6 +102,9 @@ type		: T_VOID {
 			| T_FLOAT {
 					pushi({.inst = LOADT, .type = type(TYPE_FLOAT)});
 				}
+			| T_LONG {
+					pushi({.inst = LOADT, .type = type(TYPE_LONG)});
+				}
 			| T_FUNC {
 					pushi({.inst = LOADT, .type = type(TYPE_FUNC)});
 				} '(' type_list ')'
@@ -148,6 +153,7 @@ expr		: '(' expr ')'
 			| L_STRING { pushi({.inst = LOAD, .type = type(TYPE_STR), .a.v_ptr = $1}); }
 			| L_BOOL { pushi({.inst = LOAD, .type = type(TYPE_BOOL), .a.v_int = $1}); }
 			| L_FLOAT { pushi({.inst = LOAD, .type = type(TYPE_FLOAT), .a.v_float = $1}); }
+			| L_LONG { pushi({.inst = LOAD, .type = type(TYPE_LONG), .a.v_long = $1}); }
 			| IDENTIFIER { pushi({.inst = LOADV, .a.v_ptr = $1}); }
 			| num_op
 			| bool_op
