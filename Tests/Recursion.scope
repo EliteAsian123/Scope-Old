@@ -1,6 +1,6 @@
 #insert Standard/Core.scope
 #insert Standard/Math.scope
 
-println((string) factorial(4));
-println((string) factorial(6));
-println((string) factorial(10));
+println((string) factorial(4l));
+println((string) factorial(6l));
+println((string) factorial(10l));

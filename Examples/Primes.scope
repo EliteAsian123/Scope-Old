@@ -2,7 +2,7 @@
 #insert Standard/Math.scope
 	
 for (int p = 0, p <= 20, p++) {
-	if (isPrime(p)) {
+	if (isPrime((long) p)) {
 		println((string) p);
 	}
 }

@@ -1,10 +1,10 @@
-func bool isPrime(int n) {
-	if (n < 2) {
+func bool isPrime(long n) {
+	if (n < 2l) {
 		ret false;
 	}
 	
-	for (int i = 2, i * i <= n, i++) {
-		if (n % i == 0) {
+	for (long i = 2l, i * i <= n, i += 1l) {
+		if (n % i == 0l) {
 			ret false;
 		}
 	}
@@ -12,17 +12,17 @@ func bool isPrime(int n) {
 	ret true;
 }
 
-func bool isComposite(int n) {
+func bool isComposite(long n) {
 	ret !isPrime(n);
 }
 
-func int[] factorsOf(int n) {
-	int[] out = new int[0];
+func long[] factorsOf(long n) {
+	long[] out = new long[0];
 	
 	// Temporary
-	func void append(int arg) {
-		int[] temp = out;
-		out = new int[temp.length + 1];
+	func void append(long arg) {
+		long[] temp = out;
+		out = new long[temp.length + 1];
 		for (int i = 0, i < temp.length, i++) {
 			out[i] = temp[i];
 		}
@@ -30,8 +30,8 @@ func int[] factorsOf(int n) {
 		out[temp.length] = arg;
 	}
 	
-	for (int i = 1, i * i <= n, i++) {
-		if (n % i == 0) {
+	for (long i = 1l, i * i <= n, i += 1l) {
+		if (n % i == 0l) {
 			append(i);
 		
 			if (n / i != i) {
@@ -43,12 +43,12 @@ func int[] factorsOf(int n) {
 	ret out;
 }
 
-func int factorial(int n) {
-	if (n <= 1) {
-		ret 1;
+func long factorial(long n) {
+	if (n <= 1l) {
+		ret 1l;
 	}
 	
-	ret factorial(n - 1) * n;
+	ret factorial(n - 1l) * n;
 }
 
 func float abs(float n) {
