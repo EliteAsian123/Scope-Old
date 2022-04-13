@@ -32,6 +32,8 @@
 		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int op b.v.v_int});     \
 	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                    \
 		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_float op b.v.v_float}); \
+	} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {                      \
+		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_long op b.v.v_long});   \
 	} else {                                                                            \
 		ierr("Invalid types for `" #op "`.");                                           \
 	}
@@ -1015,6 +1017,8 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT ||
 					a.type.id == TYPE_FUNC && b.type.id == TYPE_FUNC) {
 					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int == b.v.v_int});
+				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
+					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_long == b.v.v_long});
 				} else if (a.type.id == TYPE_BOOL && b.type.id == TYPE_BOOL) {
 					iwarn("Operation can be simplified for `eq`.");
 					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int == b.v.v_int});
