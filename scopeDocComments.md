@@ -38,7 +38,7 @@ func float myAwesomeFunction(float a, bool b) {
     ret 3.1415f;
 }
 </pre>
-> The comment about this awesome function! The `a` controls the awesomeness!
+> The comment about this awesome function! The `a` controls the awesomeness!<br/>
 > Make sure you use `bool isItAwesome(string, int, ...)` first, or it could throw an error...
 
 If an arugment and a function have the same name, simple use a `.` to differentiate them.
@@ -56,8 +56,8 @@ func bool myAwesomeFunction(bool isItAwesome) {
     ret !isItAwesome;
 }
 </pre>
-> This function does some tricky math to figure out if something is awesome.
-> `isItAwesome` is the thing to test!
+> This function does some tricky math to figure out if something is awesome.<br/>
+> `isItAwesome` is the thing to test!<br/>
 > Make sure you use `bool isItAwesome(string, int, ...)` first.
 
 ## Argument Descriptions
@@ -66,17 +66,16 @@ If you want to descibe how arguments can be used, use this syntax:
 <pre>
 <b>/%
 The comment about this awesome function!
-
-@"a": The awesomeness!
+<br/>
+@"a": The awesomeness!<br/>
 @"b": The awesome switch!
 %/</b>
 func float myAwesomeFunction(float a, bool b) {
     ret 3.1415f;
 }
 </pre>
-> The comment about this awesome function!
->
-> `float a`: The awesomeness!
+> The comment about this awesome function!<br/><br/>
+> `float a`: The awesomeness!<br/>
 > `bool b`: The awesome switch!
 
 All invalid argument names will be discarded completely.
@@ -91,7 +90,7 @@ PI is **awesome**! Do *you* agree?
 %/</b>
 float pi = 3.1415f;
 </pre>
-> PI is **awesome**! Do *you* agree?
+> PI is **awesome**! Do *you* agree?<br/>
 > ~~Pie stinks though.~~ `Pie is awesome!`
 
 ## Tags
@@ -107,9 +106,8 @@ PI up to 4 digits.
 %/</b>
 float pi = 3.1415f;
 </pre>
-> *Deprecated:* Use `fullPi` instead
-> *Unsafe*
->
+> *Deprecated:* Use `fullPi` instead<br/>
+> *Unsafe*<br/><br/>
 > PI up to 4 digits.
 
 Here is a list of tags. All invalid tags will be complete discarded.
