@@ -1,5 +1,5 @@
 #insert Standard/Core.scope
-#insert Standard/Math.scope
+#insert Standard/Math/Core.scope
 
 println((string) sqrt(5f));
 println((string) sqrt(4f));

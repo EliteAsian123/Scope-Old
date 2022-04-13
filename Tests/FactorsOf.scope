@@ -1,5 +1,5 @@
 #insert Standard/Core.scope
-#insert Standard/Math.scope
+#insert Standard/Math/Factors.scope
 
 long[] factors = factorsOf(840l);
 

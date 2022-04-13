@@ -1,0 +1,30 @@
+func long factorial(long n) {
+	// if n <= 1, the answer is 1 (in this case)
+	if (n <= 1l) {
+		ret 1l;
+	}
+	
+	// Simple recursion
+	ret factorial(n - 1l) * n;
+}
+
+func float abs(float n) {
+	if (n < 0f) {
+		ret -n;
+	}
+	
+	ret n;
+}
+
+func bool approximately(float a, float b, float error) {
+	float diff = abs(a - b);
+	ret diff <= error;
+}
+
+func float sqrt(float n) {
+	if (n < 0f) {
+		throw "Math Error: Cannot get the root of a negative number.";
+	}
+	
+	ret extern(n, 3);
+}

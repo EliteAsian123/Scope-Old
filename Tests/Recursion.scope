@@ -1,5 +1,5 @@
 #insert Standard/Core.scope
-#insert Standard/Math.scope
+#insert Standard/Math/Core.scope
 
 println((string) factorial(4l));
 println((string) factorial(6l));
