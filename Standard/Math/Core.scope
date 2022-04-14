@@ -1,3 +1,6 @@
+float pi = 3.1415926f;
+float e = 2.7182818f;
+
 /%
 Returns the factorial of @"n".
 %/
@@ -43,4 +46,21 @@ func float sqrt(float n) {
 	}
 	
 	ret extern(n, 3);
+}
+
+/%
+@optimized
+
+Returns the @"n"th digit of @"a". Right to left, one based.
+This will return zero if the @"n" is out of bounds.
+
+@"n": The digit you want to get.
+@"a": The number in which the digit will be retrieved from.
+%/
+func int nthDigit(int n, long a) {
+	if (n < 0) {
+		ret 0;
+	}
+	
+	ret a / (10l ^ (long) (n - 1)) % 10l;
 }
