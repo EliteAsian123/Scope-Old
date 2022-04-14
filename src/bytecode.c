@@ -1002,24 +1002,26 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				b = pop();
 				a = pop();
 				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
-					if (b.v.v_int < 0) {
-						ierr("Use floats for negative powers.");
-					}
-
 					int number = 1;
-					for (int j = 0; j < b.v.v_int; j++) {
-						number *= a.v.v_int;
+
+					if (b.v.v_int < 0) {
+						number = 0;
+					} else {
+						for (int j = 0; j < b.v.v_int; j++) {
+							number *= a.v.v_int;
+						}
 					}
 
 					push((Object){.type = type(TYPE_INT), .v.v_int = number});
 				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
-					if (b.v.v_long < 0) {
-						ierr("Use floats for negative powers.");
-					}
-
 					long number = 1;
-					for (long j = 0; j < b.v.v_long; j++) {
-						number *= a.v.v_long;
+
+					if (b.v.v_long < 0) {
+						number = 0;
+					} else {
+						for (long j = 0; j < b.v.v_long; j++) {
+							number *= a.v.v_long;
+						}
 					}
 
 					push((Object){.type = type(TYPE_LONG), .v.v_long = number});
