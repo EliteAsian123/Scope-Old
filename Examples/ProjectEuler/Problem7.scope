@@ -1,0 +1,14 @@
+#insert Standard/Core.scope
+#insert Standard/Math/Factors.scope
+
+int primes = 0;
+for (int i = 0, true, i++) {
+	if (isPrime((long) i)) {
+		primes++;
+	}
+	
+	if (primes == 10001) {
+		println((string) i);
+		break;
+	}
+}

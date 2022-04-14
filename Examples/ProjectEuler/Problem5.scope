@@ -1,1 +1,9 @@
 #insert Standard/Core.scope
+#insert Standard/Math/Factors.scope
+
+long answer = 1l;
+for (int i = 1, i <= 20, i++) {
+	answer *= ((long) i) / gcd((long) i, answer);
+}
+
+println((string) answer);

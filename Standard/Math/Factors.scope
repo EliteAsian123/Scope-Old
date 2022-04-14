@@ -92,3 +92,15 @@ func long lcm(long a, long b) {
 	// Remember, gcd(a, b) * lcm(a, b) = a * b
 	ret a / gcd(a, b) * b;
 }
+
+/%
+Returns true if the three inputs (@"a", @"b", and @"c") are a Pythagorean triplet.
+A Pythagorean triplet are a set a three numbers were @"a" < @"b" < @"c" and @"a"^2 + @"b"^2 = @"c"^2.
+%/
+func bool isPythagoreanTriplet(long a, long b, long c) {
+	if (a < b && b < c && a < c) {
+		ret a ^ 2l + b ^ 2l == c ^ 2l;
+	}
+	
+	ret false;
+}
