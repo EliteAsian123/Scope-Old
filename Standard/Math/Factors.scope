@@ -73,12 +73,22 @@ func long[] factorsOf(long n) {
 /%
 @optimized
 
-Returns the greatest common divisor (a.k.a. GCD, HCD, GCF, HCF) of the two given numbers @"a" and @"b".
+Returns the greatest common divisor/factor (a.k.a. GCD, HCD, GCF, HCF) of @"a" and @"b".
 %/
 func long gcd(long a, long b) {
-	if (number2 == 0) {
+	if (b == 0l) {
 		ret a;
 	}
 	
 	ret gcd(b, a % b);
+}
+
+/%
+@optimized
+
+Returns the least/lowest common multiple (a.k.a. LCM, SCM) of @"a" and @"b".
+%/
+func long lcm(long a, long b) {
+	// Remember, gcd(a, b) * lcm(a, b) = a * b
+	ret a / gcd(a, b) * b;
 }
