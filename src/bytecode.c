@@ -415,7 +415,7 @@ static void instDump(size_t i) {
 	bool isStringArg = false;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 36, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 37, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case LOAD:
 			instName = "load";
@@ -445,6 +445,7 @@ static void instDump(size_t i) {
 		case MUL: 		instName = "mul"; 							break;
 		case DIV: 		instName = "div"; 							break;
 		case MOD: 		instName = "mod"; 							break;
+		case POW: 		instName = "pow"; 							break;
 		case NEG: 		instName = "neg"; 							break;
 		case EQ: 		instName = "eq"; 							break;
 		case GT: 		instName = "gt"; 							break;
@@ -526,7 +527,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 		b.type = type(TYPE_VOID);
 		c.type = type(TYPE_VOID);
 
-		static_assert(_INSTS_ENUM_LEN == 36, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 37, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD:
 				sobj = (Object){
@@ -994,6 +995,38 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long % b.v.v_long});
 				} else {
 					ierr("Invalid types for `%%`.");
+				}
+
+				break;
+			case POW:  // `a ^ b`
+				b = pop();
+				a = pop();
+				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
+					if (b.v.v_int < 0) {
+						ierr("Use floats for negative powers.");
+					}
+
+					int number = 1;
+					for (int j = 0; j < b.v.v_int; j++) {
+						number *= a.v.v_int;
+					}
+
+					push((Object){.type = type(TYPE_INT), .v.v_int = number});
+				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
+					if (b.v.v_long < 0) {
+						ierr("Use floats for negative powers.");
+					}
+
+					long number = 1;
+					for (long j = 0; j < b.v.v_long; j++) {
+						number *= a.v.v_long;
+					}
+
+					push((Object){.type = type(TYPE_LONG), .v.v_long = number});
+				} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {
+					push((Object){.type = type(TYPE_FLOAT), .v.v_long = powf(a.v.v_float, b.v.v_float)});
+				} else {
+					ierr("Invalid types for `^`.");
 				}
 
 				break;

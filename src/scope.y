@@ -62,6 +62,7 @@
 %left '+' '-'
 %left '*' '/' '%'
 %left '!' O_UMINUS
+%left '^'
 %left O_ARR_GET
 %left '.'
 
@@ -334,6 +335,7 @@ num_op		: expr '+' expr { pushi({.inst = ADD}); }
 			| expr '*' expr { pushi({.inst = MUL}); }
 			| expr '/' expr { pushi({.inst = DIV}); }
 			| expr '%' expr { pushi({.inst = MOD}); }
+			| expr '^' expr { pushi({.inst = POW}); }
 			| '-' expr { pushi({.inst = NEG}); } %prec O_UMINUS
 			;
 

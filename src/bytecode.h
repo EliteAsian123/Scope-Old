@@ -48,6 +48,7 @@ enum Insts {
 	MUL,
 	DIV,
 	MOD,
+	POW,
 	NEG,
 	EQ,
 	GT,
