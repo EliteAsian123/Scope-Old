@@ -3,6 +3,7 @@
 
 long answer = 1l;
 for (int i = 1, i <= 20, i++) {
+	// lcm and gcd "magic"
 	answer *= ((long) i) / gcd((long) i, answer);
 }
 

@@ -1,0 +1,16 @@
+#insert Standard/Core.scope
+#insert Standard/Math/Factors.scope
+
+int number = 1000;
+
+for (int a = 1, a < number, a++) {
+	for (int b = a + 1, b < number, b++) {
+		// `c = number - a - b` because `a + b + c = number`
+		int c = number - a - b;
+		
+		if (isPythagoreanTriplet((long) a, (long) b, (long) c)) {
+			println((string) a * b * c);
+			exit(0);
+		}
+	}
+}

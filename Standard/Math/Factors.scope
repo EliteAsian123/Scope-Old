@@ -84,12 +84,22 @@ func long lcm(long a, long b) {
 
 /%
 Returns true if the three inputs (@"a", @"b", and @"c") are a Pythagorean triplet.
+See @"isPythagoreanTriplet" if @"a", @"b", and @"c" are **not** squared.
 A Pythagorean triplet are a set a three numbers were @"a" < @"b" < @"c" and @"a"^2 + @"b"^2 = @"c"^2.
 %/
-func bool isPythagoreanTriplet(long a, long b, long c) {
+func bool isPythagoreanTripletSqr(long a, long b, long c) {
 	if (a < b && b < c) {
-		ret a ^ 2l + b ^ 2l == c ^ 2l;
+		ret a + b == c;
 	}
 	
 	ret false;
+}
+
+/%
+Returns true if the three inputs (@"a", @"b", and @"c") are a Pythagorean triplet.
+See @"isPythagoreanTripletSqr" if @"a", @"b", and @"c" are already squared.
+A Pythagorean triplet are a set a three numbers were @"a" < @"b" < @"c" and @"a"^2 + @"b"^2 = @"c"^2.
+%/
+func bool isPythagoreanTriplet(long a, long b, long c) {
+	ret isPythagoreanTripletSqr(a ^ 2l, b ^ 2l, c ^ 2l);
 }

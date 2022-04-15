@@ -1,0 +1,18 @@
+#insert Standard/Core.scope
+#insert Standard/Math/Factors.scope
+
+println("Warning: This program is slow! Progress will be printed.");
+
+long sum = 0l;
+
+for (long p = 1l, p < 2000000l, p += 1l) {
+	if (isPrime(p)) {
+		sum += p;
+	}
+	
+	if (p % 100000l == 0l) {
+		println(((string) p) + "/2000000 done");
+	}
+}
+
+println((string) sum);

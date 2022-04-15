@@ -1,6 +1,7 @@
 #include "bytecode.h"
 
-// TODO: Redo identifiers. Parse time variables as "array.5", "class.array.3", etc.
+// TODO: ~~Redo identifiers. Parse time variables as "array.5", "class.array.3", etc.~~
+// TODO: Edit: Why don't we just use expressions duhh...
 
 // TODO: Arrays shouldn't use ValueHolders
 // TODO: Arrays don't properly dispose their elements
@@ -1050,13 +1051,11 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				a = pop();
 
 				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT ||
-					a.type.id == TYPE_FUNC && b.type.id == TYPE_FUNC) {
+					a.type.id == TYPE_FUNC && b.type.id == TYPE_FUNC ||
+					a.type.id == TYPE_BOOL && b.type.id == TYPE_BOOL) {
 					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int == b.v.v_int});
 				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
 					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_long == b.v.v_long});
-				} else if (a.type.id == TYPE_BOOL && b.type.id == TYPE_BOOL) {
-					iwarn("Operation can be simplified for `eq`.");
-					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int == b.v.v_int});
 				} else if (a.type.id == TYPE_STR && a.type.id == TYPE_STR) {
 					push((Object){
 						.type = type(TYPE_BOOL),
