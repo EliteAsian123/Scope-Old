@@ -1,4 +1,5 @@
 #insert Standard/Core.scope
+#insert Standard/ArrayUtils.scope
 #insert Standard/Math/Factors.scope
 
 long number = 600851475143l;

@@ -5,3 +5,16 @@ func string[] stringArray(int len, string init) {
 	}
 	ret arr;
 }
+
+/%
+@unoptimized
+%/
+func long[] appendLong(long[] arr, long arg) {
+	long[] out = new long[arr.length + 1];
+	for (int i = 0, i < arr.length, i++) {
+		out[i] = arr[i];
+	}
+	out[arr.length] = arg;
+	
+	ret out;
+}

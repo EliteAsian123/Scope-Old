@@ -40,29 +40,18 @@ func long[] factorsOf(long n) {
 	// Create the output array
 	long[] out = new long[0];
 	
-	// This is temporary since we cannot append to arrays yet
-	func void append(long arg) {
-		long[] temp = out;
-		out = new long[temp.length + 1];
-		for (int i = 0, i < temp.length, i++) {
-			out[i] = temp[i];
-		}
-		
-		out[temp.length] = arg;
-	}
-	
 	// Starting at 1 and while i <= sqrt(n) (or i * i <= n)
 	for (long i = 1l, i * i <= n, i += 1l) {
 		// If i is divisible by n, it is a factor
 		if (n % i == 0l) {
-			append(i);
+			out = appendLong(out, i);
 		
 			// If n / i is not equal to n, it is also a factor
 			// e.g. n = 10, i = 2
 			// we append i which is 2, and n / i which is 5
 			// we don't reach i = 5 because it is more than sqrt(n)
 			if (n / i != i) {
-				append(n / i);
+				out = appendLong(out, n / i);
 			}
 		}
 	}
@@ -98,7 +87,7 @@ Returns true if the three inputs (@"a", @"b", and @"c") are a Pythagorean triple
 A Pythagorean triplet are a set a three numbers were @"a" < @"b" < @"c" and @"a"^2 + @"b"^2 = @"c"^2.
 %/
 func bool isPythagoreanTriplet(long a, long b, long c) {
-	if (a < b && b < c && a < c) {
+	if (a < b && b < c) {
 		ret a ^ 2l + b ^ 2l == c ^ 2l;
 	}
 	
