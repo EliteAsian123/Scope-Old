@@ -35,3 +35,12 @@ Ascii to int. Converts @"str" into an integer and returns it.
 func int atoi(string str) {
 	ret extern(str, 2);
 }
+
+/%
+@unsafe: Scope does not clean up when this function is used. Memory leaks inbound!
+
+Forces the program to exit.
+%/
+func void exit(int code) {
+	ret extern(code, 4);
+}

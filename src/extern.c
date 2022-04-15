@@ -49,9 +49,20 @@ static void floatSqrt() {
 	});
 }
 
+static void externExit() {
+	Object a = pop();
+
+	if (a.v.v_int != 0) {
+		printf("Program was forced to exit with non-zero exit code `%d`.\n", a.v.v_int);
+	}
+
+	exit(a.v.v_int);
+}
+
 const ExternPtr externs[] = {
 	print,
 	input,
 	stringToInt,
 	floatSqrt,
+	externExit,
 };
