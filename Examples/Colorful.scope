@@ -1,0 +1,12 @@
+#insert Standard/Core.scope
+#insert Standard/ANSI.scope
+
+println("This is normal text...");
+print(ansiRed + "This " + ansiReset);
+print(ansiGreen + "is " + ansiReset);
+print(ansiYellow + "colorful " + ansiReset);
+print(ansiBlue + "text! " + ansiReset);
+print(ansiMagenta + "Wow!" + ansiReset + "\n");
+println(ansiUnderline + "This is underlined!" + ansiReset);
+println(ansiBold + "This is bold!" + ansiReset);
+println(ansiInvert + "This is inverted!" + ansiReset);
