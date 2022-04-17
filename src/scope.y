@@ -383,22 +383,22 @@ arr_init	: E_NEW type '[' expr ']' {
 				}
 			;
 
-arr_get		: IDENTIFIER '[' expr ']' {
-					pushi({.inst = ARRAYG, .a.v_ptr = $1});
+arr_get		: expr '[' expr ']' {
+					pushi({.inst = ARRAYG});
 				} %prec O_ARR_GET
 			;
 
-arr_length	: IDENTIFIER '.' IDENTIFIER {
+arr_length	: expr '.' IDENTIFIER {
 					if (strcmp($3, "length") != 0) {
 						yyerror("Accessor must be `length` (for now).");
 					}
-
-					pushi({.inst = ARRAYL, .a.v_ptr = $1});
+					
+					pushi({.inst = ARRAYL});
 				}
 			;
 
-arr_save	: IDENTIFIER '[' expr ']' '=' expr {
-					pushi({.inst = ARRAYS, .a.v_ptr = $1});
+arr_save	: expr '[' expr ']' '=' expr {
+					pushi({.inst = ARRAYS});
 				}
 			;
 

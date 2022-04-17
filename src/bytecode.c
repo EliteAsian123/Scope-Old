@@ -1,8 +1,5 @@
 #include "bytecode.h"
 
-// TODO: ~~Redo identifiers. Parse time variables as "array.5", "class.array.3", etc.~~
-// TODO: Edit: Why don't we just use expressions duhh...
-
 // TODO: Arrays shouldn't use ValueHolders
 // TODO: Arrays don't properly dispose their elements
 
@@ -826,9 +823,10 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				free(arrayList);
 
 				break;
-			case ARRAYS:  // `$[a] = b`
+			case ARRAYS:  // `c[a] = b`
 				b = pop();
 				a = pop();
+				c = pop();
 
 				if (a.type.id != TYPE_INT) {
 					ierr("Index must be an int.");
@@ -838,63 +836,60 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					ierr("Index must be more than 0.");
 				}
 
-				obj = getVar(frame.o, insts[i].a.v_ptr);
-
-				if (obj.o.type.id != TYPE_ARRAY) {
+				if (c.type.id != TYPE_ARRAY) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = obj.o.v.v_array;
+				arr = c.v.v_array;
 
 				if (a.v.v_int >= arr.len) {
 					ierr("Index must be less than the length.");
 				}
 
-				if (!typeInfoEqual(b.type, obj.o.type.args[0])) {
+				if (!typeInfoEqual(b.type, c.type.args[0])) {
 					ierr("Set type doens't match expression.");
 				}
 
 				arr.arr[a.v.v_int] = b.v;
 
 				break;
-			case ARRAYG:  // `$[a]`
+			case ARRAYG:  // `a[b]`
+				b = pop();
 				a = pop();
 
-				if (a.type.id != TYPE_INT) {
+				if (b.type.id != TYPE_INT) {
 					ierr("Index must be an int.");
 				}
 
-				if (a.v.v_int < 0) {
+				if (b.v.v_int < 0) {
 					ierr("Index must be more than 0.");
 				}
 
-				obj = getVar(frame.o, insts[i].a.v_ptr);
-
-				if (obj.o.type.id != TYPE_ARRAY) {
+				if (a.type.id != TYPE_ARRAY) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = obj.o.v.v_array;
+				arr = a.v.v_array;
 
-				if (a.v.v_int >= arr.len) {
+				if (b.v.v_int >= arr.len) {
 					ierr("Index must be less than the length.");
 				}
 
 				push((Object){
-					.type = dupTypeInfo(obj.o.type.args[0]),
-					.v = arr.arr[a.v.v_int],
-					.referenceId = obj.o.referenceId,
+					.type = dupTypeInfo(a.type.args[0]),
+					.v = arr.arr[b.v.v_int],
+					.referenceId = a.referenceId,
 				});
 
 				break;
-			case ARRAYL:
-				obj = getVar(frame.o, insts[i].a.v_ptr);
+			case ARRAYL:  // `a.length`
+				a = pop();
 
-				if (obj.o.type.id != TYPE_ARRAY) {
+				if (a.type.id != TYPE_ARRAY) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = obj.o.v.v_array;
+				arr = a.v.v_array;
 
 				push((Object){
 					.type = type(TYPE_INT),
