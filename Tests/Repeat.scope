@@ -1,0 +1,10 @@
+#insert Standard/Core.scope
+
+repeat(5) {
+	repeat(5) {
+		println("There should be 25 of me...");
+	}
+
+	println("Just kidding!");
+	break;
+}
