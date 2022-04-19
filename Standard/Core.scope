@@ -44,3 +44,11 @@ Forces the program to exit.
 func void exit(int code) {
 	ret extern(code, 4);
 }
+
+/%
+Clears the console. 
+This function simply prints `\u001b[2J` which is an ANSI code that clears the screen.
+%/
+func void clear() {
+	print("\u001b[2J");
+}
