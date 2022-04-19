@@ -2,11 +2,30 @@
 #insert Standard/ANSI.scope
 
 println("This is normal text...");
-print(ansiRed + "This " + ansiReset);
-print(ansiGreen + "is " + ansiReset);
-print(ansiYellow + "colorful " + ansiReset);
-print(ansiBlue + "text! " + ansiReset);
-print(ansiMagenta + "Wow!" + ansiReset + "\n");
+
+print(ansiFgRed + "This " + ansiReset);
+print(ansiFgGreen + "is " + ansiReset);
+print(ansiFgYellow + "colorful " + ansiReset);
+print(ansiFgBlue + "text! " + ansiReset);
+println(ansiFgMagenta + "Wow!" + ansiReset);
+
 println(ansiUnderline + "This is underlined!" + ansiReset);
 println(ansiBold + "This is bold!" + ansiReset);
+println(ansiItalic + "This is italic!" + ansiReset);
 println(ansiInvert + "This is inverted!" + ansiReset);
+println(ansiDim + "This is dimmed!" + ansiReset);
+
+print(ansiBgRed + "This " + ansiReset);
+print(ansiBgGreen + "is " + ansiReset);
+print(ansiBgYellow + "colorful " + ansiReset);
+print(ansiBgBlue + "text! " + ansiReset);
+println(ansiBgMagenta + "Wow!" + ansiReset);
+
+println("Press enter for something awesome!");
+input();
+
+print(ansiClearScreen);
+print(ansiCurGoto(3, 3) + "You didn't expect this!");
+print(ansiCurDown(3) + "Not here either!");
+print(ansiCurLeft(35) + ansiCurDown(6) + "Or here!");
+print(ansiCurGoto(0, 15));
