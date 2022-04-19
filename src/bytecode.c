@@ -618,12 +618,14 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				break;
 			case CALLF:
 				obj = getVar(frame.o, (char*) insts[i].a.v_ptr);
+
+				bool dropOutput = false;
 				if (insts[i].type.id == TYPE_UNKNOWN &&
 					obj.o.type.args[0].id == TYPE_VOID) {
 					ierr("Invoke expression cannot be referencing a void function.");
 				} else if (insts[i].type.id == TYPE_VOID &&
 						   obj.o.type.args[0].id != TYPE_VOID) {
-					ierr("Invoke statement cannot be referencing a non-void function.");
+					dropOutput = true;
 				}
 
 				FuncPointer f = funcs[obj.o.v.v_int];
@@ -719,6 +721,10 @@ static void readByteCode(size_t frameIndex, size_t start) {
 
 				if (obj.o.fromArgs) {
 					pushFrame(frame);
+				}
+
+				if (dropOutput) {
+					pop();
 				}
 
 				break;
