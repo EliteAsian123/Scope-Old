@@ -1,0 +1,21 @@
+#insert Standard/Core.scope
+#insert Standard/ArrayUtils.scope
+#insert Standard/Math/Factors.scope
+
+// We could use sequences, but that is unoptimized.
+// #insert Standard/Math/Sequences.scope
+
+println("Warning: This program is slow! Progress will be printed.");
+
+long n = 0l;
+long tri = 0l;
+while (factorCount(tri) <= 500l) {
+	n += 1l;
+	tri += n;
+
+	if (n % 1000l == 0l) {
+		println("Up to " + ((string) tri) + " checked.");
+	}
+}
+
+println((string) tri);

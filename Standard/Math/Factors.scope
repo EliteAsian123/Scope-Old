@@ -35,6 +35,8 @@ func bool isComposite(long n) {
 /%
 Returns an array of all of numbers which evenly divide into @"n" without leaving a remainder.
 This is also known as the factors or the divisors of @"n".
+
+Use @"factorCount" if you don't actually need the factors.
 %/
 func long[] factorsOf(long n) {
 	// Create the output array
@@ -52,6 +54,31 @@ func long[] factorsOf(long n) {
 			// we don't reach i = 5 because it is more than sqrt(n)
 			if (n / i != i) {
 				out = appendLong(out, n / i);
+			}
+		}
+	}
+	
+	ret out;
+}
+
+/%
+Returns the count of all of numbers which evenly divide into @"n" without leaving a remainder.
+This is also known as the number of factors or divisors of @"n".
+
+Use @"factorsOf" if you need the factors.
+%/
+func long factorCount(long n) {
+	// Exactly the same as factorsOf but without array.
+	// See factorsOf for explanation of this function.
+
+	long out = 0l;
+	
+	for (long i = 1l, i * i <= n, i += 1l) {
+		if (n % i == 0l) {
+			out += 1l;
+		
+			if (n / i != i) {
+				out += 1l;
 			}
 		}
 	}

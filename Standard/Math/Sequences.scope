@@ -1,0 +1,7 @@
+/%
+Returns the @"n"th triangle number.
+[Sequence A000217](https://oeis.org/A000217)
+%/
+func long triangleNumber(long n) {
+	ret n * (n + 1l) / 2l;
+}
