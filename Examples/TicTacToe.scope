@@ -1,19 +1,20 @@
 #insert Standard/Core.scope
+#insert Standard/ANSI.scope
 #insert Standard/ArrayUtils.scope
 
-bool isAgainstBot = false;
 auto turn = "X";
 int turnNum = 0;
 
 auto board = stringArray(9, " ");
 
 func void printBoard() {
+	print(ansiReset + ansiClearScreen + ansiCurHome);
 	println("");
-	println(board[0] + "|" + board[1] + "|" + board[2] + "    " + "1|2|3");
-	println("-----    -----");
-	println(board[3] + "|" + board[4] + "|" + board[5] + "    " + "4|5|6");
-	println("-----    -----");
-	println(board[6] + "|" + board[7] + "|" + board[8] + "    " + "7|8|9");
+	println(" " + board[0] + "|" + board[1] + "|" + board[2] + "    " + "1|2|3");
+	println(" -----    -----");
+	println(" " + board[3] + "|" + board[4] + "|" + board[5] + "    " + "4|5|6");
+	println(" -----    -----");
+	println(" " + board[6] + "|" + board[7] + "|" + board[8] + "    " + "7|8|9");
 	println("");
 }
 
@@ -55,7 +56,7 @@ func void doTurn(bool isInvalid) {
 	} else {
 		println("");
 	}
-	print("Where you would you like to go " + turn + "? ");
+	print("Where you would you like to go " + turn + "? " + ansiBold);
 	
 	string in = input();
 	int index = atoi(in);
@@ -70,69 +71,13 @@ func void doTurn(bool isInvalid) {
 	doTurn(true);
 }
 
-func void doBotTurn() {
-	// TODO: Minimax
-	
-	string[][] possiblePositions = new string[][9];
-	int[] possibleScores = new int[9];
-	
-	// Generate possible positions 
-	
-	for (int i = 0, i < 9, i++) {
-		string[] duppedBoard = board;
-		if (duppedBoard[i] == " ") {
-			duppedBoard[i] = turn;
-			possibleScores[i] = 0;
-		} else {
-			possibleScores[i] = -1;
-		}
-		
-		possiblePositions[i] = duppedBoard;
-	}
-	
-	// Gather scores
-	
-	for (int i = 0, i < 9, i++) {
-		if (possibleScores[i] != -1) {
-			if (getWinner(possiblePositions[i]) == turn) {
-				possibleScores[i] = 1;
-			}
-		}
-	}
-	
-	// Choose the highest
-	
-	string[] highestBoard = possiblePositions[0];
-	int highestScore = possibleScores[0];
-	for (int i = 1, i < 9, i++) {
-		if (possibleScores[i] > highestScore) {
-			highestScore = possibleScores[i];
-			highestBoard = possiblePositions[i];
-		}
-	}
-	
-	// Set the board
-	
-	board = highestBoard;
-}
-
 func void gameLoop() {
-	print("Would you like to play against a bot? (y/n) ");
-	if (input() == "y") {
-		print("Currently broken. Sorry.");
-		// isAgainstBot = true;
-	}
-
 	turn = "X";
 	turnNum = 0;
 	while (getWinner(board) == " " && turnNum < 9) {
 		turnNum++;
 		
-		if (turn == "O" && isAgainstBot) {
-			doBotTurn();
-		} else {
-			doTurn(false);
-		}
+		doTurn(false);
 		
 		if (turn == "X") {
 			turn = "O";
