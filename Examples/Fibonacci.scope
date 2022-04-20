@@ -5,6 +5,6 @@ int b = 1;
 repeat(15) {
 	println((string) a);
 	
-	a = a + b;
+	a += b;
 	swap(a, b);
 }

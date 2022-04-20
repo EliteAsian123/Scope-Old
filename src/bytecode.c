@@ -4,7 +4,7 @@
 // TODO: Arrays don't properly dispose their elements
 
 // TODO: Proper accessors `.`
-// TODO: Array indexers as accessors
+// TODO: Redo `repeat`
 // TODO: Utilities
 // TODO: Types
 // TODO: size_t for goto and stuff
