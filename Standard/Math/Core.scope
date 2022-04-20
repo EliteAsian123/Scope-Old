@@ -2,6 +2,8 @@ float pi = 3.1415926f;
 float e = 2.7182818f;
 
 /%
+@complexity: O(n)
+
 Returns the factorial of @"n".
 %/
 func long factorial(long n) {
@@ -49,8 +51,6 @@ func float sqrt(float n) {
 }
 
 /%
-@optimized
-
 Returns the @"n"th digit of @"a". Right to left, one based.
 This will return zero if the @"n" is out of bounds.
 

@@ -1,5 +1,6 @@
 /%
-@optimized
+@unoptimized: Very slow for large numbers.
+@complexity: O(sqrt(n))
 
 Returns whether or not @"n" is prime. 
 %/
@@ -22,7 +23,8 @@ func bool isPrime(long n) {
 }
 
 /%
-@optimized
+@unoptimized: Very slow for large numbers.
+@complexity: O(sqrt(n))
 
 Returns whether or not @"n" is composite.
 In other words, it is just returns the opposite of @"isPrime".
@@ -33,6 +35,9 @@ func bool isComposite(long n) {
 }
 
 /%
+@unoptimized: Very slow for large numbers.
+@complexity: O(sqrt(n))
+
 Returns an array of all of numbers which evenly divide into @"n" without leaving a remainder.
 This is also known as the factors or the divisors of @"n".
 
@@ -62,6 +67,9 @@ func long[] factorsOf(long n) {
 }
 
 /%
+@unoptimized: Very slow for large numbers.
+@complexity: O(sqrt(n))
+
 Returns the count of all of numbers which evenly divide into @"n" without leaving a remainder.
 This is also known as the number of factors or divisors of @"n".
 
@@ -87,7 +95,7 @@ func long factorCount(long n) {
 }
 
 /%
-@optimized
+@optimized: Not the *fastest* method, but still very fast.
 
 Returns the greatest common divisor/factor (a.k.a. GCD, HCD, GCF, HCF) of @"a" and @"b".
 %/
@@ -100,7 +108,7 @@ func long gcd(long a, long b) {
 }
 
 /%
-@optimized
+@optimized: Uses @"gcd" to find answer.
 
 Returns the least/lowest common multiple (a.k.a. LCM, SCM) of @"a" and @"b".
 %/

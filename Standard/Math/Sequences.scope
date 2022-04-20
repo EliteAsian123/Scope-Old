@@ -1,7 +1,7 @@
 /%
-Returns the @"n"th triangle number.
-[Sequence A000217](https://oeis.org/A000217)
+Returns the @"n"th number of [sequence A000217](https://oeis.org/A000217).
+Triangular numbers: a(n) = binomial(n+1,2) = n*(n+1)/2 = 0 + 1 + 2 + ... + n.
 %/
-func long triangleNumber(long n) {
+func long triangularNumber(long n) {
 	ret n * (n + 1l) / 2l;
 }

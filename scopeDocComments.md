@@ -101,13 +101,15 @@ Tags are stated at the top of the documentation comment and describe simple thin
 <b>/%
 @deprecated: Use @"fullPi" instead
 @unsafe
+@complexity: O(log(n))
 
 PI up to 4 digits.
 %/</b>
 float pi = 3.1415f;
 </pre>
 > *Deprecated:* Use `fullPi` instead<br/>
-> *Unsafe*<br/><br/>
+> *Unsafe*<br/>
+> *Complexity:* `O(log(n))`<br/><br/>
 > PI up to 4 digits.
 
 Here is a list of tags. All invalid tags will be complete discarded.
@@ -117,3 +119,4 @@ Here is a list of tags. All invalid tags will be complete discarded.
 - `@unoptimized`: States that the function is slow and *definitely* shouldn't be used if speed is a concern.
 - `@optimized`: States that the function is optimized and *should* be used if speed is a concern. This does not mean it should *always* be used.
 - `@bug`: States that the object has a bug/issue associated with it. Use with `@unsafe` if it can cause a security concern.
+- `@complexity`: States the "Big O notation" of the function.
