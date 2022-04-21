@@ -992,9 +992,19 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				b = pop();
 				a = pop();
 				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
-					push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int % b.v.v_int});
+					int answer = a.v.v_int % b.v.v_int;
+					if (answer < 0) {
+						answer += b.v.v_int;
+					}
+
+					push((Object){.type = type(TYPE_INT), .v.v_int = answer});
 				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
-					push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long % b.v.v_long});
+					long answer = a.v.v_long % b.v.v_long;
+					if (answer < 0) {
+						answer += b.v.v_long;
+					}
+
+					push((Object){.type = type(TYPE_LONG), .v.v_long = answer});
 				} else {
 					ierr("Invalid types for `%%`.");
 				}
