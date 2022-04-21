@@ -47,8 +47,10 @@ func void exit(int code) {
 
 /%
 Clears the console. 
-This function simply prints `\u001b[2J` which is an ANSI code that clears the screen.
+
+This function simply prints `\u001b[2J\u001b[H` which is an ANSI code that 
+clears the screen and returns the cursor to 0, 0.
 %/
 func void clear() {
-	print("\u001b[2J");
+	print("\u001b[2J\u001b[H");
 }

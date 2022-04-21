@@ -1,0 +1,16 @@
+long lcgMultiplier = 6364136223846793005l;
+long lcgIncrement  = 1442695040888963407l;
+long lcgSeed       = 0l;
+
+func void setSeed(long seed) {
+	lcgSeed = seed;
+}
+
+func long randLong() {
+	lcgSeed = (lcgMultiplier * lcgSeed + lcgIncrement);	
+	ret lcgSeed;
+}
+
+func int randInt() {
+	ret (int) (randLong() % (long) INT_MAX);
+}
