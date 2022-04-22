@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "internaltypes.h"
+#include "references.h"
 
 typedef struct {
 	const char* displayName;

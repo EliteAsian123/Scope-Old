@@ -9,6 +9,7 @@
 
 #include "extern.h"
 #include "internaltypes.h"
+#include "references.h"
 #include "types.h"
 
 #define STACK_SIZE 256
@@ -89,9 +90,6 @@ void pushInstAt(Inst i, int loc, int scope);
 void startMoveBuffer();
 void endMoveBuffer();
 void putMoveBuffer(int scope);
-
-size_t createReference(ReferenceInfo info);
-void removeReference(size_t id);
 
 void bc_init();
 void bc_run(bool _showByteCode, bool _showCount, bool _showDisposeInfo);

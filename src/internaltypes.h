@@ -18,13 +18,13 @@ typedef struct {
 	size_t len;
 } String;
 
-union ValueHolder;
+struct Object;
 typedef struct {
-	union ValueHolder* arr;
+	struct Object* arr;
 	size_t len;
 } Array;
 
-typedef union ValueHolder {
+typedef union {
 	void* v_ptr;
 	int v_int;
 	float v_float;
@@ -40,7 +40,7 @@ struct TypeInfo {
 };
 typedef struct TypeInfo TypeInfo;
 
-typedef struct {
+typedef struct Object {
 	size_t referenceId;
 	TypeInfo type;
 	ValueHolder v;

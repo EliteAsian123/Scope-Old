@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "bytecode.h"
+#include "references.h"
 
 typedef void (*ExternPtr)();
 

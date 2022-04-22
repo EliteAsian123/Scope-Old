@@ -100,10 +100,6 @@ static InstBuffer instbuffer[STACK_SIZE];
 static size_t instbufferCount;
 static bool isInBuffer;
 
-// Interpret stage
-static ReferenceInfo* refs;
-static size_t refsCount;
-
 void pushFrame(CallFrame frame) {
 	frames[framesCount++] = frame;
 
@@ -340,7 +336,7 @@ void startMoveBuffer() {
 		fprintf(stderr, "Parse Error: Move buffer stack size exceeded.\n");
 	}
 
-	curInstBuf.insts = malloc(0);
+	curInstBuf.insts = NULL;
 	curInstBuf.instsCount = 0;
 	isInBuffer = true;
 }
@@ -373,17 +369,6 @@ void putMoveBuffer(int scope) {
 	instbufferCount--;
 }
 
-size_t createReference(ReferenceInfo info) {
-	refsCount++;
-	refs = realloc(refs, sizeof(ReferenceInfo) * refsCount);
-	refs[refsCount - 1] = info;
-	return refsCount - 1;
-}
-
-void removeReference(size_t id) {
-	// TODO
-}
-
 static bool stringEqual(String a, String b) {
 	if (a.len != b.len) {
 		return false;
@@ -399,12 +384,12 @@ static bool stringEqual(String a, String b) {
 }
 
 void bc_init() {
-	insts = malloc(0);
+	insts = NULL;
 	instsCount = 0;
 
 	stackCount = 0;
 
-	funcs = malloc(0);
+	funcs = NULL;
 	funcsCount = 0;
 }
 
@@ -632,7 +617,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				s = insts[f.location].scope;
 
 				ObjectList fo;
-				fo.vars = malloc(0);
+				fo.vars = NULL;
 				fo.varsCount = 0;
 
 				if (obj.o.fromArgs) {
@@ -775,12 +760,21 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				sobj.type.args[0] = dupTypeInfo(a.type);
 
 				// Initilize the array
-				sobj.v.v_array.arr = malloc(sizeof(ValueHolder) * b.v.v_int);
+				sobj.v.v_array.arr = malloc(sizeof(Object) * b.v.v_int);
 				sobj.v.v_array.len = b.v.v_int;
 
 				// Populate array
 				for (int i = 0; i < b.v.v_int; i++) {
-					sobj.v.v_array.arr[i] = createDefaultType(a.type);
+					sobj.v.v_array.arr[i] = (Object){
+						.type = dupTypeInfo(a.type),
+						.v = createDefaultType(a.type),
+					};
+
+					if (isDisposable(a.type.id)) {
+						size_t refId = basicReference;
+						sobj.v.v_array.arr[i].referenceId = refId;
+						refs[refId].counter++;
+					}
 				}
 
 				// Push
@@ -814,12 +808,14 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				sobj.type.args[0] = dupTypeInfo(a.type);
 
 				// Convert the object list to a ValueHolder list
-				sobj.v.v_array.arr = malloc(sizeof(ValueHolder) * insts[i].a.v_int);
+				sobj.v.v_array.arr = malloc(sizeof(Object) * insts[i].a.v_int);
 				sobj.v.v_array.len = insts[i].a.v_int;
 
 				// Populate
 				for (int j = 0; j < insts[i].a.v_int; j++) {
-					sobj.v.v_array.arr[j] = arrayList[insts[i].a.v_int - j - 1].v;
+					int arrIndex = insts[i].a.v_int - j - 1;
+					sobj.v.v_array.arr[j] = arrayList[arrIndex];
+					refs[arrayList[arrIndex].referenceId].counter++;
 				}
 
 				// Push
@@ -856,7 +852,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					ierr("Set type doens't match expression.");
 				}
 
-				arr.arr[a.v.v_int] = b.v;
+				arr.arr[a.v.v_int] = b;
 
 				break;
 			case ARRAYG:  // `a[b]`
@@ -881,11 +877,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					ierr("Index must be less than the length.");
 				}
 
-				push((Object){
-					.type = dupTypeInfo(a.type.args[0]),
-					.v = arr.arr[b.v.v_int],
-					.referenceId = a.referenceId,
-				});
+				push(arr.arr[b.v.v_int]);
 
 				break;
 			case ARRAYL:  // `a.length`
@@ -1192,7 +1184,7 @@ void bc_run(bool showByteCode, bool _showCount, bool _showDisposeInfo) {
 	// Read byte code
 
 	ObjectList o;
-	o.vars = malloc(0);
+	o.vars = NULL;
 	o.varsCount = 0;
 	pushFrame((CallFrame){.o = &o});
 

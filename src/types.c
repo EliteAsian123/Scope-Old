@@ -6,7 +6,7 @@ static ValueHolder createDefaultInt(TypeInfo type) {
 
 static ValueHolder createDefaultStr(TypeInfo type) {
 	String str = (String){
-		.chars = malloc(0),
+		.chars = NULL,
 		.len = 0,
 	};
 
@@ -23,7 +23,7 @@ static ValueHolder createDefaultFunc(TypeInfo type) {
 
 static ValueHolder createDefaultArray(TypeInfo type) {
 	Array a = (Array){
-		.arr = malloc(0),
+		.arr = NULL,
 		.len = 0,
 	};
 
@@ -39,6 +39,12 @@ static void disposeString(const TypeInfo type, ValueHolder v) {
 }
 
 static void disposeArray(const TypeInfo type, ValueHolder v) {
+	if (isDisposable(type.args[0].id)) {
+		for (int i = 0; i < v.v_array.len; i++) {
+			// TODO: Dipose elements
+		}
+	}
+
 	free(v.v_array.arr);
 }
 
