@@ -1,5 +1,6 @@
 %code requires {
 	#include "../bytecode.h"
+	#include "../flags.h"
 }
 
 %{
@@ -527,8 +528,6 @@ int main(int argc, char** argv) {
 	
 	// Check for flags
 	bool showByteCode = false;
-	bool showCount = false;
-	bool showDisposeInfo = false;
 	if (argc >= 3) {
 		showByteCode = strcmp(argv[2], "-b") == 0;
 		showCount = strcmp(argv[2], "-c") == 0;
@@ -543,7 +542,7 @@ int main(int argc, char** argv) {
 	pushInst((Inst){}, -1); // "end" instruction
 
 	// Interpret
-	bc_run(showByteCode, showCount, showDisposeInfo);
+	bc_run(showByteCode);
 	bc_end();
 	
 	return result;

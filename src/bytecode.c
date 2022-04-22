@@ -67,10 +67,6 @@ typedef struct {
 	size_t instsCount;
 } InstBuffer;
 
-// Flags
-static bool showCount = false;
-static bool showDisposeInfo = false;
-
 // Interpret stage
 static CallFrame frames[STACK_SIZE];
 static size_t framesCount;
@@ -483,17 +479,11 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					printf("Deleting : (%d > %d) `%s`\n", obj.scope, curScope, obj.name);
 				}
 
-				delVarAtIndex(frame.o, v);
-
 				if (isDisposable(obj.o.type.id)) {
-					if (refs[obj.o.referenceId].counter <= 0) {
-						if (showDisposeInfo) {
-							printf("Disposing: `%ld`\n", obj.o.referenceId);
-						}
-
-						dispose(obj.o.type, obj.o.v);
-					}
+					disposeIfNoRefs(obj.o);
 				}
+
+				delVarAtIndex(frame.o, v);
 
 				v--;
 			}
@@ -1170,16 +1160,11 @@ static void readByteCode(size_t frameIndex, size_t start) {
 	}
 }
 
-void bc_run(bool showByteCode, bool _showCount, bool _showDisposeInfo) {
+void bc_run(bool showByteCode) {
 	if (showByteCode) {
 		bc_dump();
 		return;
 	}
-
-	// Set flags
-
-	showCount = _showCount;
-	showDisposeInfo = _showDisposeInfo;
 
 	// Read byte code
 

@@ -9,10 +9,6 @@
 #define type(...) \
 	(TypeInfo) { .id = __VA_ARGS__ }
 
-#define basicReference createReference((ReferenceInfo){ \
-	.counter = 0,                                       \
-})
-
 typedef struct {
 	char* chars;
 	size_t len;
@@ -59,10 +55,6 @@ typedef struct {
 	char** args;
 	size_t argsLen;
 } FuncPointer;
-
-typedef struct {
-	int counter;
-} ReferenceInfo;
 
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 void freeTypeInfo(TypeInfo a);

@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "extern.h"
+#include "flags.h"
 #include "internaltypes.h"
 #include "references.h"
 #include "types.h"
@@ -92,7 +93,7 @@ void endMoveBuffer();
 void putMoveBuffer(int scope);
 
 void bc_init();
-void bc_run(bool _showByteCode, bool _showCount, bool _showDisposeInfo);
+void bc_run(bool _showByteCode);
 void bc_end();
 
 #endif

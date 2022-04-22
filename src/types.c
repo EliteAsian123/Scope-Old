@@ -41,7 +41,7 @@ static void disposeString(const TypeInfo type, ValueHolder v) {
 static void disposeArray(const TypeInfo type, ValueHolder v) {
 	if (isDisposable(type.args[0].id)) {
 		for (int i = 0; i < v.v_array.len; i++) {
-			// TODO: Dipose elements
+			disposeIfNoRefs(v.v_array.arr[i]);
 		}
 	}
 
