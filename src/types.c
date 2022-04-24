@@ -41,6 +41,7 @@ static void disposeString(const TypeInfo type, ValueHolder v) {
 static void disposeArray(const TypeInfo type, ValueHolder v) {
 	if (isDisposable(type.args[0].id)) {
 		for (int i = 0; i < v.v_array.len; i++) {
+			refs[v.v_array.arr[i].referenceId].counter--;
 			disposeIfNoRefs(v.v_array.arr[i]);
 		}
 	}
@@ -108,8 +109,12 @@ void* typedup(int id, const void* ptr) {
 	return p;
 }
 
-void dispose(const TypeInfo type, ValueHolder v) {
+void dispose(const TypeInfo type, ValueHolder v, size_t refId) {
 	if (types[type.id].disposable) {
+		if (showDisposeInfo) {
+			printf("Disposing: `%ld`\n", refId);
+		}
+
 		types[type.id].dispose(type, v);
 	}
 }

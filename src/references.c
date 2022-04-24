@@ -16,11 +16,7 @@ bool hasNoReferences(size_t id) {
 
 bool disposeIfNoRefs(Object obj) {
 	if (hasNoReferences(obj.referenceId)) {
-		if (showDisposeInfo) {
-			printf("Disposing: `%ld`\n", obj.referenceId);
-		}
-
-		dispose(obj.type, obj.v);
+		dispose(obj.type, obj.v, obj.referenceId);
 
 		return true;
 	}

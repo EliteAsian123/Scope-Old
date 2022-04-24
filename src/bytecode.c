@@ -479,8 +479,8 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					printf("Deleting : (%d > %d) `%s`\n", obj.scope, curScope, obj.name);
 				}
 
-				if (isDisposable(obj.o.type.id)) {
-					disposeIfNoRefs(obj.o);
+				if (refs[obj.o.referenceId].counter <= 1) {
+					dispose(obj.o.type, obj.o.v, obj.o.referenceId);
 				}
 
 				delVarAtIndex(frame.o, v);

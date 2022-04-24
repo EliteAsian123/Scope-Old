@@ -2,6 +2,7 @@
 	"files.associations": {
 		"stdlib.h": "c",
 		"type_traits": "c",
-		"bytecode.h": "c"
+		"bytecode.h": "c",
+		"references.h": "c"
 	}
 }
