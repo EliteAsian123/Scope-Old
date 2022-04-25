@@ -60,6 +60,7 @@
 "float"			{ return T_FLOAT; }
 "function"		{ return T_FUNC; }
 "long"			{ return T_LONG; }
+"double"		{ return T_DOUBLE; }
 
 "=="			{ return T_EQ; }
 "!="			{ return T_NE; }
@@ -103,6 +104,13 @@
 	free(str);
 
 	return L_FLOAT;
+}
+([0-9]*[.])?[0-9]+d {
+	char* str = strndup(yytext, strlen(yytext));
+	yylval.v_double = atof(str);
+	free(str);
+	
+	return L_DOUBLE;
 }
 "true" {
 	yylval.v_int = 1;

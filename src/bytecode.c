@@ -1,39 +1,40 @@
 #include "bytecode.h"
 
-// TODO: Arrays shouldn't use ValueHolders
-// TODO: Arrays don't properly dispose their elements
-
 // TODO: Proper accessors `.`
 // TODO: Redo `repeat`
 // TODO: Utilities
 // TODO: Types
-// TODO: size_t for goto and stuff
+// TODO: size_t for goto and stuff; or relative addresses
 // TODO: static checking
 
-#define basicOperation(op)                                                                 \
-	b = pop();                                                                             \
-	a = pop();                                                                             \
-	if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {                                  \
-		push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int op b.v.v_int});         \
-	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                       \
-		push((Object){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float op b.v.v_float}); \
-	} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {                         \
-		push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long op b.v.v_long});     \
-	} else {                                                                               \
-		ierr("Invalid types for `" #op "`.");                                              \
+#define basicOperation(op)                                                                     \
+	b = pop();                                                                                 \
+	a = pop();                                                                                 \
+	if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {                                      \
+		push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int op b.v.v_int});             \
+	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                           \
+		push((Object){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float op b.v.v_float});     \
+	} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {                             \
+		push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long op b.v.v_long});         \
+	} else if (a.type.id == TYPE_DOUBLE && b.type.id == TYPE_DOUBLE) {                         \
+		push((Object){.type = type(TYPE_DOUBLE), .v.v_double = a.v.v_double op b.v.v_double}); \
+	} else {                                                                                   \
+		ierr("Invalid types for `" #op "`.");                                                  \
 	}
 
-#define boolOperation(op)                                                               \
-	b = pop();                                                                          \
-	a = pop();                                                                          \
-	if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {                               \
-		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int op b.v.v_int});     \
-	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                    \
-		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_float op b.v.v_float}); \
-	} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {                      \
-		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_long op b.v.v_long});   \
-	} else {                                                                            \
-		ierr("Invalid types for `" #op "`.");                                           \
+#define boolOperation(op)                                                                 \
+	b = pop();                                                                            \
+	a = pop();                                                                            \
+	if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {                                 \
+		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int op b.v.v_int});       \
+	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                      \
+		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_float op b.v.v_float});   \
+	} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {                        \
+		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_long op b.v.v_long});     \
+	} else if (a.type.id == TYPE_DOUBLE && b.type.id == TYPE_DOUBLE) {                    \
+		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_double op b.v.v_double}); \
+	} else {                                                                              \
+		ierr("Invalid types for `" #op "`.");                                             \
 	}
 
 #define toStr(x, s)                                                                                      \
@@ -939,6 +940,8 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					push((Object){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float + b.v.v_float});
 				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
 					push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long + b.v.v_long});
+				} else if (a.type.id == TYPE_DOUBLE && b.type.id == TYPE_DOUBLE) {
+					push((Object){.type = type(TYPE_DOUBLE), .v.v_double = a.v.v_double + b.v.v_double});
 				} else if (a.type.id == TYPE_STR && b.type.id == TYPE_STR) {
 					// Create string
 					String s = (String){
@@ -1020,7 +1023,9 @@ static void readByteCode(size_t frameIndex, size_t start) {
 
 					push((Object){.type = type(TYPE_LONG), .v.v_long = number});
 				} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {
-					push((Object){.type = type(TYPE_FLOAT), .v.v_long = powf(a.v.v_float, b.v.v_float)});
+					push((Object){.type = type(TYPE_FLOAT), .v.v_float = powf(a.v.v_float, b.v.v_float)});
+				} else if (a.type.id == TYPE_DOUBLE && b.type.id == TYPE_DOUBLE) {
+					push((Object){.type = type(TYPE_DOUBLE), .v.v_double = pow(a.v.v_float, b.v.v_float)});
 				} else {
 					ierr("Invalid types for `^`.");
 				}
@@ -1032,6 +1037,8 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					push((Object){.type = type(TYPE_INT), .v.v_int = -a.v.v_int});
 				} else if (a.type.id == TYPE_FLOAT) {
 					push((Object){.type = type(TYPE_FLOAT), .v.v_float = -a.v.v_float});
+				} else if (a.type.id == TYPE_DOUBLE) {
+					push((Object){.type = type(TYPE_DOUBLE), .v.v_double = -a.v.v_double});
 				} else if (a.type.id == TYPE_LONG) {
 					push((Object){.type = type(TYPE_LONG), .v.v_long = -a.v.v_long});
 				} else {
@@ -1077,10 +1084,12 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				if (insts[i].type.id == TYPE_STR) {
 					if (a.type.id == TYPE_INT) {
 						toStr(a.v.v_int, "%d");
-					} else if (a.type.id == TYPE_FLOAT) {
-						toStr(a.v.v_float, "%.9g");
 					} else if (a.type.id == TYPE_LONG) {
 						toStr(a.v.v_long, "%ld");
+					} else if (a.type.id == TYPE_FLOAT) {
+						toStr(a.v.v_float, "%f");
+					} else if (a.type.id == TYPE_DOUBLE) {
+						toStr(a.v.v_double, "%lf");
 					} else if (a.type.id == TYPE_BOOL) {
 						if (a.v.v_int) {
 							push((Object){
@@ -1118,6 +1127,26 @@ static void readByteCode(size_t frameIndex, size_t start) {
 					} else {
 						printf("Cannot cast type %d.\n", a.type.id);
 						ierr("Invalid type for `cast` to `long`.");
+					}
+				} else if (insts[i].type.id == TYPE_FLOAT) {
+					if (a.type.id == TYPE_DOUBLE) {
+						push((Object){
+							.type = type(TYPE_FLOAT),
+							.v.v_float = (float) a.v.v_double,
+						});
+					} else {
+						printf("Cannot cast type %d.\n", a.type.id);
+						ierr("Invalid type for `cast` to `float`.");
+					}
+				} else if (insts[i].type.id == TYPE_DOUBLE) {
+					if (a.type.id == TYPE_FLOAT) {
+						push((Object){
+							.type = type(TYPE_DOUBLE),
+							.v.v_double = (double) a.v.v_float,
+						});
+					} else {
+						printf("Cannot cast type %d.\n", a.type.id);
+						ierr("Invalid type for `cast` to `double`.");
 					}
 				}
 

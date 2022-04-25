@@ -45,11 +45,11 @@
 			"patterns": [
 				{
 					"name": "constant.numeric.scope",
-					"match": "-?\\b[0-9]+\\b"
+					"match": "-?\\b[0-9]+l?\\b"
 				},
 				{
 					"name": "constant.numeric.scope",
-					"match": "-?\\b([0-9]*[.])?[0-9]+(f|l)\\b"
+					"match": "-?\\b([0-9]*[.])?[0-9]+(f|d)\\b"
 				}
 			]
 		},
@@ -57,7 +57,7 @@
 			"patterns": [
 				{
 					"name": "storage.type.built-in.scope",
-					"match": "\\b(auto|void|int|bool|string|float|function|long)\\b"
+					"match": "\\b(auto|void|int|bool|string|float|function|long|double)\\b"
 				}
 			]
 		},

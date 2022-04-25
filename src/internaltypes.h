@@ -25,6 +25,7 @@ typedef union {
 	int v_int;
 	float v_float;
 	long v_long;
+	double v_double;
 	Array v_array;
 	String v_string;
 } ValueHolder;

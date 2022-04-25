@@ -40,12 +40,12 @@ static void stringToInt() {
 	free(str);
 }
 
-static void floatSqrt() {
+static void squareRoot() {
 	Object a = pop();
 
 	push((Object){
-		.type = type(TYPE_FLOAT),
-		.v.v_float = sqrtf(a.v.v_float),
+		.type = type(TYPE_DOUBLE),
+		.v.v_double = sqrt(a.v.v_double),
 	});
 }
 
@@ -63,6 +63,6 @@ const ExternPtr externs[] = {
 	print,
 	input,
 	stringToInt,
-	floatSqrt,
+	squareRoot,
 	externExit,
 };

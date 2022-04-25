@@ -42,8 +42,8 @@ func bool approximately(float a, float b, float error) {
 
 Returns the square root of @"n".
 %/
-func float sqrt(float n) {
-	if (n < 0f) {
+func double sqrt(double n) {
+	if (n < 0d) {
 		throw "Math Error: Cannot get the root of a negative number.";
 	}
 	

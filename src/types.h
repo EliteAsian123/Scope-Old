@@ -28,6 +28,7 @@ enum Types {
 	TYPE_FUNC,
 	TYPE_ARRAY,
 	TYPE_LONG,
+	TYPE_DOUBLE,
 	_TYPES_ENUM_LEN
 };
 

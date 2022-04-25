@@ -35,6 +35,7 @@
 	int v_int;
 	float v_float;
 	long v_long;
+	double v_double;
 }
 
 /* Important */
@@ -49,11 +50,12 @@
 %token E_NEW
 
 /* Built-in types & literals */
-%token T_AUTO T_VOID T_STR T_INT T_BOOL T_FLOAT T_FUNC T_LONG
+%token T_AUTO T_VOID T_STR T_INT T_BOOL T_FLOAT T_FUNC T_LONG T_DOUBLE
 %token<v_int> L_NUMBER L_BOOL
 %token<v_str> L_STRING 
 %token<v_float> L_FLOAT
 %token<v_long> L_LONG
+%token<v_double> L_DOUBLE
 
 /* Operators */
 %token T_EQ T_NE T_AND T_OR T_GTE T_LTE
@@ -108,6 +110,9 @@ type		: T_VOID {
 			| T_LONG {
 					pushi({.inst = LOADT, .type = type(TYPE_LONG)});
 				}
+			| T_DOUBLE {
+					pushi({.inst = LOADT, .type = type(TYPE_DOUBLE)});
+				}
 			| T_FUNC {
 					pushi({.inst = LOADT, .type = type(TYPE_FUNC)});
 				} '(' type_list ')'
@@ -157,6 +162,7 @@ expr		: '(' expr ')'
 			| L_BOOL { pushi({.inst = LOAD, .type = type(TYPE_BOOL), .a.v_int = $1}); }
 			| L_FLOAT { pushi({.inst = LOAD, .type = type(TYPE_FLOAT), .a.v_float = $1}); }
 			| L_LONG { pushi({.inst = LOAD, .type = type(TYPE_LONG), .a.v_long = $1}); }
+			| L_DOUBLE { pushi({.inst = LOAD, .type = type(TYPE_DOUBLE), .a.v_double = $1}); }
 			| IDENTIFIER { pushi({.inst = LOADV, .a.v_ptr = $1}); }
 			| num_op
 			| bool_op
@@ -354,6 +360,8 @@ bool_op		: expr T_EQ expr { pushi({.inst = EQ}); }
 cast		: '(' T_STR ')' expr { pushi({.inst = CAST, .type = type(TYPE_STR)}); } %prec O_CAST
 			| '(' T_INT ')' expr { pushi({.inst = CAST, .type = type(TYPE_INT)}); } %prec O_CAST
 			| '(' T_LONG ')' expr { pushi({.inst = CAST, .type = type(TYPE_LONG)}); } %prec O_CAST
+			| '(' T_FLOAT ')' expr { pushi({.inst = CAST, .type = type(TYPE_FLOAT)}); } %prec O_CAST
+			| '(' T_DOUBLE ')' expr { pushi({.inst = CAST, .type = type(TYPE_DOUBLE)}); } %prec O_CAST
 			;
 
 /* Arrays */

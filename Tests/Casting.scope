@@ -2,7 +2,7 @@
 
 int a = (int) 123l;
 long b = (long) -532;
-float c = 532.5f;
+float c = (float) 532.5535d;
 
 println((string) a);
 println((string) b);
