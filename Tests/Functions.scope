@@ -1,7 +1,7 @@
 #insert Standard/Core.scope
 
-func bool bestBool(int i) {
-	ret i == 123;
+func bool bestBool(function(int) i) {
+	ret i() == 123;
 }
 
 func void myFunction() {
@@ -18,7 +18,7 @@ func void myFunction() {
 		println("It is the same function!");
 	}
 	
-	if (bestBool(bestNumber())) {
+	if (bestBool(bestNumber)) {
 		println("It is the best boolean!");
 	}
 }
