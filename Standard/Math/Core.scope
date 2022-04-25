@@ -19,7 +19,7 @@ func long factorial(long n) {
 /%
 Returns the absolute value of @"n".
 %/
-func float abs(float n) {
+func float fAbs(float n) {
 	if (n < 0f) {
 		ret -n;
 	}
@@ -32,8 +32,29 @@ Returns whether or not the distance between @"a" and @"b" are within @"error".
 
 @"error": The maximum distance between @"a" and @"b".
 %/
-func bool approximately(float a, float b, float error) {
-	float diff = abs(a - b);
+func bool fApprox(float a, float b, float error) {
+	float diff = fAbs(a - b);
+	ret diff <= error;
+}
+
+/%
+Returns the absolute value of @"n".
+%/
+func double dAbs(double n) {
+	if (n < 0d) {
+		ret -n;
+	}
+	
+	ret n;
+}
+
+/%
+Returns whether or not the distance between @"a" and @"b" are within @"error".
+
+@"error": The maximum distance between @"a" and @"b".
+%/
+func bool dApprox(double a, double b, double error) {
+	double diff = dAbs(a - b);
 	ret diff <= error;
 }
 
