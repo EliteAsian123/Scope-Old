@@ -1,6 +1,6 @@
 // For now, minimum values cannot be represented by literals
-int INT_MAX = 2147483647;
-int INT_MIN = INT_MAX + 1;
+int  INT_MAX  = 2147483647;
+int  INT_MIN  = INT_MAX + 1;
 long LONG_MAX = 9223372036854775807l;
 long LONG_MIN = LONG_MAX + 1l;
 

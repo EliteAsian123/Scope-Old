@@ -2,14 +2,21 @@
 
 #define INPUT_BUFFER_SIZE 256
 
-static void print() {
+#define mathFunc(f)                    \
+	Object a = pop();                  \
+	push((Object){                     \
+		.type = type(TYPE_DOUBLE),     \
+		.v.v_double = f(a.v.v_double), \
+	});
+
+static void _print() {
 	Object a = pop();
 	char* cstr = strToCstr(a.v.v_string);
 	printf("%s", cstr);
 	free(cstr);
 }
 
-static void input() {
+static void _input() {
 	// Get the input
 	char in[INPUT_BUFFER_SIZE];
 	fgets(in, INPUT_BUFFER_SIZE, stdin);
@@ -28,7 +35,7 @@ static void input() {
 	});
 }
 
-static void stringToInt() {
+static void _stringToInt() {
 	Object a = pop();
 
 	// Convert str to cstr then use atoi
@@ -40,16 +47,35 @@ static void stringToInt() {
 	free(str);
 }
 
-static void squareRoot() {
-	Object a = pop();
-
-	push((Object){
-		.type = type(TYPE_DOUBLE),
-		.v.v_double = sqrt(a.v.v_double),
-	});
+static void _sqrt() {
+	mathFunc(sqrt);
 }
 
-static void externExit() {
+static void _sin() {
+	mathFunc(sin);
+}
+
+static void _cos() {
+	mathFunc(cos);
+}
+
+static void _tan() {
+	mathFunc(tan);
+}
+
+static void _asin() {
+	mathFunc(asin);
+}
+
+static void _acos() {
+	mathFunc(acos);
+}
+
+static void _atan() {
+	mathFunc(atan);
+}
+
+static void _exit() {
 	Object a = pop();
 
 	if (a.v.v_int != 0) {
@@ -60,9 +86,17 @@ static void externExit() {
 }
 
 const ExternPtr externs[] = {
-	print,
-	input,
-	stringToInt,
-	squareRoot,
-	externExit,
+	_print,
+	_input,
+	_stringToInt,
+	_sqrt,
+	_exit,
+	_sin,
+	_cos,
+	_tan,
+	_asin,
+	_acos,
+	_atan,
 };
+
+#undef mathFunc

@@ -1,16 +1,55 @@
+// LCG stands for Linear Congruential Generator.
+// https://en.wikipedia.org/wiki/Linear_congruential_generator
+
+// We use the "MMIX" multiplier and increment.
 long lcgMultiplier = 6364136223846793005l;
 long lcgIncrement  = 1442695040888963407l;
 long lcgSeed       = 0l;
 
+/%
+Sets the seed for the LCG.
+%/
 func void setSeed(long seed) {
 	lcgSeed = seed;
 }
 
+/%
+@unsafe: LCG is pseudorandom and is not cryptographically secure.
+@optimized: LCG is very fast.
+
+Generates a random @"long" using LCG between @"LONG_MIN" and @"LONG_MAX" (inclusive).
+%/
 func long randLong() {
 	lcgSeed = (lcgMultiplier * lcgSeed + lcgIncrement);	
 	ret lcgSeed;
 }
 
+/%
+@unsafe: LCG is pseudorandom and is not cryptographically secure.
+@optimized: LCG is very fast.
+
+Generates a random @"int" using LCG between @"INT_MIN" and @"INT_MAX" (inclusive).
+%/
 func int randInt() {
 	ret (int) (randLong() % (long) INT_MAX);
+}
+
+/%
+@unsafe: LCG is pseudorandom and is not cryptographically secure.
+@optimized: LCG is very fast.
+
+Generates a random @"float" using LCG between 0 and 1 (inclusive).
+%/
+func float randFloat() {
+	ret ((float) randInt()) / ((float) INT_MAX);
+}
+
+/%
+@unsafe: LCG is pseudorandom and is not cryptographically secure.
+@optimized: LCG is very fast.
+
+Generates a random @"double" using LCG between 0 and 1 (inclusive).
+%/
+func double randDouble() {
+	ret ((double) randInt()) / ((double) INT_MAX);
 }
