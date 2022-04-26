@@ -1,19 +1,4 @@
 /%
-@complexity: O(n)
-
-Returns the factorial of @"n".
-%/
-func long factorial(long n) {
-	// if n <= 1, the answer is 1 (in this case)
-	if (n <= 1l) {
-		ret 1l;
-	}
-	
-	// Simple recursion
-	ret factorial(n - 1l) * n;
-}
-
-/%
 Returns the absolute value of @"n".
 %/
 func float fAbs(float n) {

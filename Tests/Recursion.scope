@@ -1,5 +1,14 @@
 #insert Standard/Core.scope
-#insert Standard/Math/Core.scope
+
+func long factorial(long n) {
+	// if n <= 1, the answer is 1 (in this case)
+	if (n <= 1l) {
+		ret 1l;
+	}
+	
+	// Simple recursion
+	ret factorial(n - 1l) * n;
+}
 
 println((string) factorial(4l));
 println((string) factorial(6l));

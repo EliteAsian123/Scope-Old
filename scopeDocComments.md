@@ -120,3 +120,4 @@ Here is a list of tags. All invalid tags will be complete discarded.
 - `@optimized`: States that the function is optimized and *should* be used if speed is a concern. This does not mean it should *always* be used.
 - `@bug`: States that the object has a bug/issue associated with it. Use with `@unsafe` if it can cause a security concern.
 - `@complexity`: States the "Big O notation" of the function.
+- `@approx`: Marks the function as being an approximation, meaning the result could be slightly off from the real value.
