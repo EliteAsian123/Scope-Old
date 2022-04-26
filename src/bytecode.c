@@ -390,58 +390,74 @@ void bc_init() {
 	funcsCount = 0;
 }
 
+static bool instHasPointer(size_t i) {
+	static_assert(_INSTS_ENUM_LEN == 38, "Update bytecode pointers.");
+	switch (insts[i].inst) {
+		case LOAD:
+			return insts[i].type.id == TYPE_STR;
+			break;
+		case LOADV:
+		case LOADA:
+		case SAVEV:
+		case RESAVEV:
+		case CALLF:
+		case ARRAYS:
+		case ARRAYG:
+		case THROW:
+			return true;
+		default:
+			return false;
+	}
+}
+
 static void instDump(size_t i) {
 	const char* instName;
-	bool isStringArg = false;
 
 	// clang-format off
 	static_assert(_INSTS_ENUM_LEN == 38, "Update bytecode strings.");
 	switch (insts[i].inst) {
-		case LOAD:
-			instName = "load";
-			isStringArg = insts[i].type.id == TYPE_STR;
-			break;
-		case LOADT: 	instName = "loadt"; 						break;
-		case LOADV: 	instName = "loadv"; 	isStringArg = true; break;
-		case LOADA: 	instName = "loada"; 	isStringArg = true; break;
-		case SAVEV: 	instName = "savev"; 	isStringArg = true; break;
-		case RESAVEV: 	instName = "resavev"; 	isStringArg = true; break;
-		case SAVEF: 	instName = "savef"; 						break;
-		case CALLF: 	instName = "callf"; 	isStringArg = true;	break;
-		case ENDF: 		instName = "endf"; 							break;
-		case EXTERN: 	instName = "extern"; 						break;
-		case APPENDT: 	instName = "appendt"; 						break;
-		case ARRAYI: 	instName = "arrayi"; 						break;
-		case ARRAYIW: 	instName = "arrayiw"; 						break;
-		case ARRAYIL: 	instName = "arrayil"; 						break;
-		case ARRAYS: 	instName = "arrays"; 	isStringArg = true; break;
-		case ARRAYG: 	instName = "arrayg"; 	isStringArg = true; break;
-		case ARRAYL: 	instName = "arrayl"; 						break;
-		case SWAP: 		instName = "swap"; 							break;
-		case NOT: 		instName = "not"; 							break;
-		case AND: 		instName = "and"; 							break;
-		case OR: 		instName = "or"; 							break;
-		case ADD: 		instName = "add"; 							break;
-		case SUB: 		instName = "sub"; 							break;
-		case MUL: 		instName = "mul"; 							break;
-		case DIV: 		instName = "div"; 							break;
-		case MOD: 		instName = "mod"; 							break;
-		case POW: 		instName = "pow"; 							break;
-		case NEG: 		instName = "neg"; 							break;
-		case EQ: 		instName = "eq"; 							break;
-		case GT: 		instName = "gt"; 							break;
-		case LT: 		instName = "lt"; 							break;
-		case GTE: 		instName = "gte"; 							break;
-		case LTE: 		instName = "lte"; 							break;
-		case CAST: 		instName = "cast"; 							break;
-		case GOTO: 		instName = "goto"; 							break;
-		case IFN:	 	instName = "ifn"; 							break;
-		case THROW:	 	instName = "throw";		isStringArg = true;	break;
-		default: 		instName = "?"; 							break;
+		case LOAD:      instName = "load";      break;
+		case LOADT: 	instName = "loadt"; 	break;
+		case LOADV: 	instName = "loadv"; 	break;
+		case LOADA: 	instName = "loada"; 	break;
+		case SAVEV: 	instName = "savev"; 	break;
+		case RESAVEV: 	instName = "resavev"; 	break;
+		case SAVEF: 	instName = "savef"; 	break;
+		case CALLF: 	instName = "callf"; 	break;
+		case ENDF: 		instName = "endf"; 		break;
+		case EXTERN: 	instName = "extern"; 	break;
+		case APPENDT: 	instName = "appendt"; 	break;
+		case ARRAYI: 	instName = "arrayi"; 	break;
+		case ARRAYIW: 	instName = "arrayiw"; 	break;
+		case ARRAYIL: 	instName = "arrayil"; 	break;
+		case ARRAYS: 	instName = "arrays"; 	break;
+		case ARRAYG: 	instName = "arrayg"; 	break;
+		case ARRAYL: 	instName = "arrayl"; 	break;
+		case SWAP: 		instName = "swap"; 		break;
+		case NOT: 		instName = "not"; 		break;
+		case AND: 		instName = "and"; 		break;
+		case OR: 		instName = "or"; 		break;
+		case ADD: 		instName = "add"; 		break;
+		case SUB: 		instName = "sub"; 		break;
+		case MUL: 		instName = "mul"; 		break;
+		case DIV: 		instName = "div"; 		break;
+		case MOD: 		instName = "mod"; 		break;
+		case POW: 		instName = "pow"; 		break;
+		case NEG: 		instName = "neg"; 		break;
+		case EQ: 		instName = "eq"; 		break;
+		case GT: 		instName = "gt"; 		break;
+		case LT: 		instName = "lt"; 		break;
+		case GTE: 		instName = "gte"; 		break;
+		case LTE: 		instName = "lte"; 		break;
+		case CAST: 		instName = "cast"; 		break;
+		case GOTO: 		instName = "goto"; 		break;
+		case IFN:	 	instName = "ifn"; 		break;
+		case THROW:	 	instName = "throw";		break;
+		default: 		instName = "?"; 		break;
 	}
 	// clang-format on
 
-	if (isStringArg) {
+	if (instHasPointer(i)) {
 		printf("[%ld, %d] %s: \"%s\", %s\n", i, insts[i].scope, instName,
 			   (char*) insts[i].a.v_ptr, typestr(insts[i].type.id));
 	} else {
@@ -1302,13 +1318,17 @@ void bc_end() {
 			freeTypeInfo(insts[i].type);
 		}
 
-		// TODO: Free strings
+		// Double frees
+		/*if (instHasPointer(i)) {
+			free(insts[i].a.v_ptr);
+		}*/
 	}
 
-	// free(insts);
+	free(insts);
 
 	// End
 
 	free(funcs);
+	free(refs);
 	// malloc_stats();
 }
