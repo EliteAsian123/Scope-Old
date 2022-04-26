@@ -9,7 +9,7 @@ for (int a = 1, a < number, a++) {
 		int c = number - a - b;
 		
 		if (isPythagoreanTriplet((long) a, (long) b, (long) c)) {
-			println((string) a * b * c);
+			println((string) (a * b * c));
 			exit(0);
 		}
 	}

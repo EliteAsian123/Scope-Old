@@ -39,29 +39,29 @@ string ansiClearLine        = "\u001b[2K";
 string ansiCurHome          = "\u001b[H";
 
 func string ansiCurGoto(int x, int y) {
-	ret "\u001b[" + ((string) y) + ";" + ((string) x) + "H";
+	ret "\u001b[" + (string) y + ";" + (string) x + "H";
 }
 
 func string ansiCurUp(int amount) {
-	ret "\u001b[" + ((string) amount) + "A";
+	ret "\u001b[" + (string) amount + "A";
 }
 
 func string ansiCurDown(int amount) {
-	ret "\u001b[" + ((string) amount) + "B";
+	ret "\u001b[" + (string) amount + "B";
 }
 
 func string ansiCurRight(int amount) {
-	ret "\u001b[" + ((string) amount) + "C";
+	ret "\u001b[" + (string) amount + "C";
 }
 
 func string ansiCurLeft(int amount) {
-	ret "\u001b[" + ((string) amount) + "D";
+	ret "\u001b[" + (string) amount + "D";
 }
 
 func string ansiScrollUp(int amount) {
-	ret "\u001b[" + ((string) amount) + "S";
+	ret "\u001b[" + (string) amount + "S";
 }
 
 func string ansiScrollDown(int amount) {
-	ret "\u001b[" + ((string) amount) + "T";
+	ret "\u001b[" + (string) amount + "T";
 }

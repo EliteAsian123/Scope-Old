@@ -11,7 +11,7 @@ for (long p = 1l, p < 2000000l, p += 1l) {
 	}
 	
 	if (p % 100000l == 0l) {
-		println(((string) p) + "/2000000 done");
+		println((string) p + "/2000000 done");
 	}
 }
 

@@ -10,4 +10,4 @@ a = 0.5f / 0.25f - 0.1f;
 println((string) a);
 
 float b = 2048f;
-println((string) a + b);
+println((string) (a + b));

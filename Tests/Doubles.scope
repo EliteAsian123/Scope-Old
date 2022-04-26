@@ -10,4 +10,4 @@ a = 0.5d / 0.25d - 0.1d;
 println((string) a);
 
 double b = 2048d;
-println((string) a + b);
+println((string) (a + b));

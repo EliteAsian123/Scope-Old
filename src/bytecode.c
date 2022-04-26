@@ -1085,7 +1085,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {
 					push((Object){.type = type(TYPE_FLOAT), .v.v_float = powf(a.v.v_float, b.v.v_float)});
 				} else if (a.type.id == TYPE_DOUBLE && b.type.id == TYPE_DOUBLE) {
-					push((Object){.type = type(TYPE_DOUBLE), .v.v_double = pow(a.v.v_float, b.v.v_float)});
+					push((Object){.type = type(TYPE_DOUBLE), .v.v_double = pow(a.v.v_double, b.v.v_double)});
 				} else {
 					ierr("Invalid types for `^`.");
 				}

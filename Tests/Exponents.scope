@@ -1,6 +1,6 @@
 #insert Standard/Core.scope
 
-println((string) 2 ^ 8);
-println((string) 5l ^ 6l);
-println((string) (-5l) ^ 4l);
-println((string) -5l ^ 4l);
+println((string) (2 ^ 8));
+println((string) (5l ^ 6l));
+println((string) ((-5l) ^ 4l));
+println((string) (-5l ^ 4l));

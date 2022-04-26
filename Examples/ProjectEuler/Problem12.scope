@@ -14,7 +14,7 @@ while (factorCount(tri) <= 500l) {
 	tri += n;
 
 	if (n % 1000l == 0l) {
-		println("Up to " + ((string) tri) + " checked.");
+		println("Up to " + (string) tri + " checked.");
 	}
 }
 

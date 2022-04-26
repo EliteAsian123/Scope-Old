@@ -11,4 +11,4 @@ for (long i = 1l, i <= 100l, i += 1l) {
 }
 squareOfSum = squareOfSum ^ 2l;
 
-println((string) squareOfSum - sumOfSquares);
+println((string) (squareOfSum - sumOfSquares));

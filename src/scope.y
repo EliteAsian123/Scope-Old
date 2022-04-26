@@ -61,9 +61,9 @@
 %token T_EQ T_NE T_AND T_OR T_GTE T_LTE
 %left T_AND T_OR
 %left '>' '<' T_EQ T_NE T_GTE T_LTE
-%left O_CAST
 %left '+' '-'
 %left '*' '/' '%'
+%left O_CAST
 %left '!' O_UMINUS
 %left '^'
 %left O_ARR_GET
