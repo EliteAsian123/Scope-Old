@@ -41,7 +41,7 @@ func int randInt() {
 Generates a random @"float" using LCG between 0 and 1 (inclusive).
 %/
 func float randFloat() {
-	ret ((float) randInt()) / ((float) INT_MAX);
+	ret ((float) randLong()) / ((float) LONG_MAX);
 }
 
 /%
@@ -51,5 +51,5 @@ func float randFloat() {
 Generates a random @"double" using LCG between 0 and 1 (inclusive).
 %/
 func double randDouble() {
-	ret ((double) randInt()) / ((double) INT_MAX);
+	ret ((double) randLong()) / ((double) LONG_MAX);
 }

@@ -395,7 +395,7 @@ static void instDump(size_t i) {
 	bool isStringArg = false;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 37, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 38, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case LOAD:
 			instName = "load";
@@ -412,6 +412,7 @@ static void instDump(size_t i) {
 		case EXTERN: 	instName = "extern"; 						break;
 		case APPENDT: 	instName = "appendt"; 						break;
 		case ARRAYI: 	instName = "arrayi"; 						break;
+		case ARRAYIW: 	instName = "arrayiw"; 						break;
 		case ARRAYIL: 	instName = "arrayil"; 						break;
 		case ARRAYS: 	instName = "arrays"; 	isStringArg = true; break;
 		case ARRAYG: 	instName = "arrayg"; 	isStringArg = true; break;
@@ -501,7 +502,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 		b.type = type(TYPE_VOID);
 		c.type = type(TYPE_VOID);
 
-		static_assert(_INSTS_ENUM_LEN == 37, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 38, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD:
 				sobj = (Object){
@@ -760,6 +761,49 @@ static void readByteCode(size_t frameIndex, size_t start) {
 						.type = dupTypeInfo(a.type),
 						.v = createDefaultType(a.type),
 					};
+
+					if (isDisposable(a.type.id)) {
+						size_t refId = basicReference;
+						sobj.v.v_array.arr[i].referenceId = refId;
+						refs[refId].counter++;
+					}
+				}
+
+				// Push
+				push(sobj);
+
+				break;
+			case ARRAYIW:  // `new a[b] with c`
+				c = pop();
+				b = pop();
+				a = pop();
+
+				if (b.type.id != TYPE_INT || b.v.v_int < 0) {
+					ierr("Expected positive int in array initilization.");
+				}
+
+				if (!typeInfoEqual(a.type, c.type)) {
+					ierr("The `with` expression differs in type from the array.");
+				}
+
+				// Initilize the new stack element
+				sobj = (Object){
+					.type = type(TYPE_ARRAY),
+					.referenceId = basicReference,
+				};
+
+				// Convert type into array type
+				sobj.type.argsLen = 1;
+				sobj.type.args = malloc(sizeof(TypeInfo));
+				sobj.type.args[0] = dupTypeInfo(a.type);
+
+				// Initilize the array
+				sobj.v.v_array.arr = malloc(sizeof(Object) * b.v.v_int);
+				sobj.v.v_array.len = b.v.v_int;
+
+				// Populate array
+				for (int i = 0; i < b.v.v_int; i++) {
+					sobj.v.v_array.arr[i] = c;
 
 					if (isDisposable(a.type.id)) {
 						size_t refId = basicReference;

@@ -51,6 +51,7 @@
 "repeat"		{ return S_REPEAT; }
 
 "new"			{ return E_NEW; }
+"with"			{ return E_WITH; }
 
 "auto"			{ return T_AUTO; }
 "void"			{ return T_VOID; }

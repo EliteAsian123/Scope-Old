@@ -5,7 +5,7 @@
 auto turn = "X";
 int turnNum = 0;
 
-auto board = stringArray(9, " ");
+auto board = new string[9] with " ";
 
 func void printBoard() {
 	print(ansiReset + ansiClearScreen + ansiCurHome);

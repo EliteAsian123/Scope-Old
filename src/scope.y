@@ -47,7 +47,7 @@
 %token S_REPEAT
 
 /* Expression keywords */
-%token E_NEW
+%token E_NEW E_WITH
 
 /* Built-in types & literals */
 %token T_AUTO T_VOID T_STR T_INT T_BOOL T_FLOAT T_FUNC T_LONG T_DOUBLE
@@ -384,6 +384,9 @@ arr_init_list_elem	: /* Nothing */
 
 arr_init	: E_NEW type '[' expr ']' {
 					pushi({.inst = ARRAYI});
+				}
+			| E_NEW type '[' expr ']' E_WITH expr {
+					pushi({.inst = ARRAYIW});
 				}
 			| E_NEW type '[' ']' {
 					push((Object) {.v.v_int = 0});

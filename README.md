@@ -43,19 +43,13 @@ repeat(5) {
 }
 ```
 
-*Initilizing an array is annoying... (Not implemented yet)*
+*Initilizing an array is annoying...*
 
 ```cpp
 // with?
 
 int[] arr = new int[100] with 1;
 string[] helloWorlds = new string[5] with "Hello, World!";
-
-// with.
-
-float[] floats = new float[100] with {
-    return index * 0.1f;
-};
 
 // with!
 ```
