@@ -1134,6 +1134,16 @@ static void readByteCode(size_t frameIndex, size_t start) {
 							.type = type(TYPE_FLOAT),
 							.v.v_float = (float) a.v.v_double,
 						});
+					} else if (a.type.id == TYPE_INT) {
+						push((Object){
+							.type = type(TYPE_FLOAT),
+							.v.v_float = (float) a.v.v_int,
+						});
+					} else if (a.type.id == TYPE_LONG) {
+						push((Object){
+							.type = type(TYPE_FLOAT),
+							.v.v_float = (float) a.v.v_long,
+						});
 					} else {
 						printf("Cannot cast type %d.\n", a.type.id);
 						ierr("Invalid type for `cast` to `float`.");
@@ -1143,6 +1153,16 @@ static void readByteCode(size_t frameIndex, size_t start) {
 						push((Object){
 							.type = type(TYPE_DOUBLE),
 							.v.v_double = (double) a.v.v_float,
+						});
+					} else if (a.type.id == TYPE_INT) {
+						push((Object){
+							.type = type(TYPE_DOUBLE),
+							.v.v_double = (double) a.v.v_int,
+						});
+					} else if (a.type.id == TYPE_LONG) {
+						push((Object){
+							.type = type(TYPE_DOUBLE),
+							.v.v_double = (double) a.v.v_long,
 						});
 					} else {
 						printf("Cannot cast type %d.\n", a.type.id);
