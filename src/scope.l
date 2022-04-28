@@ -49,6 +49,7 @@
 "for"			{ return S_FOR; }
 "throw"			{ return S_THROW; }
 "repeat"		{ return S_REPEAT; }
+"utility"		{ return S_UTILITY; }
 
 "new"			{ return E_NEW; }
 "with"			{ return E_WITH; }

@@ -44,7 +44,7 @@
 
 /* Statement keywords */
 %token S_EXTERN S_IF S_ELSE S_WHILE S_RETURN S_BREAK S_FUNC S_SWAP S_FOR S_THROW
-%token S_REPEAT
+%token S_REPEAT S_UTILITY
 
 /* Expression keywords */
 %token E_NEW E_WITH
@@ -141,6 +141,7 @@ estatement	: if
 			| declaref
 			| for
 			| repeat
+			| utility
 			;
 
 statement	: declare
@@ -260,7 +261,7 @@ repeat		: S_REPEAT '(' {
 					char* str = malloc(length);
 					snprintf(str, length, "_$_repeatIndex_%d", internalVarId);
 					push((Object) {.v.v_ptr = str});
-
+					
 					// Create an internal index
 					scope++;
 					pushi({.inst = LOADT, .type = type(TYPE_INT)});
@@ -279,7 +280,7 @@ repeat		: S_REPEAT '(' {
 					pushLoc();
 					pushLoop();
 					pushi({});
-
+				
 				} s_block {
 					// Increment the internal index
 					pushi({.inst = LOADV, .a.v_ptr = repVarName});
@@ -518,6 +519,20 @@ else_block	: if_cond block {
 					setInst((Inst){.inst = IFN, .a.v_int = instsCount}, loc, scope);
 				} S_ELSE block {
 					setInst((Inst){.inst = GOTO, .a.v_int = instsCount}, popLoc(), scope);
+				}
+			;
+
+/* Utility */
+
+utility_in	: /* Nothing */
+			| utility_in declare EOL
+			| utility_in declaref
+			| utility_in EOL
+
+utility		: S_UTILITY IDENTIFIER {
+					pushi({.inst = STARTU, .a.v_ptr = $2});
+				} '{' utility_in '}' {
+					pushi({.inst = ENDU});
 				}
 			;
 
