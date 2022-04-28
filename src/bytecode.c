@@ -391,7 +391,7 @@ void bc_init() {
 }
 
 static bool instHasPointer(size_t i) {
-	static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode pointers.");
+	static_assert(_INSTS_ENUM_LEN == 39, "Update bytecode pointers.");
 	switch (insts[i].inst) {
 		case LOAD:
 			return insts[i].type.id == TYPE_STR;
@@ -401,7 +401,6 @@ static bool instHasPointer(size_t i) {
 		case SAVEV:
 		case RESAVEV:
 		case CALLF:
-		case STARTU:
 		case ARRAYS:
 		case ARRAYG:
 		case THROW:
@@ -415,7 +414,7 @@ static void instDump(size_t i) {
 	const char* instName;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 39, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case LOAD:      instName = "load";      break;
 		case LOADT: 	instName = "loadt"; 	break;
@@ -427,7 +426,6 @@ static void instDump(size_t i) {
 		case CALLF: 	instName = "callf"; 	break;
 		case ENDF: 		instName = "endf"; 		break;
 		case STARTU: 	instName = "startu"; 	break;
-		case ENDU: 		instName = "endu"; 		break;
 		case EXTERN: 	instName = "extern"; 	break;
 		case APPENDT: 	instName = "appendt"; 	break;
 		case ARRAYI: 	instName = "arrayi"; 	break;
@@ -521,7 +519,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 		b.type = type(TYPE_VOID);
 		c.type = type(TYPE_VOID);
 
-		static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 39, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD:
 				sobj = (Object){
@@ -729,9 +727,6 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				return;
 			case STARTU:;
 				// We have to read byte code here
-
-				break;
-			case ENDU:;
 
 				break;
 			case EXTERN:

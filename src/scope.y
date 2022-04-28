@@ -530,9 +530,11 @@ utility_in	: /* Nothing */
 			| utility_in EOL
 
 utility		: S_UTILITY IDENTIFIER {
-					pushi({.inst = STARTU, .a.v_ptr = $2});
+					pushi({.inst = LOADA, .a.v_ptr = $2});
+					pushLoc();
+					pushi({});
 				} '{' utility_in '}' {
-					pushi({.inst = ENDU});
+					setInst((Inst){.inst = STARTU, .a.v_int = instsCount}, popLoc(), scope);
 				}
 			;
 

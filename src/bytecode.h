@@ -35,7 +35,6 @@ enum Insts {
 	CALLF,
 	ENDF,
 	STARTU,
-	ENDU,
 	EXTERN,
 	APPENDT,
 	ARRAYI,
