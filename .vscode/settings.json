@@ -4,6 +4,7 @@
 		"type_traits": "c",
 		"bytecode.h": "c",
 		"references.h": "c",
-		"*.tcc": "c"
+		"*.tcc": "c",
+		"typeinfo": "c"
 	}
 }

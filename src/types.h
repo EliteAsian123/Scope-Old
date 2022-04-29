@@ -29,6 +29,7 @@ enum Types {
 	TYPE_ARRAY,
 	TYPE_LONG,
 	TYPE_DOUBLE,
+	TYPE_UTIL,
 	_TYPES_ENUM_LEN
 };
 

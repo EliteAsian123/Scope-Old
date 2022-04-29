@@ -38,6 +38,11 @@ static ValueHolder createDefaultDouble(TypeInfo type) {
 	return (ValueHolder){.v_double = 0.0};
 }
 
+static ValueHolder errorOnDefault(TypeInfo type) {
+	fprintf(stderr, "Attempted to create a default value of a type that does not have a default value.\n");
+	exit(-1);
+}
+
 static void disposeString(const TypeInfo type, ValueHolder v) {
 	free(v.v_string.chars);
 }
@@ -92,6 +97,10 @@ const Type types[] = {
 	{
 		.displayName = "double",
 		.createDefault = createDefaultDouble,
+	},
+	{
+		.displayName = "utility",
+		.createDefault = errorOnDefault,
 	},
 };
 static_assert(sizeof(types) / sizeof(Type) == _TYPES_ENUM_LEN, "Update enum or type array.");

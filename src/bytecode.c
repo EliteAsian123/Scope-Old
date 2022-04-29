@@ -68,6 +68,11 @@ typedef struct {
 	size_t instsCount;
 } InstBuffer;
 
+typedef struct {
+	char* name;
+	ObjectList o;
+} Utility;
+
 // Interpret stage
 static CallFrame frames[STACK_SIZE];
 static size_t framesCount;
@@ -91,6 +96,10 @@ static size_t argstackCount;
 // Interpret stage
 static FuncPointer* funcs;
 static size_t funcsCount;
+
+// Interpret stage
+static Utility* utils;
+static size_t utilsCount;
 
 // Parse stage
 static InstBuffer instbuffer[STACK_SIZE];
@@ -473,11 +482,11 @@ static void bc_dump() {
 	}
 }
 
-static void readByteCode(size_t frameIndex, size_t start) {
+static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 	int lastKnownScope = 0;
 	CallFrame frame = frames[frameIndex];
 
-	for (size_t i = start; i < instsCount; i++) {
+	for (size_t i = start; i < instsCount - endOffset; i++) {
 		if (showCount) {
 			instDump(i);
 		}
@@ -660,7 +669,7 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				}
 
 				pushFrame((CallFrame){.o = &fo});
-				readByteCode(framesCount - 1, f.location);
+				readByteCode(framesCount - 1, f.location, 0);
 				popFrame();
 
 #define skipdelete         \
@@ -726,7 +735,15 @@ static void readByteCode(size_t frameIndex, size_t start) {
 				// RETURN not break
 				return;
 			case STARTU:;
-				// We have to read byte code here
+				ObjectList utilObjs;
+				utilObjs.vars = NULL;
+				utilObjs.varsCount = 0;
+
+				pushFrame((CallFrame){.o = &utilObjs});
+				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].a.v_int);
+				popFrame();
+
+				jump(insts[i].a.v_int);
 
 				break;
 			case EXTERN:
@@ -1287,7 +1304,7 @@ void bc_run(bool showByteCode) {
 	o.varsCount = 0;
 	pushFrame((CallFrame){.o = &o});
 
-	readByteCode(framesCount - 1, 0);
+	readByteCode(framesCount - 1, 0, 0);
 
 	popFrame();
 	disposeObjectList(&o);
