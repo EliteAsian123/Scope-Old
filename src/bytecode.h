@@ -42,7 +42,7 @@ enum Insts {
 	ARRAYIL,
 	ARRAYS,
 	ARRAYG,
-	ARRAYL,
+	ACCESS,
 	SWAP,
 	NOT,
 	AND,

@@ -387,10 +387,10 @@ static bool instHasPointer(size_t i) {
 		case LOADA:
 		case SAVEV:
 		case RESAVEV:
-		case CALLF:
 		case ARRAYS:
 		case ARRAYG:
 		case THROW:
+		case ACCESS:
 			return true;
 		default:
 			return false;
@@ -420,7 +420,7 @@ static void instDump(size_t i) {
 		case ARRAYIL: 	instName = "arrayil"; 	break;
 		case ARRAYS: 	instName = "arrays"; 	break;
 		case ARRAYG: 	instName = "arrayg"; 	break;
-		case ARRAYL: 	instName = "arrayl"; 	break;
+		case ACCESS: 	instName = "access"; 	break;
 		case SWAP: 		instName = "swap"; 		break;
 		case NOT: 		instName = "not"; 		break;
 		case AND: 		instName = "and"; 		break;
@@ -597,26 +597,33 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				jump(insts[i].a.v_int);
 
 				break;
-			case CALLF:
-				obj = getVar(frame.o, (char*) insts[i].a.v_ptr);
+			case CALLF:;  // `a(...)`
+				a = pop();
+
+				// Some leak here. Could fix age old function problem.
+				for (int i = 0; i < a.type.argsLen; i++) {
+					printf("%d ", a.type.args[i].id);
+				}
+
+				printf("\n");
 
 				bool dropOutput = false;
 				if (insts[i].type.id == TYPE_UNKNOWN &&
-					obj.o.type.args[0].id == TYPE_VOID) {
+					a.type.args[0].id == TYPE_VOID) {
 					ierr("Invoke expression cannot be referencing a void function.");
 				} else if (insts[i].type.id == TYPE_VOID &&
-						   obj.o.type.args[0].id != TYPE_VOID) {
+						   a.type.args[0].id != TYPE_VOID) {
 					dropOutput = true;
 				}
 
-				FuncPointer f = funcs[obj.o.v.v_int];
+				FuncPointer f = funcs[a.v.v_int];
 				s = insts[f.location].scope;
 
 				ObjectList fo;
 				fo.vars = NULL;
 				fo.varsCount = 0;
 
-				if (obj.o.fromArgs) {
+				if (a.fromArgs) {
 					popFrame();
 				}
 				CallFrame funcFrame = frames[framesCount - 1];
@@ -675,7 +682,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 
 					// Skip and delete if the variable is an argument
-					if (obj.o.fromArgs) {
+					if (a.fromArgs) {
 						skipdelete;
 					}
 
@@ -700,7 +707,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				freeObjectList(&fo);
 
-				if (obj.o.fromArgs) {
+				if (a.fromArgs) {
 					pushFrame(frame);
 				}
 
@@ -738,7 +745,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				jump(insts[i].a.v_int);
 
 				break;
-			case EXTERN:
+			case EXTERN:  // `extern(..., a)`
+				// Pop dummy object
+				pop();
+
 				a = pop();
 				externs[a.v.v_int]();
 
@@ -945,19 +955,25 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				push(arr.arr[b.v.v_int]);
 
 				break;
-			case ARRAYL:  // `a.length`
+			case ACCESS:  // `a.$`
 				a = pop();
 
-				if (a.type.id != TYPE_ARRAY) {
-					ierr("The object referenced is not an array.");
+				if (a.type.id == TYPE_ARRAY) {
+					if (strcmp(insts[i].a.v_ptr, "length") != 0) {
+						ierr("The only accessible member of an array is `length`.");
+					}
+
+					arr = a.v.v_array;
+
+					push((Object){
+						.type = type(TYPE_INT),
+						.v.v_int = arr.len,
+					});
+				} else if (a.type.id == TYPE_UTIL) {
+					push(getVar(a.v.v_utility.o, insts[i].a.v_ptr).o);
+				} else {
+					ierr("The object referenced does not have accessible members.");
 				}
-
-				arr = a.v.v_array;
-
-				push((Object){
-					.type = type(TYPE_INT),
-					.v.v_int = arr.len,
-				});
 
 				break;
 			case SWAP:

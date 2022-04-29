@@ -168,12 +168,12 @@ expr		: '(' expr ')'
 			| num_op
 			| bool_op
 			| cast
+			| access
 			| elambda /* Explict Lambda */
 			| invoke_e
 			| extern
 			| arr_init
 			| arr_get
-			| arr_length
 			;
 
 /* Basic Statements */
@@ -366,7 +366,7 @@ cast		: '(' T_STR ')' expr { pushi({.inst = CAST, .type = type(TYPE_STR)}); } %p
 			;
 
 access		: expr '.' IDENTIFIER {
-					//pushi({.inst = ACCESS});
+					pushi({.inst = ACCESS, .a.v_ptr = $3});
 				}
 			;
 
@@ -459,20 +459,24 @@ declaref	: S_FUNC {
 			;
 
 iargs_list	: /* Nothing */
-			| expr ial_elem
+			| expr {
+					pushi({.inst = SWAP});
+				} ial_elem
 			;
 
 ial_elem	: /* Nothing */
-			| ',' expr ial_elem
+			| ',' expr {
+					pushi({.inst = SWAP});
+				} ial_elem
 			;
 
-invoke_s	: IDENTIFIER '(' iargs_list ')' {
-					pushi({.inst = CALLF, .a.v_ptr = $1, .type = type(TYPE_VOID)});
+invoke_s	: expr '(' iargs_list ')' {
+					pushi({.inst = CALLF, .type = type(TYPE_VOID)});
 				}
 			;
 
-invoke_e	: IDENTIFIER '(' iargs_list ')' {
-					pushi({.inst = CALLF, .a.v_ptr = $1, .type = type(TYPE_UNKNOWN)});
+invoke_e	: expr '(' iargs_list ')' {
+					pushi({.inst = CALLF, .type = type(TYPE_UNKNOWN)});
 				}
 			;
 
@@ -484,7 +488,10 @@ return		: S_RETURN {
 				}
 			;
 
-extern		: S_EXTERN '(' iargs_list ')' {
+extern		: S_EXTERN {
+					// Push a dummy item on the stack to swap down
+					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 0});
+				} '(' iargs_list ')' {
 					pushi({.inst = EXTERN});
 				}
 			;
