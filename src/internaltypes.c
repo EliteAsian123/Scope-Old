@@ -76,3 +76,11 @@ Object objdup(Object obj) {
 
 	return out;
 }
+
+void freeObjectList(ObjectList* o) {
+	for (size_t i = 0; i < o->varsCount; i++) {
+		free(o->vars[i].name);
+		freeTypeInfo(o->vars[i].o.type);
+	}
+	free(o->vars);
+}

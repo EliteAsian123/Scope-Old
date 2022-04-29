@@ -20,6 +20,11 @@ typedef struct {
 	size_t len;
 } Array;
 
+struct ObjectList;
+typedef struct {
+	struct ObjectList* o;
+} Utility;
+
 typedef union {
 	void* v_ptr;
 	int v_int;
@@ -28,6 +33,7 @@ typedef union {
 	double v_double;
 	Array v_array;
 	String v_string;
+	Utility v_utility;
 } ValueHolder;
 
 struct TypeInfo {
@@ -57,6 +63,11 @@ typedef struct {
 	size_t argsLen;
 } FuncPointer;
 
+typedef struct ObjectList {
+	NamedObject* vars;
+	size_t varsCount;
+} ObjectList;
+
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 void freeTypeInfo(TypeInfo a);
 TypeInfo dupTypeInfo(TypeInfo a);
@@ -64,5 +75,6 @@ String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
 NamedObject unnamedToNamed(Object obj, char* name, int scope);
 Object objdup(Object obj);
+void freeObjectList(ObjectList* o);
 
 #endif

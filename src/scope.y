@@ -365,6 +365,11 @@ cast		: '(' T_STR ')' expr { pushi({.inst = CAST, .type = type(TYPE_STR)}); } %p
 			| '(' T_DOUBLE ')' expr { pushi({.inst = CAST, .type = type(TYPE_DOUBLE)}); } %prec O_CAST
 			;
 
+access		: expr '.' IDENTIFIER {
+					//pushi({.inst = ACCESS});
+				}
+			;
+
 /* Arrays */
 
 arr_init_list		: /* Nothing */
@@ -399,15 +404,6 @@ arr_init	: E_NEW type '[' expr ']' {
 arr_get		: expr '[' expr ']' {
 					pushi({.inst = ARRAYG});
 				} %prec O_ARR_GET
-			;
-
-arr_length	: expr '.' IDENTIFIER {
-					if (strcmp($3, "length") != 0) {
-						yyerror("Accessor must be `length` (for now).");
-					}
-					
-					pushi({.inst = ARRAYL});
-				}
 			;
 
 arr_save	: expr '[' expr ']' '=' expr {
@@ -510,7 +506,7 @@ if_block	: if_cond block {
 				}
 			;
 
-else_block	: if_cond block {  
+else_block	: if_cond block {
 					int loc = popLoc();
 					
 					pushLoc();

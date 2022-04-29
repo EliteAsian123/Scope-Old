@@ -58,6 +58,11 @@ static void disposeArray(const TypeInfo type, ValueHolder v) {
 	free(v.v_array.arr);
 }
 
+static void disposeUtility(const TypeInfo type, ValueHolder v) {
+	freeObjectList(v.v_utility.o);
+	free(v.v_utility.o);
+}
+
 const Type types[] = {
 	{
 		.displayName = "void",
@@ -101,6 +106,8 @@ const Type types[] = {
 	{
 		.displayName = "utility",
 		.createDefault = errorOnDefault,
+		.disposable = true,
+		.dispose = disposeUtility,
 	},
 };
 static_assert(sizeof(types) / sizeof(Type) == _TYPES_ENUM_LEN, "Update enum or type array.");

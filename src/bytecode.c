@@ -55,11 +55,6 @@
 #define curInstBuf instbuffer[instbufferCount - 1]
 
 typedef struct {
-	NamedObject* vars;
-	size_t varsCount;
-} ObjectList;
-
-typedef struct {
 	ObjectList* o;
 } CallFrame;
 
@@ -67,11 +62,6 @@ typedef struct {
 	Inst* insts;
 	size_t instsCount;
 } InstBuffer;
-
-typedef struct {
-	char* name;
-	ObjectList o;
-} Utility;
 
 // Interpret stage
 static CallFrame frames[STACK_SIZE];
@@ -96,10 +86,6 @@ static size_t argstackCount;
 // Interpret stage
 static FuncPointer* funcs;
 static size_t funcsCount;
-
-// Interpret stage
-static Utility* utils;
-static size_t utilsCount;
 
 // Parse stage
 static InstBuffer instbuffer[STACK_SIZE];
@@ -276,14 +262,6 @@ static bool isVar(ObjectList* o, const char* n) {
 	}
 
 	return false;
-}
-
-static void disposeObjectList(ObjectList* o) {
-	for (size_t i = 0; i < o->varsCount; i++) {
-		free(o->vars[i].name);
-		freeTypeInfo(o->vars[i].o.type);
-	}
-	free(o->vars);
 }
 
 void pushInst(Inst i, int scope) {
@@ -720,7 +698,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 #undef skipdelete
 
-				disposeObjectList(&fo);
+				freeObjectList(&fo);
 
 				if (obj.o.fromArgs) {
 					pushFrame(frame);
@@ -735,13 +713,27 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				// RETURN not break
 				return;
 			case STARTU:;
-				ObjectList utilObjs;
-				utilObjs.vars = NULL;
-				utilObjs.varsCount = 0;
+				ObjectList* utilObjs = malloc(sizeof(ObjectList));
+				utilObjs->vars = NULL;
+				utilObjs->varsCount = 0;
 
-				pushFrame((CallFrame){.o = &utilObjs});
+				pushFrame((CallFrame){.o = utilObjs});
 				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].a.v_int);
 				popFrame();
+
+				obj = (NamedObject){
+					.name = strdup(popArg()),
+					.scope = curScope,
+					.o = (Object){
+						.type = type(TYPE_UTIL),
+						.referenceId = basicReference,
+						.v.v_utility = (Utility){
+							.o = utilObjs,
+						},
+					},
+				};
+
+				setVar(frame.o, obj);
 
 				jump(insts[i].a.v_int);
 
@@ -1307,7 +1299,7 @@ void bc_run(bool showByteCode) {
 	readByteCode(framesCount - 1, 0, 0);
 
 	popFrame();
-	disposeObjectList(&o);
+	freeObjectList(&o);
 }
 
 void bc_end() {
