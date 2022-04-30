@@ -600,13 +600,6 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 			case CALLF:;  // `a(...)`
 				a = pop();
 
-				// Some leak here. Could fix age old function problem.
-				for (int i = 0; i < a.type.argsLen; i++) {
-					printf("%d ", a.type.args[i].id);
-				}
-
-				printf("\n");
-
 				bool dropOutput = false;
 				if (insts[i].type.id == TYPE_UNKNOWN &&
 					a.type.args[0].id == TYPE_VOID) {
@@ -970,7 +963,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 						.v.v_int = arr.len,
 					});
 				} else if (a.type.id == TYPE_UTIL) {
-					push(getVar(a.v.v_utility.o, insts[i].a.v_ptr).o);
+					sobj = getVar(a.v.v_utility.o, insts[i].a.v_ptr).o;
+					sobj.type = dupTypeInfo(sobj.type);
+
+					push(sobj);
 				} else {
 					ierr("The object referenced does not have accessible members.");
 				}
