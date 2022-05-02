@@ -186,20 +186,20 @@ static int pushFunc(int loc, TypeInfo type) {
 }
 
 static void delVarAtIndex(ObjectList* o, size_t i) {
-	NamedObject var = o->vars[i];
+	Object var = o->vars[i];
 
 	// Change ref counter
-	if (isDisposable(var.o.type.id)) {
-		refs[var.o.referenceId].counter--;
+	if (isDisposable(var.type.id)) {
+		refs[var.referenceId].counter--;
 
 		if (showDisposeInfo) {
-			printf("(-) %s: %d\n", var.name, refs[var.o.referenceId].counter);
+			printf("(-) %s: %d\n", var.name, refs[var.referenceId].counter);
 		}
 	}
 
 	// Free
 	free(var.name);
-	freeTypeInfo(var.o.type);
+	freeTypeInfo(var.type);
 
 	// Ripple down
 	for (int j = i; j < o->varsCount - 1; j++) {
@@ -208,7 +208,7 @@ static void delVarAtIndex(ObjectList* o, size_t i) {
 
 	// Resize
 	o->varsCount--;
-	o->vars = (NamedObject*) realloc(o->vars, sizeof(NamedObject) * o->varsCount);
+	o->vars = (Object*) realloc(o->vars, sizeof(Object) * o->varsCount);
 }
 
 static void delVar(ObjectList* o, const char* n) {
@@ -219,31 +219,31 @@ static void delVar(ObjectList* o, const char* n) {
 	}
 }
 
-static void setVar(ObjectList* o, NamedObject obj) {
+static void setVar(ObjectList* o, Object obj) {
 	delVar(o, obj.name);
 
-	if (isDisposable(obj.o.type.id)) {
-		refs[obj.o.referenceId].counter++;
+	if (isDisposable(obj.type.id)) {
+		refs[obj.referenceId].counter++;
 
 		if (showDisposeInfo) {
-			printf("(+) %s: %d\n", obj.name, refs[obj.o.referenceId].counter);
+			printf("(+) %s: %d\n", obj.name, refs[obj.referenceId].counter);
 		}
 	}
 
 	o->varsCount++;
-	o->vars = realloc(o->vars, sizeof(NamedObject) * o->varsCount);
+	o->vars = realloc(o->vars, sizeof(Object) * o->varsCount);
 	o->vars[o->varsCount - 1] = obj;
 }
 
-static void dupVar(ObjectList* o, NamedObject obj) {
-	NamedObject d = obj;
+static void dupVar(ObjectList* o, Object obj) {
+	Object d = obj;
 	d.name = strdup(obj.name);
-	d.o.type = dupTypeInfo(obj.o.type);
+	d.type = dupTypeInfo(obj.type);
 
 	setVar(o, d);
 }
 
-static NamedObject getVar(ObjectList* o, const char* n) {
+static Object getVar(ObjectList* o, const char* n) {
 	for (size_t i = 0; i < o->varsCount; i++) {
 		if (strcmp(o->vars[i].name, n) == 0) {
 			return o->vars[i];
@@ -386,7 +386,7 @@ static bool instHasPointer(size_t i) {
 		case LOADV:
 		case LOADA:
 		case SAVEV:
-		case RESAVEV:
+		case ASSIGNV:
 		case ARRAYS:
 		case ARRAYG:
 		case THROW:
@@ -408,7 +408,7 @@ static void instDump(size_t i) {
 		case LOADV: 	instName = "loadv"; 	break;
 		case LOADA: 	instName = "loada"; 	break;
 		case SAVEV: 	instName = "savev"; 	break;
-		case RESAVEV: 	instName = "resavev"; 	break;
+		case ASSIGNV: 	instName = "ASSIGNV"; 	break;
 		case SAVEF: 	instName = "savef"; 	break;
 		case CALLF: 	instName = "callf"; 	break;
 		case ENDF: 		instName = "endf"; 		break;
@@ -475,7 +475,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 		if (curScope < lastKnownScope) {
 			for (size_t v = 0; v < frame.o->varsCount; v++) {
-				NamedObject obj = frame.o->vars[v];
+				Object obj = frame.o->vars[v];
 
 				if (obj.scope <= curScope) {
 					continue;
@@ -485,8 +485,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					printf("Deleting : (%d > %d) `%s`\n", obj.scope, curScope, obj.name);
 				}
 
-				if (isDisposable(obj.o.type.id) && refs[obj.o.referenceId].counter <= 1) {
-					dispose(obj.o.type, obj.o.v, obj.o.referenceId);
+				if (isDisposable(obj.type.id) && refs[obj.referenceId].counter <= 1) {
+					dispose(obj.type, obj.v, obj.referenceId);
 				}
 
 				delVarAtIndex(frame.o, v);
@@ -496,7 +496,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 		}
 		lastKnownScope = curScope;
 
-		NamedObject obj;
+		Object obj;
 		Object sobj;
 		Array arr;
 		int s;
@@ -533,12 +533,12 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 			case LOADV:
 				obj = getVar(frame.o, insts[i].a.v_ptr);
 
-				if (obj.o.fromArgs && obj.o.type.id == TYPE_FUNC) {
+				if (obj.fromArgs && obj.type.id == TYPE_FUNC) {
 					ierr("Functions from arguments can only be called.");
 				}
 
-				obj.o.type = dupTypeInfo(obj.o.type);
-				push(obj.o);
+				obj.type = dupTypeInfo(obj.type);
+				push(obj);
 				break;
 			case LOADA:
 				pushArg(strdup(insts[i].a.v_ptr));
@@ -559,35 +559,34 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 				}
 
-				obj = (NamedObject){
-					.name = strdup(insts[i].a.v_ptr),
-					.scope = curScope,
-					.o = objdup(b),
-				};
+				obj = objdup(b);
+				obj.scope = curScope;
 
 				setVar(frame.o, obj);
 				break;
-			case RESAVEV:
+			case ASSIGNV:  // `a = b`
 				a = pop();
+				b = pop();
+
+				if (a.name == NULL) {
+					ierr("Attempted to assign a non-variable.");
+				}
 
 				if (a.type.id == TYPE_FUNC) {
 					ierr("Functions can't be reassigned at the moment.");
 				}
 
-				obj = getVar(frame.o, insts[i].a.v_ptr);
-				if (obj.o.fromArgs) {
+				if (a.fromArgs) {
 					ierr("Cannot assign to an argument.");
 				}
 
-				if (!typeInfoEqual(a.type, obj.o.type)) {
+				if (!typeInfoEqual(a.type, b.type)) {
 					ierr("Assignment type doesn't match expression.");
 				}
 
-				obj = (NamedObject){
-					.name = strdup(insts[i].a.v_ptr),
-					.scope = obj.scope,
-					.o = objdup(a),
-				};
+				obj = objdup(b);
+				obj.name = strdup(a.name);
+
 				setVar(frame.o, obj);
 				break;
 			case SAVEF:
@@ -624,7 +623,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				// Duping may not even be required?
 				// TODO: Optimize
 				for (size_t v = 0; v < funcFrame.o->varsCount; v++) {
-					NamedObject vobj = funcFrame.o->vars[v];
+					Object vobj = funcFrame.o->vars[v];
 					if (vobj.scope < s) {
 						dupVar(&fo, vobj);
 					}
@@ -638,11 +637,9 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 						ierr("Type mismatch in function arguments.");
 					}
 
-					NamedObject vo = (NamedObject){
-						.name = strdup(f.args[v]),
-						.scope = s,
-						.o = objdup(e),
-					};
+					Object vo = objdup(e);
+					vo.scope = s;
+
 					setVar(&fo, vo);
 				}
 
@@ -657,10 +654,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				// TODO: Optimize
 				for (size_t v = 0; v < fo.varsCount; v++) {
-					NamedObject vobj = fo.vars[v];
+					Object vobj = fo.vars[v];
 
 					// Temporary for now
-					if (vobj.o.type.id == TYPE_FUNC) {
+					if (vobj.type.id == TYPE_FUNC) {
 						skipdelete;
 					}
 
@@ -680,10 +677,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 
 					// Get the var in the frame
-					NamedObject oobj = getVar(funcFrame.o, vobj.name);
+					Object oobj = getVar(funcFrame.o, vobj.name);
 
 					// Skip if the types are not equal
-					if (!typeInfoEqual(vobj.o.type, oobj.o.type)) {
+					if (!typeInfoEqual(vobj.type, oobj.type)) {
 						skipdelete;
 					}
 
@@ -721,16 +718,14 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].a.v_int);
 				popFrame();
 
-				obj = (NamedObject){
+				obj = (Object){
+					.referenceId = basicReference,
+					.v.v_utility = (Utility){
+						.o = utilObjs,
+					},
 					.name = strdup(popArg()),
 					.scope = curScope,
-					.o = (Object){
-						.type = type(TYPE_UTIL),
-						.referenceId = basicReference,
-						.v.v_utility = (Utility){
-							.o = utilObjs,
-						},
-					},
+					.type = type(TYPE_UTIL),
 				};
 
 				setVar(frame.o, obj);
@@ -963,7 +958,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 						.v.v_int = arr.len,
 					});
 				} else if (a.type.id == TYPE_UTIL) {
-					sobj = getVar(a.v.v_utility.o, insts[i].a.v_ptr).o;
+					sobj = getVar(a.v.v_utility.o, insts[i].a.v_ptr);
 					sobj.type = dupTypeInfo(sobj.type);
 
 					push(sobj);

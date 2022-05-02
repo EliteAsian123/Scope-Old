@@ -62,16 +62,13 @@ char* strToCstr(const String str) {
 	return cstr;
 }
 
-NamedObject unnamedToNamed(Object obj, char* name, int scope) {
-	return (NamedObject){
-		.name = name,
-		.scope = scope,
-		.o = obj,
-	};
-}
-
 Object objdup(Object obj) {
 	Object out = obj;
+
+	if (out.name != NULL) {
+		out.name = strdup(out.name);
+	}
+
 	out.type = dupTypeInfo(obj.type);
 
 	return out;
@@ -80,7 +77,7 @@ Object objdup(Object obj) {
 void freeObjectList(ObjectList* o) {
 	for (size_t i = 0; i < o->varsCount; i++) {
 		free(o->vars[i].name);
-		freeTypeInfo(o->vars[i].o.type);
+		freeTypeInfo(o->vars[i].type);
 	}
 	free(o->vars);
 }

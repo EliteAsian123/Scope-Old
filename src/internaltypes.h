@@ -45,16 +45,13 @@ typedef struct TypeInfo TypeInfo;
 
 typedef struct Object {
 	size_t referenceId;
-	TypeInfo type;
 	ValueHolder v;
-	bool fromArgs;
-} Object;
 
-typedef struct {
 	char* name;
 	int scope;
-	Object o;
-} NamedObject;
+	TypeInfo type;
+	bool fromArgs;
+} Object;
 
 typedef struct {
 	int location;
@@ -64,7 +61,7 @@ typedef struct {
 } FuncPointer;
 
 typedef struct ObjectList {
-	NamedObject* vars;
+	Object* vars;
 	size_t varsCount;
 } ObjectList;
 
@@ -73,7 +70,6 @@ void freeTypeInfo(TypeInfo a);
 TypeInfo dupTypeInfo(TypeInfo a);
 String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
-NamedObject unnamedToNamed(Object obj, char* name, int scope);
 Object objdup(Object obj);
 void freeObjectList(ObjectList* o);
 

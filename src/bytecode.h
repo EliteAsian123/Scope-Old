@@ -30,7 +30,7 @@ enum Insts {
 	LOADV,
 	LOADA,
 	SAVEV,
-	RESAVEV,
+	ASSIGNV,
 	SAVEF,
 	CALLF,
 	ENDF,

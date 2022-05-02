@@ -186,8 +186,8 @@ declare		: type IDENTIFIER '=' expr { pushi({.inst = SAVEV, .a.v_ptr = $2}); }
 				}
 			;
 
-assign		: IDENTIFIER '=' expr { 
-					pushi({.inst = RESAVEV, .a.v_ptr = $1}); 
+assign		: expr '=' expr { 
+					pushi({.inst = ASSIGNV}); 
 				}
 			;
 
@@ -195,25 +195,25 @@ op_assign	: IDENTIFIER '+' '=' {
 					pushi({.inst = LOADV, .a.v_ptr = $1});
 				} expr {
 					pushi({.inst = ADD});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
 				}
 			| IDENTIFIER '-' '=' {
 					pushi({.inst = LOADV, .a.v_ptr = $1});
 				} expr {
 					pushi({.inst = SUB});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
 				}
 			| IDENTIFIER '*' '=' {
 					pushi({.inst = LOADV, .a.v_ptr = $1});
 				} expr {
 					pushi({.inst = MUL});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
 				}
 			| IDENTIFIER '/' '=' {
 					pushi({.inst = LOADV, .a.v_ptr = $1});
 				} expr {
 					pushi({.inst = DIV});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
 				}
 			;
 
@@ -286,7 +286,7 @@ repeat		: S_REPEAT '(' {
 					pushi({.inst = LOADV, .a.v_ptr = repVarName});
 					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
 					pushi({.inst = ADD});
-					pushi({.inst = RESAVEV, .a.v_ptr = repVarName});
+					pushi({.inst = ASSIGNV, .a.v_ptr = repVarName});
 					
 					// End the loop
 					popLoop();
@@ -312,8 +312,8 @@ break		: S_BREAK {
 swap		: S_SWAP '(' IDENTIFIER ',' IDENTIFIER ')' {
 					pushi({.inst = LOADV, .a.v_ptr = $3});
 					pushi({.inst = LOADV, .a.v_ptr = $5});
-					pushi({.inst = RESAVEV, .a.v_ptr = $3});
-					pushi({.inst = RESAVEV, .a.v_ptr = $5});
+					pushi({.inst = ASSIGNV, .a.v_ptr = $3});
+					pushi({.inst = ASSIGNV, .a.v_ptr = $5});
 				}
 			;
 
@@ -321,13 +321,13 @@ inc_dec		: IDENTIFIER '+' '+' {
 					pushi({.inst = LOADV, .a.v_ptr = $1});
 					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
 					pushi({.inst = ADD});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
 				}
 			| IDENTIFIER '-' '-' {
 					pushi({.inst = LOADV, .a.v_ptr = $1});
 					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
 					pushi({.inst = SUB});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
 				}
 			;
 
