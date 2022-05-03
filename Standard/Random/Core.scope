@@ -31,7 +31,7 @@ func long randLong() {
 Generates a random @"int" using LCG between @"INT_MIN" and @"INT_MAX" (inclusive).
 %/
 func int randInt() {
-	ret (int) (randLong() % (long) INT_MAX);
+	ret (int) randLong();
 }
 
 /%

@@ -87,3 +87,10 @@ Returns the result in radians.
 func double acsc(double n) {
 	ret asin(1d / n);
 }
+
+/%
+Returns the hypotenuse of the right triangle with sides @"a" and @"b".
+%/
+func double hypot(double a, double b) {
+	ret sqrt(a ^ 2d + b ^ 2d);
+}
