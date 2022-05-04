@@ -191,29 +191,29 @@ assign		: expr '=' expr {
 				}
 			;
 
-op_assign	: IDENTIFIER '+' '=' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+op_assign	: expr '+' '=' {
+					pushi({.inst = DUP});
 				} expr {
 					pushi({.inst = ADD});
-					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
-			| IDENTIFIER '-' '=' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+			| expr '-' '=' {
+					pushi({.inst = DUP});
 				} expr {
 					pushi({.inst = SUB});
-					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
-			| IDENTIFIER '*' '=' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+			| expr '*' '=' {
+					pushi({.inst = DUP});
 				} expr {
 					pushi({.inst = MUL});
-					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
-			| IDENTIFIER '/' '=' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+			| expr '/' '=' {
+					pushi({.inst = DUP});
 				} expr {
 					pushi({.inst = DIV});
-					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
 			;
 
@@ -255,51 +255,8 @@ for			: S_FOR '(' {
 				}
 			;
 
-repeat		: S_REPEAT '(' {
-					// Generate variable name
-					int length = snprintf(NULL, 0, "_$_repeatIndex_%d", internalVarId++) + 1;
-					char* str = malloc(length);
-					snprintf(str, length, "_$_repeatIndex_%d", internalVarId);
-					push((Object) {.v.v_ptr = str});
-					
-					// Create an internal index
-					scope++;
-					pushi({.inst = LOADT, .type = type(TYPE_INT)});
-					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 0});
-					pushi({.inst = SAVEV, .a.v_ptr = repVarName});
-					
-					pushLoc();
-					scope++;
-					
-					// Create the compare expression
-					pushi({.inst = LOADV, .a.v_ptr = repVarName});
-				} expr ')' {
-					pushi({.inst = LT});
-					
-					// Start the loop
-					pushLoc();
-					pushLoop();
-					pushi({});
-				
-				} s_block {
-					// Increment the internal index
-					pushi({.inst = LOADV, .a.v_ptr = repVarName});
-					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
-					pushi({.inst = ADD});
-					pushi({.inst = ASSIGNV, .a.v_ptr = repVarName});
-					
-					// End the loop
-					popLoop();
-					setInst((Inst){.inst = IFN, .a.v_int = instsCount + 1}, popLoc(), scope);
-					scope--;
-					pushi({.inst = GOTO, .a.v_int = popLoc()});
-					scope--;
-					
-					// Push padding to dispose variables
-					pushi({});
-
-					// Clean up
-					free(pop().v.v_ptr);
+repeat		: S_REPEAT '(' expr ')' s_block {
+					yyerror("REPEAT will be deprecated until preprocessing is added.");
 				}
 			;
 
@@ -309,25 +266,22 @@ break		: S_BREAK {
 				}
 			;
 
-swap		: S_SWAP '(' IDENTIFIER ',' IDENTIFIER ')' {
-					pushi({.inst = LOADV, .a.v_ptr = $3});
-					pushi({.inst = LOADV, .a.v_ptr = $5});
-					pushi({.inst = ASSIGNV, .a.v_ptr = $3});
-					pushi({.inst = ASSIGNV, .a.v_ptr = $5});
+swap		: S_SWAP '(' expr ',' expr ')' {
+					pushi({.inst = SWAPV});
 				}
 			;
 
-inc_dec		: IDENTIFIER '+' '+' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+inc_dec		: expr '+' '+' {
+					pushi({.inst = DUP});
 					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
 					pushi({.inst = ADD});
-					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
-			| IDENTIFIER '-' '-' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+			| expr '-' '-' {
+					pushi({.inst = DUP});
 					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
 					pushi({.inst = SUB});
-					pushi({.inst = ASSIGNV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
 			;
 

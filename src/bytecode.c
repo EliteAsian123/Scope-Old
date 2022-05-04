@@ -220,6 +220,10 @@ static void delVar(ObjectList* o, const char* n) {
 }
 
 static void setVar(ObjectList* o, Object obj) {
+	if (obj.name == NULL) {
+		ierr("Attempted to set a variable with a null name.");
+	}
+
 	delVar(o, obj.name);
 
 	if (isDisposable(obj.type.id)) {
@@ -378,7 +382,7 @@ void bc_init() {
 }
 
 static bool instHasPointer(size_t i) {
-	static_assert(_INSTS_ENUM_LEN == 39, "Update bytecode pointers.");
+	static_assert(_INSTS_ENUM_LEN == 41, "Update bytecode pointers.");
 	switch (insts[i].inst) {
 		case LOAD:
 			return insts[i].type.id == TYPE_STR;
@@ -386,7 +390,6 @@ static bool instHasPointer(size_t i) {
 		case LOADV:
 		case LOADA:
 		case SAVEV:
-		case ASSIGNV:
 		case ARRAYS:
 		case ARRAYG:
 		case THROW:
@@ -401,14 +404,15 @@ static void instDump(size_t i) {
 	const char* instName;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 39, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 41, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case LOAD:      instName = "load";      break;
 		case LOADT: 	instName = "loadt"; 	break;
 		case LOADV: 	instName = "loadv"; 	break;
 		case LOADA: 	instName = "loada"; 	break;
 		case SAVEV: 	instName = "savev"; 	break;
-		case ASSIGNV: 	instName = "ASSIGNV"; 	break;
+		case ASSIGNV: 	instName = "assignv"; 	break;
+		case SWAPV: 	instName = "swapv"; 	break;
 		case SAVEF: 	instName = "savef"; 	break;
 		case CALLF: 	instName = "callf"; 	break;
 		case ENDF: 		instName = "endf"; 		break;
@@ -422,6 +426,7 @@ static void instDump(size_t i) {
 		case ARRAYG: 	instName = "arrayg"; 	break;
 		case ACCESS: 	instName = "access"; 	break;
 		case SWAP: 		instName = "swap"; 		break;
+		case DUP: 		instName = "dup"; 		break;
 		case NOT: 		instName = "not"; 		break;
 		case AND: 		instName = "and"; 		break;
 		case OR: 		instName = "or"; 		break;
@@ -506,7 +511,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 		b.type = type(TYPE_VOID);
 		c.type = type(TYPE_VOID);
 
-		static_assert(_INSTS_ENUM_LEN == 39, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 41, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD:
 				sobj = (Object){
@@ -543,7 +548,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 			case LOADA:
 				pushArg(strdup(insts[i].a.v_ptr));
 				break;
-			case SAVEV:
+			case SAVEV:	 // `a $ = b`
 				b = pop();
 				a = pop();
 
@@ -560,13 +565,14 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 
 				obj = objdup(b);
+				obj.name = strdup(insts[i].a.v_ptr);
 				obj.scope = curScope;
 
 				setVar(frame.o, obj);
 				break;
 			case ASSIGNV:  // `a = b`
-				a = pop();
 				b = pop();
+				a = pop();
 
 				if (a.name == NULL) {
 					ierr("Attempted to assign a non-variable.");
@@ -588,6 +594,23 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				obj.name = strdup(a.name);
 
 				setVar(frame.o, obj);
+				break;
+			case SWAPV:	 // `swap(a, b)`
+				b = pop();
+				a = pop();
+
+				if (!typeInfoEqual(a.type, b.type)) {
+					ierr("Attempted to swap values that don't match in type.");
+				}
+
+				obj = objdup(a);
+				obj.name = strdup(b.name);
+				setVar(frame.o, obj);
+
+				obj = objdup(b);
+				obj.name = strdup(a.name);
+				setVar(frame.o, obj);
+
 				break;
 			case SAVEF:
 				a = pop();
@@ -638,6 +661,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 
 					Object vo = objdup(e);
+					vo.name = strdup(f.args[v]);
 					vo.scope = s;
 
 					setVar(&fo, vo);
@@ -977,6 +1001,12 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				// We don't want this to get freed
 				a = (Object){0};
 				b = (Object){0};
+
+				break;
+			case DUP:
+				obj = stackRead();
+				obj.type = dupTypeInfo(obj.type);
+				push(obj);
 
 				break;
 			case NOT:
