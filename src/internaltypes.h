@@ -9,33 +9,6 @@
 #define type(...) \
 	(TypeInfo) { .id = __VA_ARGS__ }
 
-typedef struct {
-	char* chars;
-	size_t len;
-} String;
-
-struct Object;
-typedef struct {
-	struct Object* arr;
-	size_t len;
-} Array;
-
-struct ObjectList;
-typedef struct {
-	struct ObjectList* o;
-} Utility;
-
-typedef union {
-	void* v_ptr;
-	int v_int;
-	float v_float;
-	long v_long;
-	double v_double;
-	Array v_array;
-	String v_string;
-	Utility v_utility;
-} ValueHolder;
-
 struct TypeInfo {
 	int id;
 	struct TypeInfo* args;
@@ -43,15 +16,43 @@ struct TypeInfo {
 };
 typedef struct TypeInfo TypeInfo;
 
-typedef struct Object {
-	size_t referenceId;
-	ValueHolder v;
-
-	char* name;
-	int scope;
+union Data;
+typedef struct {
 	TypeInfo type;
-	bool fromArgs;
-} Object;
+	Data data;
+	int refCount;
+} Value;
+
+typedef struct {
+	char* name;
+	Value* value;
+} Name;
+
+typedef struct {
+	Value* var;
+	Value elem;
+} StackElem;
+
+typedef struct {
+	Name* names;
+	size_t len;
+} NameList;
+
+// ==================== //
+
+typedef struct {
+	char* chars;
+	size_t len;
+} String;
+
+typedef struct {
+	Value* arr;
+	size_t len;
+} Array;
+
+typedef struct {
+	Name* members;
+} Utility;
 
 typedef struct {
 	int location;
@@ -60,17 +61,24 @@ typedef struct {
 	size_t argsLen;
 } FuncPointer;
 
-typedef struct ObjectList {
-	Object* vars;
-	size_t varsCount;
-} ObjectList;
+// ==================== //
+
+typedef union Data {
+	void* _ptr;
+	int _int;
+	float _float;
+	long _long;
+	double _double;
+	Array _array;
+	String _string;
+	Utility _utility;
+} Data;
 
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 void freeTypeInfo(TypeInfo a);
 TypeInfo dupTypeInfo(TypeInfo a);
+
 String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
-Object objdup(Object obj);
-void freeObjectList(ObjectList* o);
 
 #endif

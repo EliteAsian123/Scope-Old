@@ -256,7 +256,7 @@ for			: S_FOR '(' {
 			;
 
 repeat		: S_REPEAT '(' expr ')' s_block {
-					yyerror("REPEAT will be deprecated until preprocessing is added.");
+					yyerror("REPEAT will be disabled until preprocessing is added.");
 				}
 			;
 

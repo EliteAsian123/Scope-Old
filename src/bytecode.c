@@ -55,7 +55,7 @@
 #define curInstBuf instbuffer[instbufferCount - 1]
 
 typedef struct {
-	ObjectList* o;
+	Name* o;
 } CallFrame;
 
 typedef struct {
@@ -68,7 +68,7 @@ static CallFrame frames[STACK_SIZE];
 static size_t framesCount;
 
 // Interpret & Parse stage
-static Object stack[STACK_SIZE];
+static StackElem stack[STACK_SIZE];
 static size_t stackCount;
 
 // Parse stage
@@ -104,7 +104,7 @@ CallFrame popFrame() {
 	return frames[--framesCount];
 }
 
-void push(Object obj) {
+void push(StackElem obj) {
 	stack[stackCount++] = obj;
 
 	if (stackCount >= STACK_SIZE) {
@@ -112,11 +112,11 @@ void push(Object obj) {
 	}
 }
 
-Object pop() {
+StackElem pop() {
 	return stack[--stackCount];
 }
 
-Object stackRead() {
+StackElem stackRead() {
 	return stack[stackCount - 1];
 }
 
@@ -185,21 +185,21 @@ static int pushFunc(int loc, TypeInfo type) {
 	return funcsCount - 1;
 }
 
-static void delVarAtIndex(ObjectList* o, size_t i) {
-	Object var = o->vars[i];
+static void delVarAtIndex(Name* names, size_t i) {
+	Name name = names[i];
+	Value var = *name.value;
 
 	// Change ref counter
 	if (isDisposable(var.type.id)) {
-		refs[var.referenceId].counter--;
+		var.refCount--;
 
 		if (showDisposeInfo) {
-			printf("(-) %s: %d\n", var.name, refs[var.referenceId].counter);
+			printf("(-) %s: %d\n", name.name, var.refCount);
 		}
 	}
 
 	// Free
-	free(var.name);
-	freeTypeInfo(var.type);
+	free(name.name);
 
 	// Ripple down
 	for (int j = i; j < o->varsCount - 1; j++) {
