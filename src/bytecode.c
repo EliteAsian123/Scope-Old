@@ -185,8 +185,8 @@ static int pushFunc(int loc, TypeInfo type) {
 	return funcsCount - 1;
 }
 
-static void delVarAtIndex(Name* names, size_t i) {
-	Name name = names[i];
+static void delVarAtIndex(NameList* names, size_t i) {
+	Name name = names->names[i];
 	Value var = *name.value;
 
 	// Change ref counter
@@ -202,41 +202,46 @@ static void delVarAtIndex(Name* names, size_t i) {
 	free(name.name);
 
 	// Ripple down
-	for (int j = i; j < o->varsCount - 1; j++) {
-		o->vars[j] = o->vars[j + 1];
+	for (int j = i; j < names->len - 1; j++) {
+		names->names[j] = names->names[j + 1];
 	}
 
 	// Resize
-	o->varsCount--;
-	o->vars = (Object*) realloc(o->vars, sizeof(Object) * o->varsCount);
+	names->len--;
+	names->names = (Name*) realloc(names->names, sizeof(Name) * names->len);
 }
 
-static void delVar(ObjectList* o, const char* n) {
-	for (size_t i = 0; i < o->varsCount; i++) {
-		if (strcmp(o->vars[i].name, n) == 0) {
-			delVarAtIndex(o, i);
+static void delVar(NameList* names, const char* v) {
+	for (size_t i = 0; i < names->len; i++) {
+		if (strcmp(names->names[i].name, v) == 0) {
+			delVarAtIndex(v, i);
+			return;
 		}
 	}
 }
 
-static void setVar(ObjectList* o, Object obj) {
-	if (obj.name == NULL) {
-		ierr("Attempted to set a variable with a null name.");
-	}
+static Value* createVar(NameList* names, const char* name, Value val) {
+	delVar(names, name);
 
-	delVar(o, obj.name);
-
-	if (isDisposable(obj.type.id)) {
-		refs[obj.referenceId].counter++;
+	if (isDisposable(val.type.id)) {
+		val.refCount++;
 
 		if (showDisposeInfo) {
-			printf("(+) %s: %d\n", obj.name, refs[obj.referenceId].counter);
+			printf("(+) %s: %d\n", name, val.refCount);
 		}
 	}
 
-	o->varsCount++;
-	o->vars = realloc(o->vars, sizeof(Object) * o->varsCount);
-	o->vars[o->varsCount - 1] = obj;
+	Value* ptr = malloc(sizeof(Value));
+	*ptr = val;
+
+	names->len++;
+	names->names = realloc(names->names, sizeof(Name) * names->len);
+	names->names[names->len - 1] = (Name){
+		.name = strdup(name),
+		.value = ptr,
+	};
+
+	return ptr;
 }
 
 static void dupVar(ObjectList* o, Object obj) {
