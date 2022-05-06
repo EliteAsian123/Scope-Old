@@ -21,6 +21,7 @@ typedef struct {
 	TypeInfo type;
 	Data data;
 	int refCount;
+	int scope;
 } Value;
 
 typedef struct {

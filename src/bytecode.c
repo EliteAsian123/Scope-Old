@@ -55,7 +55,7 @@
 #define curInstBuf instbuffer[instbufferCount - 1]
 
 typedef struct {
-	Name* o;
+	NameList names;
 } CallFrame;
 
 typedef struct {
@@ -244,28 +244,20 @@ static Value* createVar(NameList* names, const char* name, Value val) {
 	return ptr;
 }
 
-static void dupVar(ObjectList* o, Object obj) {
-	Object d = obj;
-	d.name = strdup(obj.name);
-	d.type = dupTypeInfo(obj.type);
-
-	setVar(o, d);
-}
-
-static Object getVar(ObjectList* o, const char* n) {
-	for (size_t i = 0; i < o->varsCount; i++) {
-		if (strcmp(o->vars[i].name, n) == 0) {
-			return o->vars[i];
+static Value* getVar(NameList* names, const char* name) {
+	for (size_t i = 0; i < names->len; i++) {
+		if (strcmp(names->names[i].name, name) == 0) {
+			return names->names[i].value;
 		}
 	}
 
-	printf("Unknown variable `%s`.\n", n);
+	printf("Unknown variable `%s`.\n", name);
 	ierr("Use of undeclared variable.");
 }
 
-static bool isVar(ObjectList* o, const char* n) {
-	for (size_t i = 0; i < o->varsCount; i++) {
-		if (strcmp(o->vars[i].name, n) == 0) {
+static bool isVar(NameList* names, const char* name) {
+	for (size_t i = 0; i < names->len; i++) {
+		if (strcmp(names->names[i].name, name) == 0) {
 			return true;
 		}
 	}
@@ -484,15 +476,16 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 		int curScope = insts[i].scope;
 
 		if (curScope < lastKnownScope) {
-			for (size_t v = 0; v < frame.o->varsCount; v++) {
-				Object obj = frame.o->vars[v];
+			for (size_t v = 0; v < frame.names.len; v++) {
+				Name name = frame.names.names[v];
+				Value value = *name.value;
 
-				if (obj.scope <= curScope) {
+				if (value.scope <= curScope) {
 					continue;
 				}
 
 				if (showDisposeInfo) {
-					printf("Deleting : (%d > %d) `%s`\n", obj.scope, curScope, obj.name);
+					printf("Deleting : (%d > %d) `%s`\n", value.scope, curScope, name.name);
 				}
 
 				if (isDisposable(obj.type.id) && refs[obj.referenceId].counter <= 1) {
