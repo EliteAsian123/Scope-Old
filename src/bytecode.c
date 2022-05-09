@@ -449,10 +449,10 @@ static void instDump(size_t i) {
 
 	if (instHasPointer(i)) {
 		printf("[%ld, %d] %s: \"%s\", %s\n", i, insts[i].scope, instName,
-			   (char*) insts[i].a.v_ptr, typestr(insts[i].type.id));
+			   (char*) insts[i].data._ptr, typestr(insts[i].type.id));
 	} else {
 		printf("[%ld, %d] %s: %d, %s\n", i, insts[i].scope, instName,
-			   insts[i].a.v_int, typestr(insts[i].type.id));
+			   insts[i].data._int, typestr(insts[i].type.id));
 	}
 }
 
@@ -488,52 +488,45 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					printf("Deleting : (%d > %d) `%s`\n", value.scope, curScope, name.name);
 				}
 
-				if (isDisposable(obj.type.id) && refs[obj.referenceId].counter <= 1) {
-					dispose(obj.type, obj.v, obj.referenceId);
+				if (isDisposable(value.type.id) && value.refCount <= 1) {
+					dispose(name);
 				}
 
-				delVarAtIndex(frame.o, v);
+				delVarAtIndex(&frame.names, v);
 
 				v--;
 			}
 		}
 		lastKnownScope = curScope;
 
-		Object obj;
-		Object sobj;
-		Array arr;
-		int s;
-
-		Object a, b, c;
-		a.type = type(TYPE_VOID);
-		b.type = type(TYPE_VOID);
-		c.type = type(TYPE_VOID);
+		StackElem a, b, c;
+		a.elem.type = type(TYPE_VOID);
+		b.elem.type = type(TYPE_VOID);
+		c.elem.type = type(TYPE_VOID);
 
 		static_assert(_INSTS_ENUM_LEN == 41, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
-			case LOAD:
-				sobj = (Object){
+			case LOAD: {
+				Value v = (Value){
 					.type = dupTypeInfo(insts[i].type),
 				};
 
 				if (insts[i].type.id == TYPE_STR) {
 					// We must convert string literals because they are c-strings
-					sobj.v.v_string = cstrToStr(insts[i].a.v_ptr);
+					v.data._string = cstrToStr(insts[i].data._ptr);
 				} else {
-					sobj.v = insts[i].a;
+					v.data = insts[i].data;
 				}
 
-				if (isDisposable(insts[i].type.id)) {
-					sobj.referenceId = basicReference;
-				}
-
-				push(sobj);
+				push(toElem(v));
 
 				break;
-			case LOADT:
-				push((Object){.type = dupTypeInfo(insts[i].type)});
+			}
+			case LOADT: {
+				push(toElem((Value){.type = dupTypeInfo(insts[i].type)}));
 				break;
-			case LOADV:
+			}
+			case LOADV: {
 				obj = getVar(frame.o, insts[i].a.v_ptr);
 
 				if (obj.fromArgs && obj.type.id == TYPE_FUNC) {
@@ -543,6 +536,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				obj.type = dupTypeInfo(obj.type);
 				push(obj);
 				break;
+			}
 			case LOADA:
 				pushArg(strdup(insts[i].a.v_ptr));
 				break;

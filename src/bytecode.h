@@ -10,7 +10,6 @@
 #include "extern.h"
 #include "flags.h"
 #include "internaltypes.h"
-#include "references.h"
 #include "types.h"
 
 #define STACK_SIZE 256
@@ -21,7 +20,7 @@ typedef struct {
 	size_t location;
 
 	TypeInfo type;
-	ValueHolder a;
+	Data data;
 } Inst;
 
 enum Insts {
@@ -74,9 +73,9 @@ size_t instsCount;
 void initTypeArgs(TypeInfo* i, TypeInfo args[], size_t len);
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 
-void push(Object elem);
-Object pop();
-Object stackRead();
+void push(StackElem elem);
+StackElem pop();
+StackElem stackRead();
 
 void pushLoc();
 void pushSLoc();

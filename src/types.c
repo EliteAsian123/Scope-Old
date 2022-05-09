@@ -133,13 +133,13 @@ void* typedup(int id, const void* ptr) {
 	return p;
 }
 
-void dispose(const TypeInfo type, ValueHolder v, size_t refId) {
-	if (types[type.id].disposable) {
+void dispose(Name name) {
+	if (types[name.value->type.id].disposable) {
 		if (showDisposeInfo) {
-			printf("Disposing: `%ld`\n", refId);
+			printf("Disposing: `%s`\n", name.name);
 		}
 
-		types[type.id].dispose(type, v);
+		types[name.value->type.id].dispose(name.value);
 	}
 }
 

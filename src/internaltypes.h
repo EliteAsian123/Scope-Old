@@ -9,6 +9,9 @@
 #define type(...) \
 	(TypeInfo) { .id = __VA_ARGS__ }
 
+#define toElem(v) \
+	(StackElem) { .elem = v, .var = NULL }
+
 struct TypeInfo {
 	int id;
 	struct TypeInfo* args;

@@ -8,7 +8,6 @@
 #include <string.h>
 
 #include "internaltypes.h"
-#include "references.h"
 
 typedef struct {
 	const char* displayName;
@@ -38,7 +37,7 @@ extern const Type types[];
 const char* typestr(int id);
 ValueHolder createDefaultType(TypeInfo type);
 void* typedup(int id, const void* ptr);
-void dispose(TypeInfo type, ValueHolder v, size_t refId);
+void dispose(Name name);
 bool isDisposable(int id);
 
 #endif
