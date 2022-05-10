@@ -81,3 +81,19 @@ void freeObjectList(ObjectList* o) {
 	}
 	free(o->vars);
 }
+
+Value getValue(StackElem s) {
+	if (s.var == NULL) {
+		return s.elem;
+	} else {
+		return *s.var->value;
+	}
+}
+
+Value* dupVal(Value v) {
+	Value* out = malloc(sizeof(Value));
+	*out = v;
+	out->type = dupTypeInfo(v.type);
+
+	return out;
+}

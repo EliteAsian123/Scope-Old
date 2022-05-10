@@ -220,15 +220,11 @@ static void delVar(NameList* names, const char* v) {
 	}
 }
 
-static Value* createVar(NameList* names, const char* name, Value val) {
+static Name* createVar(NameList* names, const char* name, Value val) {
 	delVar(names, name);
 
 	if (isDisposable(val.type.id)) {
-		val.refCount++;
-
-		if (showDisposeInfo) {
-			printf("(+) %s: %d\n", name, val.refCount);
-		}
+		val.refCount = 1;
 	}
 
 	Value* ptr = malloc(sizeof(Value));
@@ -241,13 +237,32 @@ static Value* createVar(NameList* names, const char* name, Value val) {
 		.value = ptr,
 	};
 
-	return ptr;
+	return &names->names[names->len - 1];
 }
 
-static Value* getVar(NameList* names, const char* name) {
+static Name* createVarD(NameList* names, const char* name, Name* var) {
+	var->value->refCount++;
+
+	if (showDisposeInfo) {
+		printf("(+) %s: %d\n", name, var->value->refCount);
+	}
+
+	delVar(names, name);
+
+	names->len++;
+	names->names = realloc(names->names, sizeof(Name) * names->len);
+	names->names[names->len - 1] = (Name){
+		.name = strdup(name),
+		.value = var->value,
+	};
+
+	return &names->names[names->len - 1];
+}
+
+static Name* getVar(NameList* names, const char* name) {
 	for (size_t i = 0; i < names->len; i++) {
 		if (strcmp(names->names[i].name, name) == 0) {
-			return names->names[i].value;
+			return &names->names[i];
 		}
 	}
 
@@ -499,11 +514,6 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 		}
 		lastKnownScope = curScope;
 
-		StackElem a, b, c;
-		a.elem.type = type(TYPE_VOID);
-		b.elem.type = type(TYPE_VOID);
-		c.elem.type = type(TYPE_VOID);
-
 		static_assert(_INSTS_ENUM_LEN == 41, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD: {
@@ -527,90 +537,106 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				break;
 			}
 			case LOADV: {
-				obj = getVar(frame.o, insts[i].a.v_ptr);
+				Name* n = getVar(&frame.names, insts[i].data._ptr);
 
-				if (obj.fromArgs && obj.type.id == TYPE_FUNC) {
+				if (n->value->fromArgs && n->value->type.id == TYPE_FUNC) {
 					ierr("Functions from arguments can only be called.");
 				}
 
-				obj.type = dupTypeInfo(obj.type);
-				push(obj);
+				push(toVar(n));
 				break;
 			}
-			case LOADA:
-				pushArg(strdup(insts[i].a.v_ptr));
+			case LOADA: {
+				pushArg(strdup(insts[i].data._ptr));
 				break;
-			case SAVEV:	 // `a $ = b`
-				b = pop();
-				a = pop();
+			}
+			case SAVEV: {  // `a $ = b`
+				StackElem b = pop();
+				StackElem a = pop();
 
-				if (isVar(frame.o, insts[i].a.v_ptr)) {
-					if (getVar(frame.o, insts[i].a.v_ptr).scope == curScope) {
+				if (isVar(&frame.names, insts[i].data._ptr)) {
+					if (getVar(&frame.names, insts[i].data._ptr)->value->scope == curScope) {
 						ierr("Redefinition of existing variable in the same scope.");
 					}
 				}
 
-				if (a.type.id != TYPE_UNKNOWN) {
-					if (!typeInfoEqual(b.type, a.type)) {
+				if (a.elem.type.id != TYPE_UNKNOWN) {
+					if (!typeInfoEqual(a.elem.type, getValue(b).type)) {
 						ierr("Declaration type doesn't match expression.");
 					}
 				}
 
-				obj = objdup(b);
-				obj.name = strdup(insts[i].a.v_ptr);
-				obj.scope = curScope;
+				if (b.var == NULL) {
+					createVar(&frame.names, insts[i].data._ptr, b.elem);
+				} else if (isDisposable(a.elem.type.id)) {
+					createVarD(&frame.names, insts[i].data._ptr, b.var);
+				} else {
+					createVar(&frame.names, insts[i].data._ptr, *b.var->value);
+				}
 
-				setVar(frame.o, obj);
 				break;
-			case ASSIGNV:  // `a = b`
-				b = pop();
-				a = pop();
+			}
+			case ASSIGNV: {	 // `a = b`
+				StackElem b = pop();
+				StackElem a = pop();
 
-				if (a.name == NULL) {
+				if (a.var == NULL) {
 					ierr("Attempted to assign a non-variable.");
 				}
 
-				if (a.type.id == TYPE_FUNC) {
+				if (a.var->value->type.id == TYPE_FUNC) {
 					ierr("Functions can't be reassigned at the moment.");
 				}
 
-				if (a.fromArgs) {
+				if (a.var->value->fromArgs) {
 					ierr("Cannot assign to an argument.");
 				}
 
-				if (!typeInfoEqual(a.type, b.type)) {
+				if (!typeInfoEqual(a.var->value->type, getValue(b).type)) {
 					ierr("Assignment type doesn't match expression.");
 				}
 
-				obj = objdup(b);
-				obj.name = strdup(a.name);
+				if (b.var == NULL) {
+					*a.var->value = b.elem;
+				} else if (isDisposable(a.var->value->type.id)) {
+					a.var->value = b.var->value;
+				} else {
+					a.var->value = dupVal(*b.var->value);
+				}
 
-				setVar(frame.o, obj);
 				break;
-			case SWAPV:	 // `swap(a, b)`
-				b = pop();
-				a = pop();
+			}
+			case SWAPV: {  // `swap(a, b)`
+				StackElem b = pop();
+				StackElem a = pop();
 
-				if (!typeInfoEqual(a.type, b.type)) {
+				if (!typeInfoEqual(getValue(a).type, getValue(b).type)) {
 					ierr("Attempted to swap values that don't match in type.");
 				}
 
-				obj = objdup(a);
-				obj.name = strdup(b.name);
-				setVar(frame.o, obj);
+				if (a.var == NULL || b.var == NULL) {
+					ierr("Attempted to swap values that aren't variables.");
+				}
 
-				obj = objdup(b);
-				obj.name = strdup(a.name);
-				setVar(frame.o, obj);
-
-				break;
-			case SAVEF:
-				a = pop();
-
-				push((Object){.type = dupTypeInfo(a.type), .v.v_int = pushFunc(i + 1, a.type)});
-				jump(insts[i].a.v_int);
+				Value* aptr = a.var->value;
+				a.var->value = b.var->value;
+				b.var->value = aptr;
 
 				break;
+			}
+			case SAVEF: {
+				StackElem a = pop();
+
+				Value v = (Value){
+					.type = dupTypeInfo(getValue(a).type),
+					.data._int = pushFunc(i + 1, getValue(a).type),
+				};
+
+				push(toElem(v));
+				jump(insts[i].data._int);
+
+				break;
+			}
 			case CALLF:;  // `a(...)`
 				a = pop();
 

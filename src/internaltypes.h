@@ -9,8 +9,11 @@
 #define type(...) \
 	(TypeInfo) { .id = __VA_ARGS__ }
 
-#define toElem(v) \
-	(StackElem) { .elem = v, .var = NULL }
+#define toElem(...) \
+	(StackElem) { .elem = __VA_ARGS__, .var = NULL }
+
+#define toVar(...) \
+	(StackElem) { .elem = (Value){0}, .var = __VA_ARGS__ }
 
 struct TypeInfo {
 	int id;
@@ -25,6 +28,7 @@ typedef struct {
 	Data data;
 	int refCount;
 	int scope;
+	bool fromArgs;
 } Value;
 
 typedef struct {
@@ -33,7 +37,7 @@ typedef struct {
 } Name;
 
 typedef struct {
-	Value* var;
+	Name* var;
 	Value elem;
 } StackElem;
 
@@ -84,5 +88,8 @@ TypeInfo dupTypeInfo(TypeInfo a);
 
 String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
+
+Value getValue(StackElem s);
+Value* dupVal(Value v);
 
 #endif
