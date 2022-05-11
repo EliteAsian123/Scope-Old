@@ -629,117 +629,122 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				Value v = (Value){
 					.type = dupTypeInfo(getValue(a).type),
-					.data._int = pushFunc(i + 1, getValue(a).type),
+					//.data._int = pushFunc(i + 1, getValue(a).type)
 				};
+				v.data._int = pushFunc(i + 1, getValue(a).type);
 
 				push(toElem(v));
 				jump(insts[i].data._int);
 
 				break;
 			}
-			case CALLF:;  // `a(...)`
-				a = pop();
+			case CALLF: {  // `a(...)`
+				StackElem a = pop();
+				Value av = getValue(a);
 
 				bool dropOutput = false;
 				if (insts[i].type.id == TYPE_UNKNOWN &&
-					a.type.args[0].id == TYPE_VOID) {
+					av.type.args[0].id == TYPE_VOID) {
 					ierr("Invoke expression cannot be referencing a void function.");
 				} else if (insts[i].type.id == TYPE_VOID &&
-						   a.type.args[0].id != TYPE_VOID) {
+						   av.type.args[0].id != TYPE_VOID) {
 					dropOutput = true;
 				}
 
-				FuncPointer f = funcs[a.v.v_int];
-				s = insts[f.location].scope;
+				FuncPointer f = funcs[av.data._int];
+				int s = insts[f.location].scope;
 
-				ObjectList fo;
-				fo.vars = NULL;
-				fo.varsCount = 0;
+				NameList names;
+				names.names = NULL;
+				names.len = 0;
 
-				if (a.fromArgs) {
+				if (av.fromArgs) {
 					popFrame();
 				}
 				CallFrame funcFrame = frames[framesCount - 1];
 
 				// Duping may not even be required?
 				// TODO: Optimize
-				for (size_t v = 0; v < funcFrame.o->varsCount; v++) {
-					Object vobj = funcFrame.o->vars[v];
-					if (vobj.scope < s) {
-						dupVar(&fo, vobj);
+				for (size_t v = 0; v < funcFrame.names.len; v++) {
+					Name name = funcFrame.names.names[v];
+					if (name.value->scope < s) {
+						dupVar(&names, name);
 					}
 				}
 
-				for (int v = f.argsLen - 1; v >= 0; v--) {
-					Object e = pop();
+				for (int j = f.argsLen - 1; j >= 0; j--) {
+					StackElem arg = pop();
+					Value argv = getValue(arg);
 
-					if (!typeInfoEqual(f.type.args[v + 1], e.type)) {
-						printf("`%d` != `%d` in `%s`\n", e.type.id, f.type.args[v + 1].id, (char*) insts[i].a.v_ptr);
+					if (!typeInfoEqual(f.type.args[j + 1], argv.type)) {
+						printf("`%d` != `%d` in `%s`\n", argv.type.id,
+							   f.type.args[j + 1].id, (char*) insts[i].data._ptr);
 						ierr("Type mismatch in function arguments.");
 					}
 
-					Object vo = objdup(e);
-					vo.name = strdup(f.args[v]);
-					vo.scope = s;
+					Value v = argv;
+					v.type = dupTypeInfo(argv.type);
+					v.scope = s;
 
-					setVar(&fo, vo);
+					createVar(&names, strdup(f.args[j + 1]), v);
 				}
 
-				pushFrame((CallFrame){.o = &fo});
+				pushFrame((CallFrame){.names = names});
 				readByteCode(framesCount - 1, f.location, 0);
 				popFrame();
 
-#define skipdelete         \
-	delVarAtIndex(&fo, v); \
-	v--;                   \
+#define skipdelete            \
+	delVarAtIndex(&names, j); \
+	j--;                      \
 	continue
 
 				// TODO: Optimize
-				for (size_t v = 0; v < fo.varsCount; v++) {
-					Object vobj = fo.vars[v];
+				for (size_t j = 0; j < names.len; j++) {
+					Name vname = names.names[j];
+					Value v = *vname.value;
 
 					// Temporary for now
-					if (vobj.type.id == TYPE_FUNC) {
+					if (v.type.id == TYPE_FUNC) {
 						skipdelete;
 					}
 
 					// Skip if it is a local variable
-					if (vobj.scope >= s) {
+					if (v.scope >= s) {
 						skipdelete;
 					}
 
 					// Skip if the current frame doesn't contain the variable
-					if (!isVar(funcFrame.o, vobj.name)) {
+					if (!isVar(&funcFrame.names, vname.name)) {
 						skipdelete;
 					}
 
 					// Skip and delete if the variable is an argument
-					if (a.fromArgs) {
+					if (v.fromArgs) {
 						skipdelete;
 					}
 
 					// Get the var in the frame
-					Object oobj = getVar(funcFrame.o, vobj.name);
+					Value vf = *getVar(&funcFrame.names, vname.name)->value;
 
 					// Skip if the types are not equal
-					if (!typeInfoEqual(vobj.type, oobj.type)) {
+					if (!typeInfoEqual(v.type, vf.type)) {
 						skipdelete;
 					}
 
 					// Skip if the scopes don't match
-					if (vobj.scope != oobj.scope) {
+					if (v.scope != vf.scope) {
 						skipdelete;
 					}
 
 					// Update the variable outside of the frame
-					dupVar(funcFrame.o, vobj);
+					dupVar(&funcFrame.names, v);
 				}
 
 #undef skipdelete
 
-				freeObjectList(&fo);
+				free(names.names);
 
-				if (a.fromArgs) {
+				if (av.fromArgs) {
 					pushFrame(frame);
 				}
 
@@ -748,44 +753,52 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 
 				break;
+			}
 			case ENDF:
 				// RETURN not break
 				return;
-			case STARTU:;
-				ObjectList* utilObjs = malloc(sizeof(ObjectList));
-				utilObjs->vars = NULL;
-				utilObjs->varsCount = 0;
+			case STARTU: {
+				NameList* members = malloc(sizeof(NameList));
+				members->names = NULL;
+				members->len = 0;
 
-				pushFrame((CallFrame){.o = utilObjs});
-				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].a.v_int);
+				pushFrame((CallFrame){.names = members});
+				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].data._int);
 				popFrame();
 
-				obj = (Object){
-					.referenceId = basicReference,
-					.v.v_utility = (Utility){
-						.o = utilObjs,
-					},
-					.name = strdup(popArg()),
-					.scope = curScope,
+				Value v = (Value){
 					.type = type(TYPE_UTIL),
+					.scope = curScope,
 				};
 
-				setVar(frame.o, obj);
+				v.data._utility = (Utility){
+					.members = members,
+				},
 
-				jump(insts[i].a.v_int);
+				createVar(&frame.names, strdup(popArg()), v);
+
+				jump(insts[i].data._int);
 
 				break;
-			case EXTERN:  // `extern(..., a)`
+			}
+			case EXTERN: {	// `extern(..., a)`
 				// Pop dummy object
 				pop();
 
-				a = pop();
-				externs[a.v.v_int]();
+				StackElem a = pop();
+				int index = getValue(a).data._int;
+
+				if (index < 0 || index >= externLen) {
+					ierr("Unknown extern index.");
+				}
+
+				externs[index]();
 
 				break;
-			case APPENDT:
-				b = pop();
-				a = pop();
+			}
+			case APPENDT: {
+				Value b = pop().elem;
+				Value a = pop().elem;
 
 				a.type.argsLen++;
 				if (a.type.args == NULL) {
@@ -796,53 +809,50 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					a.type.args[a.type.argsLen - 1] = dupTypeInfo(b.type);
 				}
 
-				push(a);
-
-				// We don't want this to get freed
-				a.type = type(TYPE_VOID);
+				push(toElem(a));
 
 				break;
-			case ARRAYI:  // `new a[b]`
-				b = pop();
-				a = pop();
+			}
+			case ARRAYI: {	// `new a[b]`
+				Value b = getValue(pop());
+				Value a = pop().elem;
 
-				if (b.type.id != TYPE_INT || b.v.v_int < 0) {
+				if (b.type.id != TYPE_INT || b.data._int < 0) {
 					ierr("Expected positive int in array initilization.");
 				}
 
 				// Initilize the new stack element
-				sobj = (Object){
+				Value outv = (Value){
 					.type = type(TYPE_ARRAY),
-					.referenceId = basicReference,
 				};
 
 				// Convert type into array type
-				sobj.type.argsLen = 1;
-				sobj.type.args = malloc(sizeof(TypeInfo));
-				sobj.type.args[0] = dupTypeInfo(a.type);
+				outv.type.argsLen = 1;
+				outv.type.args = malloc(sizeof(TypeInfo));
+				outv.type.args[0] = dupTypeInfo(a.type);
 
 				// Initilize the array
-				sobj.v.v_array.arr = malloc(sizeof(Object) * b.v.v_int);
-				sobj.v.v_array.len = b.v.v_int;
+				outv.data._array.arr = malloc(sizeof(Value*) * b.data._int);
+				outv.data._array.len = b.data._int;
 
 				// Populate array
-				for (int i = 0; i < b.v.v_int; i++) {
-					sobj.v.v_array.arr[i] = (Object){
+				for (int i = 0; i < b.data._int; i++) {
+					outv.data._array.arr[i] = malloc(sizeof(Value));
+					*outv.data._array.arr[i] = (Value){
 						.type = dupTypeInfo(a.type),
-						.v = createDefaultType(a.type),
+						.data = createDefaultType(a.type),
 					};
 
 					if (isDisposable(a.type.id)) {
-						size_t refId = basicReference;
-						sobj.v.v_array.arr[i].referenceId = refId;
-						refs[refId].counter++;
+						outv.data._array.arr[i]->counter++;
 					}
 				}
 
 				// Push
-				push(sobj);
+				push(toElem(outv));
 
 				break;
+			}
 			case ARRAYIW:  // `new a[b] with c`
 				c = pop();
 				b = pop();

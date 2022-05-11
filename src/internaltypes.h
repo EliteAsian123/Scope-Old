@@ -54,7 +54,7 @@ typedef struct {
 } String;
 
 typedef struct {
-	Value* arr;
+	Value** arr;
 	size_t len;
 } Array;
 

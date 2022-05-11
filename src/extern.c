@@ -98,5 +98,6 @@ const ExternPtr externs[] = {
 	_acos,
 	_atan,
 };
+const int externLen = 11;
 
 #undef mathFunc

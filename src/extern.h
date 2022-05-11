@@ -8,5 +8,6 @@
 typedef void (*ExternPtr)();
 
 extern const ExternPtr externs[];
+extern const int externLen;
 
 #endif
