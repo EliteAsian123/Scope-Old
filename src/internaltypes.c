@@ -90,7 +90,17 @@ Value getValue(StackElem s) {
 	}
 }
 
-Value* dupVal(Value v) {
+Value* getValuePtr(StackElem s) {
+	if (s.var == NULL) {
+		Value* ptr = malloc(sizeof(Value));
+		*ptr = s.elem;
+		return ptr;
+	} else {
+		return s.var->value;
+	}
+}
+
+Value* dupValue(Value v) {
 	Value* out = malloc(sizeof(Value));
 	*out = v;
 	out->type = dupTypeInfo(v.type);

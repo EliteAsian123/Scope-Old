@@ -90,6 +90,7 @@ String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
 
 Value getValue(StackElem s);
+Value* getValuePtr(StackElem s);
 Value* dupVal(Value v);
 
 #endif

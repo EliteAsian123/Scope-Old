@@ -601,7 +601,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				} else if (isDisposable(a.var->value->type.id)) {
 					a.var->value = b.var->value;
 				} else {
-					a.var->value = dupVal(*b.var->value);
+					a.var->value = dupValue(*b.var->value);
 				}
 
 				break;
@@ -853,93 +853,103 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				break;
 			}
-			case ARRAYIW:  // `new a[b] with c`
-				c = pop();
-				b = pop();
-				a = pop();
+			case ARRAYIW: {	 // `new a[b] with c`
+				StackElem c = pop();
+				Value b = getValue(pop());
+				Value a = pop().elem;
 
-				if (b.type.id != TYPE_INT || b.v.v_int < 0) {
+				if (b.type.id != TYPE_INT || b.data._int < 0) {
 					ierr("Expected positive int in array initilization.");
 				}
 
-				if (!typeInfoEqual(a.type, c.type)) {
+				if (!typeInfoEqual(a.type, getValue(c).type)) {
 					ierr("The `with` expression differs in type from the array.");
 				}
 
-				// Initilize the new stack element
-				sobj = (Object){
+				// Initilize the new array
+				Value outv = (Value){
 					.type = type(TYPE_ARRAY),
-					.referenceId = basicReference,
 				};
 
 				// Convert type into array type
-				sobj.type.argsLen = 1;
-				sobj.type.args = malloc(sizeof(TypeInfo));
-				sobj.type.args[0] = dupTypeInfo(a.type);
+				outv.type.argsLen = 1;
+				outv.type.args = malloc(sizeof(TypeInfo));
+				outv.type.args[0] = dupTypeInfo(a.type);
 
 				// Initilize the array
-				sobj.v.v_array.arr = malloc(sizeof(Object) * b.v.v_int);
-				sobj.v.v_array.len = b.v.v_int;
+				outv.data._array.arr = malloc(sizeof(Value) * b.data._int);
+				outv.data._array.len = b.data._int;
 
 				// Populate array
-				for (int i = 0; i < b.v.v_int; i++) {
-					sobj.v.v_array.arr[i] = c;
-
-					if (isDisposable(a.type.id)) {
-						size_t refId = basicReference;
-						sobj.v.v_array.arr[i].referenceId = refId;
-						refs[refId].counter++;
+				if (isDisposable(a.type.id)) {
+					for (int i = 0; i < b.data._int; i++) {
+						Value* v = getValuePtr(c);
+						outv.data._array.arr[i] = v;
+						v->refCount++;
+					}
+				} else {
+					for (int i = 0; i < b.data._int; i++) {
+						outv.data._array.arr[i] = dupValue(getValue(c));
 					}
 				}
 
 				// Push
-				push(sobj);
+				push(toElem(outv));
 
 				break;
-			case ARRAYIL:;	// `new a[] { n0, n1, n2, ... }`
-				Object* arrayList = malloc(sizeof(Object) * insts[i].a.v_int);
-				for (int j = 0; j < insts[i].a.v_int; j++) {
-					arrayList[j] = pop();
+			}
+			case ARRAYIL: {	 // `new a[] { n0, n1, n2, ... }`
+				StackElem* arrElements = malloc(sizeof(StackElem) * insts[i].data._int);
+				for (int j = 0; j < insts[i].data._int; j++) {
+					arrElements[j] = pop();
 				}
 
-				a = pop();
+				Value a = pop().elem;
 
 				// Check types
-				for (int j = 0; j < insts[i].a.v_int; j++) {
-					if (!typeInfoEqual(arrayList[j].type, a.type)) {
+				for (int j = 0; j < insts[i].data._int; j++) {
+					if (!typeInfoEqual(getValue(arrElements[j]).type, a.type)) {
 						ierr("An element in the array initialization does not match the array type.");
 					}
 				}
 
 				// Initilize the new stack element
-				sobj = (Object){
+				Value outv = (Value){
 					.type = type(TYPE_ARRAY),
-					.referenceId = basicReference,
 				};
 
 				// Convert type into array type
-				sobj.type.argsLen = 1;
-				sobj.type.args = malloc(sizeof(TypeInfo));
-				sobj.type.args[0] = dupTypeInfo(a.type);
+				outv.type.argsLen = 1;
+				outv.type.args = malloc(sizeof(TypeInfo));
+				outv.type.args[0] = dupTypeInfo(a.type);
 
 				// Convert the object list to a ValueHolder list
-				sobj.v.v_array.arr = malloc(sizeof(Object) * insts[i].a.v_int);
-				sobj.v.v_array.len = insts[i].a.v_int;
+				outv.data._array.arr = malloc(sizeof(Value) * insts[i].data._int);
+				outv.data._array.len = insts[i].data._int;
 
 				// Populate
-				for (int j = 0; j < insts[i].a.v_int; j++) {
-					int arrIndex = insts[i].a.v_int - j - 1;
-					sobj.v.v_array.arr[j] = arrayList[arrIndex];
-					refs[arrayList[arrIndex].referenceId].counter++;
+				if (isDisposable(a.type.id)) {
+					for (int j = 0; j < insts[i].data._int; j++) {
+						int arrIndex = insts[i].data._int - j - 1;
+						Value* v = getValuePtr(arrElements[arrIndex]);
+						outv.data._array.arr[i] = v;
+						v->refCount++;
+					}
+				} else {
+					for (int j = 0; j < insts[i].data._int; j++) {
+						int arrIndex = insts[i].data._int - j - 1;
+						outv.data._array.arr[i] = dupValue(getValue(arrElements[arrIndex]));
+					}
 				}
 
 				// Push
-				push(sobj);
+				push(toElem(outv));
 
 				// Free
-				free(arrayList);
+				free(arrElements);
 
 				break;
+			}
 			case ARRAYS:  // `c[a] = b`
 				b = pop();
 				a = pop();
