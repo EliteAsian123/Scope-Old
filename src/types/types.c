@@ -1,65 +1,21 @@
 #include "types.h"
 
-static Data createDefaultInt(TypeInfo type) {
-	return (Data){._int = 0};
-}
-
-static Data createDefaultStr(TypeInfo type) {
-	String str = (String){
-		.chars = NULL,
-		.len = 0,
-	};
-
-	return (Data){._string = str};
-}
-
-static Data createDefaultFloat(TypeInfo type) {
-	return (Data){._float = 0.0};
-}
-
-static Data createDefaultFunc(TypeInfo type) {
-	return (Data){._int = -1};
-}
-
-static Data createDefaultArray(TypeInfo type) {
-	Array a = (Array){
-		.arr = NULL,
-		.len = 0,
-	};
-
-	return (Data){._array = a};
-}
-
-static Data createDefaultLong(TypeInfo type) {
-	return (Data){._long = 0};
-}
-
-static Data createDefaultDouble(TypeInfo type) {
-	return (Data){._double = 0.0};
-}
+#ifndef S_TYPES_C
+#define S_TYPES_C
+#include "array.c"
+#include "bool.c"
+#include "double.c"
+#include "float.c"
+#include "function.c"
+#include "int.c"
+#include "long.c"
+#include "string.c"
+#include "utility.c"
+#endif
 
 static Data errorOnDefault(TypeInfo type) {
 	fprintf(stderr, "Attempted to create a default value of a type that does not have a default value.\n");
 	exit(-1);
-}
-
-static void disposeString(const TypeInfo type, Data v) {
-	free(v._string.chars);
-}
-
-static void disposeArray(const TypeInfo type, Data v) {
-	// if (isDisposable(type.args[0].id)) {
-	// 	for (int i = 0; i < v._array.len; i++) {
-	// 		refs[v._array.arr[i].referenceId].counter--;
-	// 		disposeIfNoRefs(v._array.arr[i]);
-	// 	}
-	// }
-
-	// free(v._array.arr);
-}
-
-static void disposeUtility(const TypeInfo type, Data v) {
-	free(v._utility.members.names);
 }
 
 const Type types[] = {
@@ -69,24 +25,35 @@ const Type types[] = {
 	{
 		.displayName = "int",
 		.createDefault = createDefaultInt,
+		.castTo = intCastTo,
+		standardOpSet(int),
+		.opMod = intOpMod,
 	},
 	{
 		.displayName = "bool",
 		.createDefault = createDefaultInt,
+		.castTo = boolCastTo,
+		.opNot = boolOpNot,
+		.opAnd = boolOpAnd,
+		.opOr = boolOpOr,
 	},
 	{
 		.displayName = "string",
-		.createDefault = createDefaultStr,
+		.createDefault = createDefaultString,
 		.disposable = true,
 		.dispose = disposeString,
+		.opEq = stringOpEq,
+		.opAdd = stringOpAdd,
 	},
 	{
 		.displayName = "float",
 		.createDefault = createDefaultFloat,
+		.castTo = floatCastTo,
+		standardOpSet(float),
 	},
 	{
 		.displayName = "function(?,...)",
-		.createDefault = createDefaultFunc,
+		.createDefault = createDefaultFunction,
 	},
 	{
 		.displayName = "array(?)",
@@ -97,10 +64,15 @@ const Type types[] = {
 	{
 		.displayName = "long",
 		.createDefault = createDefaultLong,
+		.castTo = longCastTo,
+		standardOpSet(long),
+		.opMod = longOpMod,
 	},
 	{
 		.displayName = "double",
 		.createDefault = createDefaultDouble,
+		.castTo = doubleCastTo,
+		standardOpSet(double),
 	},
 	{
 		.displayName = "utility",

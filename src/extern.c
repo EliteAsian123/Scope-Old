@@ -2,16 +2,16 @@
 
 #define INPUT_BUFFER_SIZE 256
 
-#define mathFunc(f)                    \
-	Object a = pop();                  \
-	push((Object){                     \
-		.type = type(TYPE_DOUBLE),     \
-		.v.v_double = f(a.v.v_double), \
-	});
+#define mathFunc(f)                        \
+	Value a = getValue(pop());             \
+	push(toElem((Value){                   \
+		.type = type(TYPE_DOUBLE),         \
+		.data._double = f(a.data._double), \
+	}));
 
 static void _print() {
-	Object a = pop();
-	char* cstr = strToCstr(a.v.v_string);
+	Value a = getValue(pop());
+	char* cstr = strToCstr(a.data._string);
 	printf("%s", cstr);
 	free(cstr);
 }
@@ -28,22 +28,21 @@ static void _input() {
 	str.chars = malloc(len);
 	memcpy(str.chars, in, len);
 
-	push((Object){
+	push(toElem((Value){
 		.type = type(TYPE_STR),
-		.v.v_string = str,
-		.referenceId = basicReference,
-	});
+		.data._string = str,
+	}));
 }
 
 static void _stringToInt() {
-	Object a = pop();
+	Value a = getValue(pop());
 
 	// Convert str to cstr then use atoi
-	char* str = strToCstr(a.v.v_string);
-	push((Object){
+	char* str = strToCstr(a.data._string);
+	push(toElem((Value){
 		.type = type(TYPE_INT),
-		.v.v_int = atoi(str),
-	});
+		.data._int = atoi(str),
+	}));
 	free(str);
 }
 
@@ -76,13 +75,13 @@ static void _atan() {
 }
 
 static void _exit() {
-	Object a = pop();
+	Value a = getValue(pop());
 
-	if (a.v.v_int != 0) {
-		printf("Program was forced to exit with non-zero exit code `%d`.\n", a.v.v_int);
+	if (a.data._int != 0) {
+		printf("Program was forced to exit with non-zero exit code `%d`.\n", a.data._int);
 	}
 
-	exit(a.v.v_int);
+	exit(a.data._int);
 }
 
 const ExternPtr externs[] = {

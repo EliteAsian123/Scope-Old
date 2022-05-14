@@ -16,25 +16,18 @@
 		ierr("The object used does not have a `" #opName "` operation."); \
 	}
 
-#define doubleOperation(opName)                                                  \
-	Value b = getValue(pop());                                                   \
-	Value a = getValue(pop());                                                   \
-	if (!typeInfoEqual(a.type, b.type)) {                                        \
-		ierr("The types of the two objects used in `" #opName "`do not match."); \
-	}                                                                            \
-	DoubleOperation op = types[a.type.id].opName;                                \
-	if (op != NULL) {                                                            \
-		push(toElem(op(a, b)));                                                  \
-	} else {                                                                     \
-		ierr("The object used does not have a `" #opName "` operation.");        \
+#define doubleOperation(opName)                                                   \
+	Value b = getValue(pop());                                                    \
+	Value a = getValue(pop());                                                    \
+	if (!typeInfoEqual(a.type, b.type)) {                                         \
+		ierr("The types of the two objects used in `" #opName "` do not match."); \
+	}                                                                             \
+	DoubleOperation op = types[a.type.id].opName;                                 \
+	if (op != NULL) {                                                             \
+		push(toElem(op(a, b)));                                                   \
+	} else {                                                                      \
+		ierr("The object used does not have a `" #opName "` operation.");         \
 	}
-
-#define toStr(x, s)                                                                                      \
-	int length = snprintf(NULL, 0, s, x) + 1;                                                            \
-	char* str = malloc(length);                                                                          \
-	snprintf(str, length, s, x);                                                                         \
-	push((Object){.type = type(TYPE_STR), .v.v_string = cstrToStr(str), .referenceId = basicReference}); \
-	free(str);
 
 #define ierr(...)                                          \
 	fprintf(stderr, "Interpret Error: " __VA_ARGS__ "\n"); \
@@ -206,7 +199,7 @@ static void delVarAtIndex(NameList* names, size_t i) {
 static void delVar(NameList* names, const char* v) {
 	for (size_t i = 0; i < names->len; i++) {
 		if (strcmp(names->names[i].name, v) == 0) {
-			delVarAtIndex(v, i);
+			delVarAtIndex(names, i);
 			return;
 		}
 	}
@@ -232,7 +225,7 @@ static Name* createVar(NameList* names, const char* name, Value val) {
 	return &names->names[names->len - 1];
 }
 
-static Name* createVarD(NameList* names, const char* name, Name* var) {
+static Name* setVar(NameList* names, const char* name, Name* var) {
 	var->value->refCount++;
 
 	if (showDisposeInfo) {
@@ -359,20 +352,6 @@ void putMoveBuffer(int scope) {
 
 	free(curInstBuf.insts);
 	instbufferCount--;
-}
-
-static bool stringEqual(String a, String b) {
-	if (a.len != b.len) {
-		return false;
-	}
-
-	for (size_t i = 0; i < a.len; i++) {
-		if (a.chars[i] != b.chars[i]) {
-			return false;
-		}
-	}
-
-	return true;
 }
 
 void bc_init() {
@@ -561,7 +540,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				if (b.var == NULL) {
 					createVar(&frame.names, insts[i].data._ptr, b.elem);
 				} else if (isDisposable(a.elem.type.id)) {
-					createVarD(&frame.names, insts[i].data._ptr, b.var);
+					setVar(&frame.names, insts[i].data._ptr, b.var);
 				} else {
 					createVar(&frame.names, insts[i].data._ptr, *b.var->value);
 				}
@@ -654,12 +633,11 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 				CallFrame funcFrame = frames[framesCount - 1];
 
-				// Duping may not even be required?
 				// TODO: Optimize
 				for (size_t v = 0; v < funcFrame.names.len; v++) {
 					Name name = funcFrame.names.names[v];
 					if (name.value->scope < s) {
-						dupVar(&names, name);
+						setVar(&names, name.name, &name);
 					}
 				}
 
@@ -728,7 +706,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 
 					// Update the variable outside of the frame
-					dupVar(&funcFrame.names, v);
+					setVar(&funcFrame.names, vname.name, &vname);
 				}
 
 #undef skipdelete
@@ -749,13 +727,9 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				// RETURN not break
 				return;
 			case STARTU: {
-				NameList* members = malloc(sizeof(NameList));
-				members->names = NULL;
-				members->len = 0;
-
-				pushFrame((CallFrame){.names = members});
+				pushFrame((CallFrame){0});
 				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].data._int);
-				popFrame();
+				NameList members = popFrame().names;
 
 				Value v = (Value){
 					.type = type(TYPE_UTIL),
@@ -961,7 +935,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					ierr("Index must be less than the length.");
 				}
 
-				push(toVar(a.data._array.arr[b.data._int]));
+				push(toVar(&(Name){
+					.name = NULL,
+					.value = a.data._array.arr[b.data._int],
+				}));
 
 				break;
 			}
@@ -1114,7 +1091,7 @@ void bc_run(bool showByteCode) {
 	// Read byte code
 
 	NameList names = (NameList){0};
-	pushFrame((CallFrame){.names = &names});
+	pushFrame((CallFrame){.names = names});
 
 	readByteCode(framesCount - 1, 0, 0);
 

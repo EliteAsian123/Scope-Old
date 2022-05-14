@@ -10,7 +10,7 @@
 #include "extern.h"
 #include "flags.h"
 #include "internaltypes.h"
-#include "types.h"
+#include "types/types.h"
 
 #define STACK_SIZE 256
 

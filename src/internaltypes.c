@@ -62,6 +62,20 @@ char* strToCstr(const String str) {
 	return cstr;
 }
 
+bool stringEqual(String a, String b) {
+	if (a.len != b.len) {
+		return false;
+	}
+
+	for (size_t i = 0; i < a.len; i++) {
+		if (a.chars[i] != b.chars[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 Value getValue(StackElem s) {
 	if (s.var == NULL) {
 		return s.elem;

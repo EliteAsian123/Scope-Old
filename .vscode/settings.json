@@ -5,6 +5,9 @@
 		"bytecode.h": "c",
 		"references.h": "c",
 		"*.tcc": "c",
-		"typeinfo": "c"
+		"typeinfo": "c",
+		"stdio.h": "c",
+		"types.h": "c",
+		"internaltypes.h": "c"
 	}
 }

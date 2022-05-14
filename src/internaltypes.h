@@ -92,9 +92,10 @@ TypeInfo dupTypeInfo(TypeInfo a);
 
 String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
+bool stringEqual(String a, String b);
 
 Value getValue(StackElem s);
 Value* getValuePtr(StackElem s);
-Value* dupVal(Value v);
+Value* dupValue(Value v);
 
 #endif
