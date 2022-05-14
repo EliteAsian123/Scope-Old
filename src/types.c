@@ -1,66 +1,65 @@
 #include "types.h"
 
-static ValueHolder createDefaultInt(TypeInfo type) {
-	return (ValueHolder){.v_int = 0};
+static Data createDefaultInt(TypeInfo type) {
+	return (Data){._int = 0};
 }
 
-static ValueHolder createDefaultStr(TypeInfo type) {
+static Data createDefaultStr(TypeInfo type) {
 	String str = (String){
 		.chars = NULL,
 		.len = 0,
 	};
 
-	return (ValueHolder){.v_string = str};
+	return (Data){._string = str};
 }
 
-static ValueHolder createDefaultFloat(TypeInfo type) {
-	return (ValueHolder){.v_float = 0.0};
+static Data createDefaultFloat(TypeInfo type) {
+	return (Data){._float = 0.0};
 }
 
-static ValueHolder createDefaultFunc(TypeInfo type) {
-	return (ValueHolder){.v_int = -1};
+static Data createDefaultFunc(TypeInfo type) {
+	return (Data){._int = -1};
 }
 
-static ValueHolder createDefaultArray(TypeInfo type) {
+static Data createDefaultArray(TypeInfo type) {
 	Array a = (Array){
 		.arr = NULL,
 		.len = 0,
 	};
 
-	return (ValueHolder){.v_array = a};
+	return (Data){._array = a};
 }
 
-static ValueHolder createDefaultLong(TypeInfo type) {
-	return (ValueHolder){.v_long = 0};
+static Data createDefaultLong(TypeInfo type) {
+	return (Data){._long = 0};
 }
 
-static ValueHolder createDefaultDouble(TypeInfo type) {
-	return (ValueHolder){.v_double = 0.0};
+static Data createDefaultDouble(TypeInfo type) {
+	return (Data){._double = 0.0};
 }
 
-static ValueHolder errorOnDefault(TypeInfo type) {
+static Data errorOnDefault(TypeInfo type) {
 	fprintf(stderr, "Attempted to create a default value of a type that does not have a default value.\n");
 	exit(-1);
 }
 
-static void disposeString(const TypeInfo type, ValueHolder v) {
-	free(v.v_string.chars);
+static void disposeString(const TypeInfo type, Data v) {
+	free(v._string.chars);
 }
 
-static void disposeArray(const TypeInfo type, ValueHolder v) {
-	if (isDisposable(type.args[0].id)) {
-		for (int i = 0; i < v.v_array.len; i++) {
-			refs[v.v_array.arr[i].referenceId].counter--;
-			disposeIfNoRefs(v.v_array.arr[i]);
-		}
-	}
+static void disposeArray(const TypeInfo type, Data v) {
+	// if (isDisposable(type.args[0].id)) {
+	// 	for (int i = 0; i < v._array.len; i++) {
+	// 		refs[v._array.arr[i].referenceId].counter--;
+	// 		disposeIfNoRefs(v._array.arr[i]);
+	// 	}
+	// }
 
-	free(v.v_array.arr);
+	// free(v._array.arr);
 }
 
-static void disposeUtility(const TypeInfo type, ValueHolder v) {
-	freeObjectList(v.v_utility.o);
-	free(v.v_utility.o);
+static void disposeUtility(const TypeInfo type, Data v) {
+	free(v._utility.members.names);
 }
 
 const Type types[] = {
@@ -121,7 +120,7 @@ const char* typestr(int id) {
 	}
 }
 
-ValueHolder createDefaultType(TypeInfo type) {
+Data createDefaultType(TypeInfo type) {
 	return types[type.id].createDefault(type);
 }
 
@@ -139,7 +138,7 @@ void dispose(Name name) {
 			printf("Disposing: `%s`\n", name.name);
 		}
 
-		types[name.value->type.id].dispose(name.value);
+		types[name.value->type.id].dispose(name.value->type, name.value->data);
 	}
 }
 

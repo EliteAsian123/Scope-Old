@@ -15,61 +15,28 @@
 #define toVar(...) \
 	(StackElem) { .elem = (Value){0}, .var = __VA_ARGS__ }
 
-struct TypeInfo {
-	int id;
-	struct TypeInfo* args;
-	size_t argsLen;
-};
-typedef struct TypeInfo TypeInfo;
+// ==================== //
 
-union Data;
-typedef struct {
-	TypeInfo type;
-	Data data;
-	int refCount;
-	int scope;
-	bool fromArgs;
-} Value;
-
-typedef struct {
-	char* name;
-	Value* value;
-} Name;
-
-typedef struct {
-	Name* var;
-	Value elem;
-} StackElem;
-
-typedef struct {
-	Name* names;
+typedef struct NameList {
+	struct Name* names;
 	size_t len;
 } NameList;
 
 // ==================== //
 
-typedef struct {
+typedef struct String {
 	char* chars;
 	size_t len;
 } String;
 
-typedef struct {
-	Value** arr;
+typedef struct Array {
+	struct Value** arr;
 	size_t len;
 } Array;
 
-typedef struct {
-	Name* members;
+typedef struct Utility {
+	struct NameList members;
 } Utility;
-
-typedef struct {
-	int location;
-	TypeInfo type;
-	char** args;
-	size_t argsLen;
-} FuncPointer;
-
-// ==================== //
 
 typedef union Data {
 	void* _ptr;
@@ -77,10 +44,47 @@ typedef union Data {
 	float _float;
 	long _long;
 	double _double;
-	Array _array;
-	String _string;
-	Utility _utility;
+	struct Array _array;
+	struct String _string;
+	struct Utility _utility;
 } Data;
+
+// ==================== //
+
+typedef struct TypeInfo {
+	int id;
+	struct TypeInfo* args;
+	size_t argsLen;
+} TypeInfo;
+
+typedef struct Value {
+	TypeInfo type;
+	union Data data;
+	int refCount;
+	int scope;
+	bool fromArgs;
+} Value;
+
+typedef struct Name {
+	char* name;
+	Value* value;
+} Name;
+
+typedef struct StackElem {
+	Name* var;
+	Value elem;
+} StackElem;
+
+// ==================== //
+
+typedef struct FuncPointer {
+	int location;
+	TypeInfo type;
+	char** args;
+	size_t argsLen;
+} FuncPointer;
+
+// ==================== //
 
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 void freeTypeInfo(TypeInfo a);

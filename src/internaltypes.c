@@ -62,26 +62,6 @@ char* strToCstr(const String str) {
 	return cstr;
 }
 
-Object objdup(Object obj) {
-	Object out = obj;
-
-	if (out.name != NULL) {
-		out.name = strdup(out.name);
-	}
-
-	out.type = dupTypeInfo(obj.type);
-
-	return out;
-}
-
-void freeObjectList(ObjectList* o) {
-	for (size_t i = 0; i < o->varsCount; i++) {
-		free(o->vars[i].name);
-		freeTypeInfo(o->vars[i].type);
-	}
-	free(o->vars);
-}
-
 Value getValue(StackElem s) {
 	if (s.var == NULL) {
 		return s.elem;

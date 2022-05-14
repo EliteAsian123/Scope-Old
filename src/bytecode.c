@@ -7,34 +7,26 @@
 // TODO: size_t for goto and stuff; or relative addresses
 // TODO: static checking
 
-#define basicOperation(op)                                                                     \
-	b = pop();                                                                                 \
-	a = pop();                                                                                 \
-	if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {                                      \
-		push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int op b.v.v_int});             \
-	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                           \
-		push((Object){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float op b.v.v_float});     \
-	} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {                             \
-		push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long op b.v.v_long});         \
-	} else if (a.type.id == TYPE_DOUBLE && b.type.id == TYPE_DOUBLE) {                         \
-		push((Object){.type = type(TYPE_DOUBLE), .v.v_double = a.v.v_double op b.v.v_double}); \
-	} else {                                                                                   \
-		ierr("Invalid types for `" #op "`.");                                                  \
+#define singleOperation(opName)                                           \
+	Value a = getValue(pop());                                            \
+	SingleOperation op = types[a.type.id].opName;                         \
+	if (op != NULL) {                                                     \
+		push(toElem(op(a)));                                              \
+	} else {                                                              \
+		ierr("The object used does not have a `" #opName "` operation."); \
 	}
 
-#define boolOperation(op)                                                                 \
-	b = pop();                                                                            \
-	a = pop();                                                                            \
-	if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {                                 \
-		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int op b.v.v_int});       \
-	} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {                      \
-		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_float op b.v.v_float});   \
-	} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {                        \
-		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_long op b.v.v_long});     \
-	} else if (a.type.id == TYPE_DOUBLE && b.type.id == TYPE_DOUBLE) {                    \
-		push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_double op b.v.v_double}); \
-	} else {                                                                              \
-		ierr("Invalid types for `" #op "`.");                                             \
+#define doubleOperation(opName)                                                  \
+	Value b = getValue(pop());                                                   \
+	Value a = getValue(pop());                                                   \
+	if (!typeInfoEqual(a.type, b.type)) {                                        \
+		ierr("The types of the two objects used in `" #opName "`do not match."); \
+	}                                                                            \
+	DoubleOperation op = types[a.type.id].opName;                                \
+	if (op != NULL) {                                                            \
+		push(toElem(op(a, b)));                                                  \
+	} else {                                                                     \
+		ierr("The object used does not have a `" #opName "` operation.");        \
 	}
 
 #define toStr(x, s)                                                                                      \
@@ -629,9 +621,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				Value v = (Value){
 					.type = dupTypeInfo(getValue(a).type),
-					//.data._int = pushFunc(i + 1, getValue(a).type)
+					.data._int = pushFunc(i + 1, getValue(a).type),
 				};
-				v.data._int = pushFunc(i + 1, getValue(a).type);
 
 				push(toElem(v));
 				jump(insts[i].data._int);
@@ -844,7 +835,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					};
 
 					if (isDisposable(a.type.id)) {
-						outv.data._array.arr[i]->counter++;
+						outv.data._array.arr[i]->refCount++;
 					}
 				}
 
@@ -950,45 +941,15 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				break;
 			}
-			case ARRAYS:  // `c[a] = b`
-				b = pop();
-				a = pop();
-				c = pop();
-
-				if (a.type.id != TYPE_INT) {
-					ierr("Index must be an int.");
-				}
-
-				if (a.v.v_int < 0) {
-					ierr("Index must be more than 0.");
-				}
-
-				if (c.type.id != TYPE_ARRAY) {
-					ierr("The object referenced is not an array.");
-				}
-
-				arr = c.v.v_array;
-
-				if (a.v.v_int >= arr.len) {
-					ierr("Index must be less than the length.");
-				}
-
-				if (!typeInfoEqual(b.type, c.type.args[0])) {
-					ierr("Set type doens't match expression.");
-				}
-
-				arr.arr[a.v.v_int] = b;
-
-				break;
-			case ARRAYG:  // `a[b]`
-				b = pop();
-				a = pop();
+			case ARRAYG: {	// `a[b]`
+				Value b = getValue(pop());
+				Value a = getValue(pop());
 
 				if (b.type.id != TYPE_INT) {
 					ierr("Index must be an int.");
 				}
 
-				if (b.v.v_int < 0) {
+				if (b.data._int < 0) {
 					ierr("Index must be more than 0.");
 				}
 
@@ -996,364 +957,150 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					ierr("The object referenced is not an array.");
 				}
 
-				arr = a.v.v_array;
-
-				if (b.v.v_int >= arr.len) {
+				if (b.data._int >= a.data._array.len) {
 					ierr("Index must be less than the length.");
 				}
 
-				push(arr.arr[b.v.v_int]);
+				push(toVar(a.data._array.arr[b.data._int]));
 
 				break;
-			case ACCESS:  // `a.$`
-				a = pop();
+			}
+			case ACCESS: {	// `a.$`
+				Value a = getValue(pop());
 
 				if (a.type.id == TYPE_ARRAY) {
-					if (strcmp(insts[i].a.v_ptr, "length") != 0) {
+					if (strcmp(insts[i].data._ptr, "length") != 0) {
 						ierr("The only accessible member of an array is `length`.");
 					}
 
-					arr = a.v.v_array;
-
-					push((Object){
+					Value v = (Value){
 						.type = type(TYPE_INT),
-						.v.v_int = arr.len,
-					});
-				} else if (a.type.id == TYPE_UTIL) {
-					sobj = getVar(a.v.v_utility.o, insts[i].a.v_ptr);
-					sobj.type = dupTypeInfo(sobj.type);
+					};
+					v.data._int = a.data._array.len;
 
-					push(sobj);
+					push(toElem(v));
+				} else if (a.type.id == TYPE_UTIL) {
+					push(toVar(getVar(&a.data._utility.members, insts[i].data._ptr)));
 				} else {
 					ierr("The object referenced does not have accessible members.");
 				}
 
 				break;
-			case SWAP:
-				b = stack[stackCount - 1];
-				a = stack[stackCount - 2];
+			}
+			case SWAP: {
+				StackElem b = stack[stackCount - 1];
+				StackElem a = stack[stackCount - 2];
 
 				stack[stackCount - 2] = b;
 				stack[stackCount - 1] = a;
 
-				// We don't want this to get freed
-				a = (Object){0};
-				b = (Object){0};
+				break;
+			}
+			case DUP: {
+				StackElem elem = stackRead();
+				// elem.type = dupTypeInfo(elem.type);
+				push(elem);
 
 				break;
-			case DUP:
-				obj = stackRead();
-				obj.type = dupTypeInfo(obj.type);
-				push(obj);
-
+			}
+			case NOT: {	 // !a
+				singleOperation(opNot);
 				break;
-			case NOT:
-				a = pop();
+			}
+			case AND: {	 // a && b
+				doubleOperation(opAnd);
+				break;
+			}
+			case OR: {	// a || b
+				doubleOperation(opOr);
+				break;
+			}
+			case ADD: {	 // a + b
+				doubleOperation(opAdd);
+				break;
+			}
+			case SUB: {	 // a - b
+				doubleOperation(opSub);
+				break;
+			}
+			case MUL: {	 // a * b
+				doubleOperation(opMul);
+				break;
+			}
+			case DIV: {	 // a / b
+				doubleOperation(opDiv);
+				break;
+			}
+			case MOD: {	 // a % b
+				doubleOperation(opMod);
+				break;
+			}
+			case POW: {	 // a ^ b
+				doubleOperation(opPow);
+				break;
+			}
+			case NEG: {	 // -a
+				singleOperation(opNeg);
+				break;
+			}
+			case EQ: {	// a == b
+				doubleOperation(opEq);
+				break;
+			}
+			case GT: {	// a > b
+				doubleOperation(opGt);
+				break;
+			}
+			case LT: {	// a < b
+				doubleOperation(opLt);
+				break;
+			}
+			case GTE: {	 // a >= b
+				doubleOperation(opGte);
+				break;
+			}
+			case LTE: {	 // a <= b
+				doubleOperation(opLte);
+				break;
+			}
+			case CAST: {  // (a) b
+				Value b = getValue(pop());
+				Value a = pop().elem;
 
-				if (a.type.id == TYPE_BOOL) {
-					push((Object){.type = type(TYPE_BOOL), .v.v_int = !a.v.v_int});
+				CastOperation op = types[b.type.id].castTo;
+				if (op != NULL) {
+					push(toElem(op(a.type, b)));
 				} else {
-					ierr("Invalid type for `not`.");
+					ierr("Specified type is not castable.");
 				}
 
 				break;
-			case AND:
-				b = pop();
-				a = pop();
-
-				if (a.type.id == TYPE_BOOL && b.type.id == TYPE_BOOL) {
-					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int && b.v.v_int});
-				} else {
-					ierr("Invalid types for `and`.");
-				}
-
+			}
+			case GOTO: {
+				jump(insts[i].data._int);
 				break;
-			case OR:
-				b = pop();
-				a = pop();
-
-				if (a.type.id == TYPE_BOOL && b.type.id == TYPE_BOOL) {
-					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int || b.v.v_int});
-				} else {
-					ierr("Invalid types for `and`.");
-				}
-
-				break;
-			case ADD:
-				b = pop();
-				a = pop();
-
-				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
-					push((Object){.type = type(TYPE_INT), .v.v_int = a.v.v_int + b.v.v_int});
-				} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {
-					push((Object){.type = type(TYPE_FLOAT), .v.v_float = a.v.v_float + b.v.v_float});
-				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
-					push((Object){.type = type(TYPE_LONG), .v.v_long = a.v.v_long + b.v.v_long});
-				} else if (a.type.id == TYPE_DOUBLE && b.type.id == TYPE_DOUBLE) {
-					push((Object){.type = type(TYPE_DOUBLE), .v.v_double = a.v.v_double + b.v.v_double});
-				} else if (a.type.id == TYPE_STR && b.type.id == TYPE_STR) {
-					// Create string
-					String s = (String){
-						.len = a.v.v_string.len + b.v.v_string.len,
-					};
-					s.chars = malloc(s.len);
-
-					// Combine the two strings
-					memcpy(s.chars, a.v.v_string.chars, a.v.v_string.len);
-					memcpy(s.chars + a.v.v_string.len, b.v.v_string.chars, b.v.v_string.len);
-
-					// Push onto stack
-					push((Object){
-						.type = type(TYPE_STR),
-						.v.v_string = s,
-						.referenceId = basicReference,
-					});
-				} else {
-					ierr("Invalid types for `add`.");
-				}
-
-				break;
-			case SUB:
-				basicOperation(-);
-				break;
-			case MUL:
-				basicOperation(*);
-				break;
-			case DIV:
-				basicOperation(/);
-				break;
-			case MOD:
-				b = pop();
-				a = pop();
-				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
-					int answer = a.v.v_int % b.v.v_int;
-					if (answer < 0) {
-						answer += b.v.v_int;
-					}
-
-					push((Object){.type = type(TYPE_INT), .v.v_int = answer});
-				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
-					long answer = a.v.v_long % b.v.v_long;
-					if (answer < 0) {
-						answer += b.v.v_long;
-					}
-
-					push((Object){.type = type(TYPE_LONG), .v.v_long = answer});
-				} else {
-					ierr("Invalid types for `%%`.");
-				}
-
-				break;
-			case POW:  // `a ^ b`
-				b = pop();
-				a = pop();
-				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT) {
-					int number = 1;
-
-					if (b.v.v_int < 0) {
-						number = 0;
-					} else {
-						for (int j = 0; j < b.v.v_int; j++) {
-							number *= a.v.v_int;
-						}
-					}
-
-					push((Object){.type = type(TYPE_INT), .v.v_int = number});
-				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
-					long number = 1;
-
-					if (b.v.v_long < 0) {
-						number = 0;
-					} else {
-						for (long j = 0; j < b.v.v_long; j++) {
-							number *= a.v.v_long;
-						}
-					}
-
-					push((Object){.type = type(TYPE_LONG), .v.v_long = number});
-				} else if (a.type.id == TYPE_FLOAT && b.type.id == TYPE_FLOAT) {
-					push((Object){.type = type(TYPE_FLOAT), .v.v_float = powf(a.v.v_float, b.v.v_float)});
-				} else if (a.type.id == TYPE_DOUBLE && b.type.id == TYPE_DOUBLE) {
-					push((Object){.type = type(TYPE_DOUBLE), .v.v_double = pow(a.v.v_double, b.v.v_double)});
-				} else {
-					ierr("Invalid types for `^`.");
-				}
-
-				break;
-			case NEG:
-				a = pop();
-				if (a.type.id == TYPE_INT) {
-					push((Object){.type = type(TYPE_INT), .v.v_int = -a.v.v_int});
-				} else if (a.type.id == TYPE_FLOAT) {
-					push((Object){.type = type(TYPE_FLOAT), .v.v_float = -a.v.v_float});
-				} else if (a.type.id == TYPE_DOUBLE) {
-					push((Object){.type = type(TYPE_DOUBLE), .v.v_double = -a.v.v_double});
-				} else if (a.type.id == TYPE_LONG) {
-					push((Object){.type = type(TYPE_LONG), .v.v_long = -a.v.v_long});
-				} else {
-					ierr("Invalid types for `neg`");
-				}
-
-				break;
-			case EQ:
-				b = pop();
-				a = pop();
-
-				if (a.type.id == TYPE_INT && b.type.id == TYPE_INT ||
-					a.type.id == TYPE_FUNC && b.type.id == TYPE_FUNC ||
-					a.type.id == TYPE_BOOL && b.type.id == TYPE_BOOL) {
-					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_int == b.v.v_int});
-				} else if (a.type.id == TYPE_LONG && b.type.id == TYPE_LONG) {
-					push((Object){.type = type(TYPE_BOOL), .v.v_int = a.v.v_long == b.v.v_long});
-				} else if (a.type.id == TYPE_STR && a.type.id == TYPE_STR) {
-					push((Object){
-						.type = type(TYPE_BOOL),
-						.v.v_int = stringEqual(a.v.v_string, b.v.v_string),
-					});
-				} else {
-					ierr("Invalid types for `eq`.");
-				}
-
-				break;
-			case GT:
-				boolOperation(>);
-				break;
-			case LT:
-				boolOperation(<);
-				break;
-			case GTE:
-				boolOperation(>=);
-				break;
-			case LTE:
-				boolOperation(<=);
-				break;
-			case CAST:
-				a = pop();
-
-				if (insts[i].type.id == TYPE_STR) {
-					if (a.type.id == TYPE_INT) {
-						toStr(a.v.v_int, "%d");
-					} else if (a.type.id == TYPE_LONG) {
-						toStr(a.v.v_long, "%ld");
-					} else if (a.type.id == TYPE_FLOAT) {
-						toStr(a.v.v_float, "%f");
-					} else if (a.type.id == TYPE_DOUBLE) {
-						toStr(a.v.v_double, "%lf");
-					} else if (a.type.id == TYPE_BOOL) {
-						if (a.v.v_int) {
-							push((Object){
-								.type = type(TYPE_STR),
-								.v.v_string = cstrToStr("true"),
-								.referenceId = basicReference,
-							});
-						} else {
-							push((Object){
-								.type = type(TYPE_STR),
-								.v.v_string = cstrToStr("false"),
-								.referenceId = basicReference,
-							});
-						}
-					} else {
-						printf("Cannot cast type %d.\n", a.type.id);
-						ierr("Invalid type for `cast` to `string`.");
-					}
-				} else if (insts[i].type.id == TYPE_INT) {
-					if (a.type.id == TYPE_LONG) {
-						push((Object){
-							.type = type(TYPE_INT),
-							.v.v_int = (int) a.v.v_long,
-						});
-					} else {
-						printf("Cannot cast type %d.\n", a.type.id);
-						ierr("Invalid type for `cast` to `int`.");
-					}
-				} else if (insts[i].type.id == TYPE_LONG) {
-					if (a.type.id == TYPE_INT) {
-						push((Object){
-							.type = type(TYPE_LONG),
-							.v.v_long = (long) a.v.v_int,
-						});
-					} else {
-						printf("Cannot cast type %d.\n", a.type.id);
-						ierr("Invalid type for `cast` to `long`.");
-					}
-				} else if (insts[i].type.id == TYPE_FLOAT) {
-					if (a.type.id == TYPE_DOUBLE) {
-						push((Object){
-							.type = type(TYPE_FLOAT),
-							.v.v_float = (float) a.v.v_double,
-						});
-					} else if (a.type.id == TYPE_INT) {
-						push((Object){
-							.type = type(TYPE_FLOAT),
-							.v.v_float = (float) a.v.v_int,
-						});
-					} else if (a.type.id == TYPE_LONG) {
-						push((Object){
-							.type = type(TYPE_FLOAT),
-							.v.v_float = (float) a.v.v_long,
-						});
-					} else {
-						printf("Cannot cast type %d.\n", a.type.id);
-						ierr("Invalid type for `cast` to `float`.");
-					}
-				} else if (insts[i].type.id == TYPE_DOUBLE) {
-					if (a.type.id == TYPE_FLOAT) {
-						push((Object){
-							.type = type(TYPE_DOUBLE),
-							.v.v_double = (double) a.v.v_float,
-						});
-					} else if (a.type.id == TYPE_INT) {
-						push((Object){
-							.type = type(TYPE_DOUBLE),
-							.v.v_double = (double) a.v.v_int,
-						});
-					} else if (a.type.id == TYPE_LONG) {
-						push((Object){
-							.type = type(TYPE_DOUBLE),
-							.v.v_double = (double) a.v.v_long,
-						});
-					} else {
-						printf("Cannot cast type %d.\n", a.type.id);
-						ierr("Invalid type for `cast` to `double`.");
-					}
-				}
-
-				break;
-			case GOTO:
-				jump(insts[i].a.v_int);
-				break;
-			case IFN:
-				a = pop();
+			}
+			case IFN: {
+				Value a = getValue(pop());
 
 				if (a.type.id != TYPE_BOOL) {
 					ierr("Invalid type for `ifn`.");
 				}
 
-				if (a.v.v_int == 0) {
-					jump(insts[i].a.v_int);
+				if (a.data._int == 0) {
+					jump(insts[i].data._int);
 				}
 
 				break;
-			case THROW:
-				fprintf(stderr, "%s\n", (char*) insts[i].a.v_ptr);
+			}
+			case THROW: {
+				fprintf(stderr, "%s\n", (char*) insts[i].data._ptr);
 				ierr("An error has been thrown, and execution has been aborted.");
 
 				return;
+			}
 			default:
 				break;
-		}
-
-		if (a.type.args != NULL) {
-			freeTypeInfo(a.type);
-		}
-
-		if (b.type.args != NULL) {
-			freeTypeInfo(b.type);
-		}
-
-		if (c.type.args != NULL) {
-			freeTypeInfo(c.type);
 		}
 	}
 }
@@ -1366,15 +1113,13 @@ void bc_run(bool showByteCode) {
 
 	// Read byte code
 
-	ObjectList o;
-	o.vars = NULL;
-	o.varsCount = 0;
-	pushFrame((CallFrame){.o = &o});
+	NameList names = (NameList){0};
+	pushFrame((CallFrame){.names = &names});
 
 	readByteCode(framesCount - 1, 0, 0);
 
 	popFrame();
-	freeObjectList(&o);
+	free(names.names);
 }
 
 void bc_end() {
@@ -1390,14 +1135,6 @@ void bc_end() {
 
 	if (framesCount != 0) {
 		fprintf(stderr, "Stack Error: CallFrame stack leak detected. Ending size `%ld`.\n", framesCount);
-	}
-
-	// Check for reference leaks
-
-	for (size_t i = 0; i < refsCount; i++) {
-		if (refs[i].counter > 0) {
-			// fprintf(stderr, "Reference Warning: Reference `%ld` was not freed. It will be leaked.\n", i);
-		}
 	}
 
 	// Free instructions
@@ -1418,6 +1155,5 @@ void bc_end() {
 	// End
 
 	free(funcs);
-	free(refs);
 	// malloc_stats();
 }
