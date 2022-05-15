@@ -161,6 +161,7 @@ static int pushFunc(int loc, TypeInfo type) {
 	f.args = malloc(sizeof(char*) * f.argsLen);
 	for (int i = f.argsLen - 1; i >= 0; i--) {
 		f.args[i] = popArg();
+		printf("%s\n", f.args[i]);
 	}
 
 	funcsCount++;
@@ -251,7 +252,7 @@ static Name* getVar(NameList* names, const char* name) {
 		}
 	}
 
-	printf("Unknown variable `%s`.\n", name);
+	fprintf(stderr, "Unknown variable `%s`.\n", name);
 	ierr("Use of undeclared variable.");
 }
 
@@ -596,11 +597,11 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				break;
 			}
 			case SAVEF: {
-				StackElem a = pop();
+				Value a = getValue(pop());
 
 				Value v = (Value){
-					.type = dupTypeInfo(getValue(a).type),
-					.data._int = pushFunc(i + 1, getValue(a).type),
+					.type = dupTypeInfo(a.type),
+					.data._int = pushFunc(i + 1, a.type),
 				};
 
 				push(toElem(v));

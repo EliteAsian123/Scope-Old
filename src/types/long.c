@@ -35,10 +35,10 @@ static Value longOpMod(Value a, Value b) {
 		answer += b.data._long;
 	}
 
-	push(toElem((Value){
+	return (Value){
 		.type = type(TYPE_LONG),
 		.data._long = answer,
-	}));
+	};
 }
 
 static Value longOpEq(Value a, Value b) {

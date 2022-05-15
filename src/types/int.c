@@ -35,10 +35,10 @@ static Value intOpMod(Value a, Value b) {
 		answer += b.data._int;
 	}
 
-	push(toElem((Value){
+	return (Value){
 		.type = type(TYPE_INT),
 		.data._int = answer,
-	}));
+	};
 }
 
 static Value intOpEq(Value a, Value b) {

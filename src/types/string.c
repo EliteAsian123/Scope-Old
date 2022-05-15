@@ -32,8 +32,8 @@ static Value stringOpAdd(Value a, Value b) {
 	memcpy(s.chars + a.data._string.len, b.data._string.chars, b.data._string.len);
 
 	// Push onto stack
-	push(toElem((Value){
+	return (Value){
 		.type = type(TYPE_STR),
 		.data._string = s,
-	}));
+	};
 }
