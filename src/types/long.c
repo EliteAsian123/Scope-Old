@@ -49,8 +49,8 @@ static Value longOpPow(Value a, Value b) {
 	}
 
 	long result = 1;
-	long exp = a.data._long;
-	long base = b.data._long;
+	long exp = b.data._long;
+	long base = a.data._long;
 	while (exp != 0) {
 		if (exp % 2) {
 			result *= base;

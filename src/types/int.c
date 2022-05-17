@@ -49,8 +49,8 @@ static Value intOpPow(Value a, Value b) {
 	}
 
 	int result = 1;
-	int exp = a.data._int;
-	int base = b.data._int;
+	int exp = b.data._int;
+	int base = a.data._int;
 	while (exp != 0) {
 		if (exp % 2) {
 			result *= base;
