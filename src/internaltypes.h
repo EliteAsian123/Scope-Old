@@ -35,7 +35,7 @@ typedef struct Array {
 } Array;
 
 typedef struct Utility {
-	struct NameList members;
+	struct NameList* members;
 } Utility;
 
 typedef union Data {

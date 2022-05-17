@@ -28,6 +28,7 @@ const Type types[] = {
 		.castTo = intCastTo,
 		standardOpSet(int),
 		.opMod = intOpMod,
+		.opPow = intOpPow,
 	},
 	{
 		.displayName = "bool",
@@ -54,6 +55,7 @@ const Type types[] = {
 	{
 		.displayName = "function(?,...)",
 		.createDefault = createDefaultFunction,
+		.opEq = functionOpEq,
 	},
 	{
 		.displayName = "array(?)",
@@ -67,6 +69,7 @@ const Type types[] = {
 		.castTo = longCastTo,
 		standardOpSet(long),
 		.opMod = longOpMod,
+		.opPow = longOpPow,
 	},
 	{
 		.displayName = "double",

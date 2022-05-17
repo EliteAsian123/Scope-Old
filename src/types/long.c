@@ -41,6 +41,31 @@ static Value longOpMod(Value a, Value b) {
 	};
 }
 
+// https://stackoverflow.com/questions/29787310/does-pow-work-for-int-data-type-in-c
+static Value longOpPow(Value a, Value b) {
+	if (b.data._long < 0) {
+		fprintf(stderr, "Math Error: Attempted to raise an integer to a negative power.\n");
+		exit(-1);
+	}
+
+	long result = 1;
+	long exp = a.data._long;
+	long base = b.data._long;
+	while (exp != 0) {
+		if (exp % 2) {
+			result *= base;
+		}
+
+		exp /= 2;
+		base *= base;
+	}
+
+	return (Value){
+		.type = type(TYPE_LONG),
+		.data._long = result,
+	};
+}
+
 static Value longOpEq(Value a, Value b) {
 	simpleBoolOp(_long, ==);
 }

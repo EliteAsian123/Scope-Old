@@ -41,6 +41,31 @@ static Value intOpMod(Value a, Value b) {
 	};
 }
 
+// https://stackoverflow.com/questions/29787310/does-pow-work-for-int-data-type-in-c
+static Value intOpPow(Value a, Value b) {
+	if (b.data._int < 0) {
+		fprintf(stderr, "Math Error: Attempted to raise an integer to a negative power.\n");
+		exit(-1);
+	}
+
+	int result = 1;
+	int exp = a.data._int;
+	int base = b.data._int;
+	while (exp != 0) {
+		if (exp % 2) {
+			result *= base;
+		}
+
+		exp /= 2;
+		base *= base;
+	}
+
+	return (Value){
+		.type = type(TYPE_INT),
+		.data._int = result,
+	};
+}
+
 static Value intOpEq(Value a, Value b) {
 	simpleBoolOp(_int, ==);
 }

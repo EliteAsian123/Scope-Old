@@ -40,7 +40,7 @@
 #define curInstBuf instbuffer[instbufferCount - 1]
 
 typedef struct {
-	NameList names;
+	NameList* names;
 } CallFrame;
 
 typedef struct {
@@ -161,7 +161,6 @@ static int pushFunc(int loc, TypeInfo type) {
 	f.args = malloc(sizeof(char*) * f.argsLen);
 	for (int i = f.argsLen - 1; i >= 0; i--) {
 		f.args[i] = popArg();
-		printf("%s\n", f.args[i]);
 	}
 
 	funcsCount++;
@@ -185,7 +184,7 @@ static void delVarAtIndex(NameList* names, size_t i) {
 	}
 
 	// Free
-	free(name.name);
+	// free(name.name);
 
 	// Ripple down
 	for (int j = i; j < names->len - 1; j++) {
@@ -463,8 +462,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 		int curScope = insts[i].scope;
 
 		if (curScope < lastKnownScope) {
-			for (size_t v = 0; v < frame.names.len; v++) {
-				Name name = frame.names.names[v];
+			for (size_t v = 0; v < frame.names->len; v++) {
+				Name name = frame.names->names[v];
 				Value value = *name.value;
 
 				if (value.scope <= curScope) {
@@ -479,7 +478,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					dispose(name);
 				}
 
-				delVarAtIndex(&frame.names, v);
+				delVarAtIndex(frame.names, v);
 
 				v--;
 			}
@@ -509,7 +508,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				break;
 			}
 			case LOADV: {
-				Name* n = getVar(&frame.names, insts[i].data._ptr);
+				Name* n = getVar(frame.names, insts[i].data._ptr);
 
 				if (n->value->fromArgs && n->value->type.id == TYPE_FUNC) {
 					ierr("Functions from arguments can only be called.");
@@ -526,8 +525,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				StackElem b = pop();
 				StackElem a = pop();
 
-				if (isVar(&frame.names, insts[i].data._ptr)) {
-					if (getVar(&frame.names, insts[i].data._ptr)->value->scope == curScope) {
+				if (isVar(frame.names, insts[i].data._ptr)) {
+					if (getVar(frame.names, insts[i].data._ptr)->value->scope == curScope) {
 						ierr("Redefinition of existing variable in the same scope.");
 					}
 				}
@@ -539,11 +538,11 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 
 				if (b.var == NULL) {
-					createVar(&frame.names, insts[i].data._ptr, b.elem);
+					createVar(frame.names, insts[i].data._ptr, b.elem);
 				} else if (isDisposable(a.elem.type.id)) {
-					setVar(&frame.names, insts[i].data._ptr, b.var);
+					setVar(frame.names, insts[i].data._ptr, b.var);
 				} else {
-					createVar(&frame.names, insts[i].data._ptr, *b.var->value);
+					createVar(frame.names, insts[i].data._ptr, *b.var->value);
 				}
 
 				break;
@@ -635,8 +634,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				CallFrame funcFrame = frames[framesCount - 1];
 
 				// TODO: Optimize
-				for (size_t v = 0; v < funcFrame.names.len; v++) {
-					Name name = funcFrame.names.names[v];
+				for (size_t v = 0; v < funcFrame.names->len; v++) {
+					Name name = funcFrame.names->names[v];
 					if (name.value->scope < s) {
 						setVar(&names, name.name, &name);
 					}
@@ -656,10 +655,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					v.type = dupTypeInfo(argv.type);
 					v.scope = s;
 
-					createVar(&names, strdup(f.args[j + 1]), v);
+					createVar(&names, strdup(f.args[j]), v);
 				}
 
-				pushFrame((CallFrame){.names = names});
+				pushFrame((CallFrame){.names = &names});
 				readByteCode(framesCount - 1, f.location, 0);
 				popFrame();
 
@@ -684,7 +683,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 
 					// Skip if the current frame doesn't contain the variable
-					if (!isVar(&funcFrame.names, vname.name)) {
+					if (!isVar(funcFrame.names, vname.name)) {
 						skipdelete;
 					}
 
@@ -694,7 +693,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 
 					// Get the var in the frame
-					Value vf = *getVar(&funcFrame.names, vname.name)->value;
+					Value vf = *getVar(funcFrame.names, vname.name)->value;
 
 					// Skip if the types are not equal
 					if (!typeInfoEqual(v.type, vf.type)) {
@@ -707,7 +706,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 
 					// Update the variable outside of the frame
-					setVar(&funcFrame.names, vname.name, &vname);
+					setVar(funcFrame.names, vname.name, &vname);
 				}
 
 #undef skipdelete
@@ -730,7 +729,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 			case STARTU: {
 				pushFrame((CallFrame){0});
 				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].data._int);
-				NameList members = popFrame().names;
+				NameList* members = popFrame().names;
 
 				Value v = (Value){
 					.type = type(TYPE_UTIL),
@@ -741,7 +740,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					.members = members,
 				},
 
-				createVar(&frame.names, strdup(popArg()), v);
+				createVar(frame.names, strdup(popArg()), v);
 
 				jump(insts[i].data._int);
 
@@ -958,7 +957,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 					push(toElem(v));
 				} else if (a.type.id == TYPE_UTIL) {
-					push(toVar(getVar(&a.data._utility.members, insts[i].data._ptr)));
+					push(toVar(getVar(a.data._utility.members, insts[i].data._ptr)));
 				} else {
 					ierr("The object referenced does not have accessible members.");
 				}
@@ -1042,12 +1041,11 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				break;
 			}
 			case CAST: {  // (a) b
-				Value b = getValue(pop());
-				Value a = pop().elem;
+				Value a = getValue(pop());
 
-				CastOperation op = types[b.type.id].castTo;
+				CastOperation op = types[a.type.id].castTo;
 				if (op != NULL) {
-					push(toElem(op(a.type, b)));
+					push(toElem(op(insts[i].type, a)));
 				} else {
 					ierr("Specified type is not castable.");
 				}
@@ -1092,7 +1090,7 @@ void bc_run(bool showByteCode) {
 	// Read byte code
 
 	NameList names = (NameList){0};
-	pushFrame((CallFrame){.names = names});
+	pushFrame((CallFrame){.names = &names});
 
 	readByteCode(framesCount - 1, 0, 0);
 
