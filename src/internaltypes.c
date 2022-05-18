@@ -93,11 +93,3 @@ Value* getValuePtr(StackElem s) {
 		return s.var->value;
 	}
 }
-
-Value* dupValue(Value v) {
-	Value* out = malloc(sizeof(Value));
-	*out = v;
-	out->type = dupTypeInfo(v.type);
-
-	return out;
-}

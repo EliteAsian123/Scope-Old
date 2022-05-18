@@ -96,6 +96,5 @@ bool stringEqual(String a, String b);
 
 Value getValue(StackElem s);
 Value* getValuePtr(StackElem s);
-Value* dupValue(Value v);
 
 #endif

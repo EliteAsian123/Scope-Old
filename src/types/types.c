@@ -13,9 +13,13 @@
 #include "utility.c"
 #endif
 
-static Data errorOnDefault(TypeInfo type) {
+static Data errorOnDefault(const TypeInfo type) {
 	fprintf(stderr, "Attempted to create a default value of a type that does not have a default value.\n");
 	exit(-1);
+}
+
+static Data noDuplicate(const TypeInfo type, const Data v) {
+	return v;
 }
 
 const Type types[] = {
@@ -25,6 +29,7 @@ const Type types[] = {
 	{
 		.displayName = "int",
 		.createDefault = createDefaultInt,
+		.duplicate = noDuplicate,
 		.castTo = intCastTo,
 		standardOpSet(int),
 		.opMod = intOpMod,
@@ -33,6 +38,7 @@ const Type types[] = {
 	{
 		.displayName = "bool",
 		.createDefault = createDefaultInt,
+		.duplicate = noDuplicate,
 		.castTo = boolCastTo,
 		.opNot = boolOpNot,
 		.opAnd = boolOpAnd,
@@ -41,6 +47,7 @@ const Type types[] = {
 	{
 		.displayName = "string",
 		.createDefault = createDefaultString,
+		.duplicate = stringDuplicate,
 		.disposable = true,
 		.dispose = disposeString,
 		.opEq = stringOpEq,
@@ -49,23 +56,27 @@ const Type types[] = {
 	{
 		.displayName = "float",
 		.createDefault = createDefaultFloat,
+		.duplicate = noDuplicate,
 		.castTo = floatCastTo,
 		standardOpSet(float),
 	},
 	{
 		.displayName = "function(?,...)",
 		.createDefault = createDefaultFunction,
+		.duplicate = noDuplicate,
 		.opEq = functionOpEq,
 	},
 	{
 		.displayName = "array(?)",
 		.createDefault = createDefaultArray,
+		.duplicate = arrayDuplicate,
 		.disposable = true,
 		.dispose = disposeArray,
 	},
 	{
 		.displayName = "long",
 		.createDefault = createDefaultLong,
+		.duplicate = noDuplicate,
 		.castTo = longCastTo,
 		standardOpSet(long),
 		.opMod = longOpMod,
@@ -74,12 +85,14 @@ const Type types[] = {
 	{
 		.displayName = "double",
 		.createDefault = createDefaultDouble,
+		.duplicate = noDuplicate,
 		.castTo = doubleCastTo,
 		standardOpSet(double),
 	},
 	{
 		.displayName = "utility",
 		.createDefault = errorOnDefault,
+		.duplicate = noDuplicate,
 		.disposable = true,
 		.dispose = disposeUtility,
 	},
@@ -119,4 +132,13 @@ void dispose(Name name) {
 
 bool isDisposable(int id) {
 	return types[id].disposable;
+}
+
+Value dupValue(Value v) {
+	Value out = v;
+	out.type = dupTypeInfo(out.type);
+	out.refCount = 0;
+	out.data = types[out.type.id].duplicate(out.type, out.data);
+
+	return out;
 }

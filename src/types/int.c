@@ -1,6 +1,6 @@
 #include "types.h"
 
-static Data createDefaultInt(TypeInfo type) {
+static Data createDefaultInt(const TypeInfo type) {
 	return (Data){._int = 0};
 }
 

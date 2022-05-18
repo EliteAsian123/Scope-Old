@@ -48,9 +48,10 @@ typedef Value (*CastOperation)(TypeInfo type, Value v);
 typedef struct {
 	const char* displayName;
 	size_t (*size)(const void* ptr);
-	Data (*createDefault)(TypeInfo type);
+	Data (*createDefault)(const TypeInfo type);
 	bool disposable;
-	void (*dispose)(TypeInfo type, Data v);
+	void (*dispose)(const TypeInfo type, const Data v);
+	Data (*duplicate)(const TypeInfo type, const Data v);
 
 	CastOperation castTo;
 	SingleOperation opNot;
@@ -92,5 +93,6 @@ Data createDefaultType(TypeInfo type);
 void* typedup(int id, const void* ptr);
 void dispose(Name name);
 bool isDisposable(int id);
+Value dupValue(Value v);
 
 #endif

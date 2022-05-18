@@ -1,6 +1,6 @@
 #include "types.h"
 
-static Data createDefaultString(TypeInfo type) {
+static Data createDefaultString(const TypeInfo type) {
 	String str = (String){
 		.chars = NULL,
 		.len = 0,
@@ -11,6 +11,13 @@ static Data createDefaultString(TypeInfo type) {
 
 static void disposeString(const TypeInfo type, Data v) {
 	free(v._string.chars);
+}
+
+static Data stringDuplicate(const TypeInfo type, Data v) {
+	Data ret = v;
+	ret._string.chars = malloc(v._string.len + 1);
+	memcpy(ret._string.chars, v._string.chars, v._string.len + 1);
+	return ret;
 }
 
 static Value stringOpEq(Value a, Value b) {

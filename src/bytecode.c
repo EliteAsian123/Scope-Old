@@ -570,7 +570,9 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				} else if (isDisposable(a.var->value->type.id)) {
 					a.var->value = b.var->value;
 				} else {
-					a.var->value = dupValue(*b.var->value);
+					Value* p = malloc(sizeof(Value));
+					*p = dupValue(*b.var->value);
+					a.var->value = p;
 				}
 
 				break;
@@ -649,65 +651,12 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 						ierr("Type mismatch in function arguments.");
 					}
 
-					Value v = argv;
-					v.type = dupTypeInfo(argv.type);
-					v.scope = s;
-
-					createVar(&names, strdup(f.args[j]), v);
+					createVar(&names, strdup(f.args[j]), dupValue(argv));
 				}
 
 				pushFrame((CallFrame){.names = &names});
 				readByteCode(framesCount - 1, f.location, 0);
 				popFrame();
-
-#define skipdelete            \
-	delVarAtIndex(&names, j); \
-	j--;                      \
-	continue
-
-				// TODO: Optimize
-				for (size_t j = 0; j < names.len; j++) {
-					Name vname = names.names[j];
-					Value v = *vname.value;
-
-					// Temporary for now
-					if (v.type.id == TYPE_FUNC) {
-						skipdelete;
-					}
-
-					// Skip if it is a local variable
-					if (v.scope >= s) {
-						skipdelete;
-					}
-
-					// Skip if the current frame doesn't contain the variable
-					if (!isVar(funcFrame.names, vname.name)) {
-						skipdelete;
-					}
-
-					// Skip and delete if the variable is an argument
-					if (v.fromArgs) {
-						skipdelete;
-					}
-
-					// Get the var in the frame
-					Value vf = *getVar(funcFrame.names, vname.name)->value;
-
-					// Skip if the types are not equal
-					if (!typeInfoEqual(v.type, vf.type)) {
-						skipdelete;
-					}
-
-					// Skip if the scopes don't match
-					if (v.scope != vf.scope) {
-						skipdelete;
-					}
-
-					// Update the variable outside of the frame
-					setVar(funcFrame.names, vname.name, &vname);
-				}
-
-#undef skipdelete
 
 				free(names.names);
 
@@ -852,7 +801,9 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 				} else {
 					for (int i = 0; i < b.data._int; i++) {
-						outv.data._array.arr[i] = dupValue(getValue(c));
+						Value* p = malloc(sizeof(Value));
+						*p = dupValue(getValue(c));
+						outv.data._array.arr[i] = p;
 					}
 				}
 
@@ -901,7 +852,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				} else {
 					for (int j = 0; j < insts[i].data._int; j++) {
 						int arrIndex = insts[i].data._int - j - 1;
-						outv.data._array.arr[i] = dupValue(getValue(arrElements[arrIndex]));
+
+						Value* p = malloc(sizeof(Value));
+						*p = dupValue(getValue(arrElements[arrIndex]));
+						outv.data._array.arr[i] = p;
 					}
 				}
 
