@@ -152,7 +152,6 @@ statement	: declare
 			| extern
 			| swap
 			| inc_dec
-			| arr_save
 			| throw
 			| op_assign
 			;
@@ -358,11 +357,6 @@ arr_init	: E_NEW type '[' expr ']' {
 arr_get		: expr '[' expr ']' {
 					pushi({.inst = ARRAYG});
 				} %prec O_ARR_GET
-			;
-
-arr_save	: expr '[' expr ']' '=' expr {
-					pushi({.inst = ARRAYS});
-				}
 			;
 
 /* Functions */

@@ -52,7 +52,7 @@ static Value longOpPow(Value a, Value b) {
 	long exp = b.data._long;
 	long base = a.data._long;
 	while (exp != 0) {
-		if (exp % 2) {
+		if (exp % 2 != 0) {
 			result *= base;
 		}
 

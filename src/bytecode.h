@@ -40,7 +40,6 @@ enum Insts {
 	ARRAYI,
 	ARRAYIW,
 	ARRAYIL,
-	ARRAYS,
 	ARRAYG,
 	ACCESS,
 	SWAP,

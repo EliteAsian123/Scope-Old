@@ -52,7 +52,7 @@ static Value intOpPow(Value a, Value b) {
 	int exp = b.data._int;
 	int base = a.data._int;
 	while (exp != 0) {
-		if (exp % 2) {
+		if (exp % 2 != 0) {
 			result *= base;
 		}
 
