@@ -88,7 +88,7 @@ enum Types {
 
 extern const Type types[];
 
-const char* typestr(int id);
+const char* typestr(TypeInfo type);
 Data createDefaultType(TypeInfo type);
 void* typedup(int id, const void* ptr);
 void dispose(Name name);

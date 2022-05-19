@@ -433,10 +433,10 @@ static void instDump(size_t i) {
 
 	if (instHasPointer(i)) {
 		printf("[%ld, %d] %s: \"%s\", %s\n", i, insts[i].scope, instName,
-			   (char*) insts[i].data._ptr, typestr(insts[i].type.id));
+			   (char*) insts[i].data._ptr, typestr(insts[i].type));
 	} else {
 		printf("[%ld, %d] %s: %d, %s\n", i, insts[i].scope, instName,
-			   insts[i].data._int, typestr(insts[i].type.id));
+			   insts[i].data._int, typestr(insts[i].type));
 	}
 }
 
@@ -521,6 +521,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 			}
 			case SAVEV: {  // `a $ = b`
 				StackElem b = pop();
+				Value bval = getValue(b);
 				StackElem a = pop();
 
 				if (isVar(frame.names, insts[i].data._ptr)) {
@@ -530,7 +531,9 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 
 				if (a.elem.type.id != TYPE_UNKNOWN) {
-					if (!typeInfoEqual(a.elem.type, getValue(b).type)) {
+					if (!typeInfoEqual(a.elem.type, bval.type)) {
+						fprintf(stderr, "`%s` != `%s`\n", typestr(a.elem.type),
+								typestr(bval.type));
 						ierr("Declaration type doesn't match expression.");
 					}
 				}
@@ -646,8 +649,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					Value argv = getValue(arg);
 
 					if (!typeInfoEqual(f.type.args[j + 1], argv.type)) {
-						printf("`%d` != `%d` in `%s`\n", argv.type.id,
-							   f.type.args[j + 1].id, (char*) insts[i].data._ptr);
+						printf("`%s` != `%s` in `%s`\n", typestr(argv.type),
+							   typestr(f.type.args[j + 1]), (char*) insts[i].data._ptr);
 						ierr("Type mismatch in function arguments.");
 					}
 
@@ -789,7 +792,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				outv.type.args[0] = dupTypeInfo(a.type);
 
 				// Initilize the array
-				outv.data._array.arr = malloc(sizeof(Value) * b.data._int);
+				outv.data._array.arr = malloc(sizeof(Value*) * b.data._int);
 				outv.data._array.len = b.data._int;
 
 				// Populate array
@@ -835,18 +838,18 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				// Convert type into array type
 				outv.type.argsLen = 1;
 				outv.type.args = malloc(sizeof(TypeInfo));
-				outv.type.args[0] = dupTypeInfo(a.type);
 
 				// Convert the object list to a ValueHolder list
-				outv.data._array.arr = malloc(sizeof(Value) * insts[i].data._int);
+				outv.data._array.arr = malloc(sizeof(Value*) * insts[i].data._int);
 				outv.data._array.len = insts[i].data._int;
 
 				// Populate
 				if (isDisposable(a.type.id)) {
 					for (int j = 0; j < insts[i].data._int; j++) {
 						int arrIndex = insts[i].data._int - j - 1;
+
 						Value* v = getValuePtr(arrElements[arrIndex]);
-						outv.data._array.arr[i] = v;
+						outv.data._array.arr[j] = v;
 						v->refCount++;
 					}
 				} else {
@@ -855,7 +858,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 						Value* p = malloc(sizeof(Value));
 						*p = dupValue(getValue(arrElements[arrIndex]));
-						outv.data._array.arr[i] = p;
+						outv.data._array.arr[j] = p;
 					}
 				}
 
@@ -887,10 +890,12 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					ierr("Index must be less than the length.");
 				}
 
-				push(toVar(&(Name){
+				Name* name = malloc(sizeof(Name));
+				*name = (Name){
 					.name = NULL,
 					.value = a.data._array.arr[b.data._int],
-				}));
+				};
+				push(toVar(name));
 
 				break;
 			}
@@ -993,11 +998,12 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				break;
 			}
 			case CAST: {  // (a) b
-				Value a = getValue(pop());
+				Value b = getValue(pop());
+				Value a = pop().elem;
 
-				CastOperation op = types[a.type.id].castTo;
+				CastOperation op = types[b.type.id].castTo;
 				if (op != NULL) {
-					push(toElem(op(insts[i].type, a)));
+					push(toElem(op(a.type, b)));
 				} else {
 					ierr("Specified type is not castable.");
 				}

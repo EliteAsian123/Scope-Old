@@ -99,13 +99,24 @@ const Type types[] = {
 };
 static_assert(sizeof(types) / sizeof(Type) == _TYPES_ENUM_LEN, "Update enum or type array.");
 
-const char* typestr(int id) {
-	switch (id) {
+const char* typestr(TypeInfo type) {
+	char* o;
+
+	switch (type.id) {
 		case TYPE_UNKNOWN:
-			return "unknown";
+			o = strdup("unknown");
+			break;
 		default:
-			return types[id].displayName;
+			o = strdup(types[type.id].displayName);
+			break;
 	}
+
+	for (int i = 0; i < type.argsLen; i++) {
+		o = strcat(o, " ");
+		o = strcat(o, typestr(type.args[i]));
+	}
+
+	return o;
 }
 
 Data createDefaultType(TypeInfo type) {

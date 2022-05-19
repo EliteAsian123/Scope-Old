@@ -311,11 +311,7 @@ bool_op		: expr T_EQ expr { pushi({.inst = EQ}); }
 			| expr T_OR expr { pushi({.inst = OR}); }
 			;
 
-cast		: '(' T_STR ')' expr { pushi({.inst = CAST, .type = type(TYPE_STR)}); } %prec O_CAST
-			| '(' T_INT ')' expr { pushi({.inst = CAST, .type = type(TYPE_INT)}); } %prec O_CAST
-			| '(' T_LONG ')' expr { pushi({.inst = CAST, .type = type(TYPE_LONG)}); } %prec O_CAST
-			| '(' T_FLOAT ')' expr { pushi({.inst = CAST, .type = type(TYPE_FLOAT)}); } %prec O_CAST
-			| '(' T_DOUBLE ')' expr { pushi({.inst = CAST, .type = type(TYPE_DOUBLE)}); } %prec O_CAST
+cast		: '(' type ')' expr { pushi({.inst = CAST}); } %prec O_CAST
 			;
 
 access		: expr '.' IDENTIFIER {
