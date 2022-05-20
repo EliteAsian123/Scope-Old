@@ -27,6 +27,13 @@ static Value floatOpDiv(Value a, Value b) {
 	simpleMathOp(TYPE_FLOAT, _float, /);
 }
 
+static Value floatOpPow(Value a, Value b) {
+	return (Value){
+		.type = type(TYPE_FLOAT),
+		.data._float = powf(a.data._float, b.data._float),
+	};
+}
+
 static Value floatOpEq(Value a, Value b) {
 	fprintf(stderr, "It is recommended not to use the `==` operator on floats. Consider `fApprox` instead.\n");
 	simpleBoolOp(_float, ==);

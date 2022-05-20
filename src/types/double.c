@@ -27,6 +27,13 @@ static Value doubleOpDiv(Value a, Value b) {
 	simpleMathOp(TYPE_DOUBLE, _double, /);
 }
 
+static Value doubleOpPow(Value a, Value b) {
+	return (Value){
+		.type = type(TYPE_DOUBLE),
+		.data._double = pow(a.data._double, b.data._double),
+	};
+}
+
 static Value doubleOpEq(Value a, Value b) {
 	fprintf(stderr, "It is recommended not to use the `==` operator on doubles. Consider `dApprox` instead.\n");
 	simpleBoolOp(_double, ==);

@@ -59,6 +59,7 @@ const Type types[] = {
 		.duplicate = noDuplicate,
 		.castTo = floatCastTo,
 		standardOpSet(float),
+		.opPow = floatOpPow,
 	},
 	{
 		.displayName = "function(?,...)",
@@ -88,6 +89,7 @@ const Type types[] = {
 		.duplicate = noDuplicate,
 		.castTo = doubleCastTo,
 		standardOpSet(double),
+		.opPow = doubleOpPow,
 	},
 	{
 		.displayName = "utility",
