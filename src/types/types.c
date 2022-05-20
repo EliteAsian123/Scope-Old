@@ -109,7 +109,11 @@ const char* typestr(TypeInfo type) {
 			o = strdup("unknown");
 			break;
 		default:
-			o = strdup(types[type.id].displayName);
+			if (type.id > _TYPES_ENUM_LEN) {
+				o = strdup("error");
+			} else {
+				o = strdup(types[type.id].displayName);
+			}
 			break;
 	}
 

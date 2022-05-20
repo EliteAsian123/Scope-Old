@@ -20,6 +20,7 @@
 	Value b = getValue(pop());                                                    \
 	Value a = getValue(pop());                                                    \
 	if (!typeInfoEqual(a.type, b.type)) {                                         \
+		fprintf(stderr, "`%s` != `%s`\n", typestr(a.type), typestr(b.type));      \
 		ierr("The types of the two objects used in `" #opName "` do not match."); \
 	}                                                                             \
 	DoubleOperation op = types[a.type.id].opName;                                 \
@@ -181,10 +182,16 @@ static void delVarAtIndex(NameList* names, size_t i) {
 		if (showDisposeInfo) {
 			printf("(-) %s: %d\n", name.name, var.refCount);
 		}
+
+		if (var.refCount <= 0) {
+			free(name.value);
+		}
+	} else {
+		// free(name.value);
 	}
 
 	// Free
-	// free(name.name);
+	free(name.name);
 
 	// Ripple down
 	for (int j = i; j < names->len - 1; j++) {
@@ -661,7 +668,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				readByteCode(framesCount - 1, f.location, 0);
 				popFrame();
 
-				free(names.names);
+				// free(names.names);
 
 				if (av.fromArgs) {
 					pushFrame(frame);
