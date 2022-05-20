@@ -838,6 +838,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				// Convert type into array type
 				outv.type.argsLen = 1;
 				outv.type.args = malloc(sizeof(TypeInfo));
+				outv.type.args[0] = dupTypeInfo(a.type);
 
 				// Convert the object list to a ValueHolder list
 				outv.data._array.arr = malloc(sizeof(Value*) * insts[i].data._int);
