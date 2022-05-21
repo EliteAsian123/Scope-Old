@@ -250,7 +250,7 @@ for			: S_FOR '(' {
 					scope--;
 					
 					// Push padding to dispose variables
-					pushi({});
+					pushi({.inst = -1});
 				}
 			;
 
@@ -513,7 +513,7 @@ int main(int argc, char** argv) {
 	
 	// Actually lex/parse
 	int result = yyparse();
-	pushInst((Inst){}, -1); // "end" instruction
+	pushInst((Inst){.inst = -1}, -1); // "end" instruction
 
 	// Interpret
 	bc_run(showByteCode);

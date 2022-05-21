@@ -379,6 +379,7 @@ static void instDump(size_t i) {
 	// clang-format off
 	static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode strings.");
 	switch (insts[i].inst) {
+		case -1:		instName = "(padding)";	break;
 		case LOAD:      instName = "load";      break;
 		case LOADT: 	instName = "loadt"; 	break;
 		case LOADV: 	instName = "loadv"; 	break;
@@ -418,7 +419,10 @@ static void instDump(size_t i) {
 		case GOTO: 		instName = "goto"; 		break;
 		case IFN:	 	instName = "ifn"; 		break;
 		case THROW:	 	instName = "throw";		break;
-		default: 		instName = "?"; 		break;
+		default:
+			printf("Warning: Unknown instruction %d\n", insts[i].inst);
+			instName = "?";
+		break;
 	}
 	// clang-format on
 
