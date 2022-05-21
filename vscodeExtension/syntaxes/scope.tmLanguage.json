@@ -9,6 +9,9 @@
 			"include": "#directives"
 		},
 		{
+			"include": "#special"
+		},
+		{
 			"include": "#types"
 		},
 		{
@@ -36,8 +39,16 @@
 		"directives": {
 			"patterns": [
 				{
-					"name": "keyword.control.directive.scope",
+					"name": "keyword.other.scope",
 					"match": "#\\b(insert)\\b"
+				}
+			]
+		},
+		"special": {
+			"patterns": [
+				{
+					"name": "variable.function.scope",
+					"match": "\\b(print|println|input|atoi|exit)\\b"
 				}
 			]
 		},
