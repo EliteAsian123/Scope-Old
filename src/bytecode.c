@@ -176,18 +176,9 @@ static void delVarAtIndex(NameList* names, size_t i) {
 	Value var = *name.value;
 
 	// Change ref counter
-	if (isDisposable(var.type.id)) {
-		var.refCount--;
-
-		if (showDisposeInfo) {
-			printf("(-) %s: %d\n", name.name, var.refCount);
-		}
-
-		if (var.refCount <= 0) {
-			free(name.value);
-		}
-	} else {
-		// free(name.value);
+	var.refCount--;
+	if (var.refCount <= 0) {
+		free(name.value);
 	}
 
 	// Free
@@ -215,12 +206,9 @@ static void delVar(NameList* names, const char* v) {
 static Name* createVar(NameList* names, const char* name, Value val) {
 	delVar(names, name);
 
-	if (isDisposable(val.type.id)) {
-		val.refCount = 1;
-	}
-
 	Value* ptr = malloc(sizeof(Value));
 	*ptr = val;
+	ptr->refCount = 1;
 
 	names->len++;
 	names->names = realloc(names->names, sizeof(Name) * names->len);
@@ -234,10 +222,6 @@ static Name* createVar(NameList* names, const char* name, Value val) {
 
 static Name* setVar(NameList* names, const char* name, Name* var) {
 	var->value->refCount++;
-
-	if (showDisposeInfo) {
-		printf("(+) %s: %d\n", name, var->value->refCount);
-	}
 
 	delVar(names, name);
 
@@ -475,13 +459,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					continue;
 				}
 
-				if (showDisposeInfo) {
-					printf("Deleting : (%d > %d) `%s`\n", value.scope, curScope, name.name);
-				}
-
-				if (isDisposable(value.type.id) && value.refCount <= 1) {
-					dispose(name);
-				}
+				dispose(name);
 
 				delVarAtIndex(frame.names, v);
 
@@ -547,10 +525,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				if (b.var == NULL) {
 					createVar(frame.names, insts[i].data._ptr, b.elem);
-				} else if (isDisposable(a.elem.type.id)) {
-					setVar(frame.names, insts[i].data._ptr, b.var);
 				} else {
-					createVar(frame.names, insts[i].data._ptr, *b.var->value);
+					setVar(frame.names, insts[i].data._ptr, b.var);
 				}
 
 				break;
@@ -563,10 +539,6 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					ierr("Attempted to assign a non-variable.");
 				}
 
-				if (a.var->value->type.id == TYPE_FUNC) {
-					ierr("Functions can't be reassigned at the moment.");
-				}
-
 				if (a.var->value->fromArgs) {
 					ierr("Cannot assign to an argument.");
 				}
@@ -576,13 +548,13 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 
 				if (b.var == NULL) {
-					*a.var->value = b.elem;
-				} else if (isDisposable(a.var->value->type.id)) {
-					a.var->value = b.var->value;
+					Value* ptr = malloc(sizeof(Value));
+					*ptr = b.elem;
+					ptr->refCount = 1;
+
+					a.var->value = ptr;
 				} else {
-					Value* p = malloc(sizeof(Value));
-					*p = dupValue(*b.var->value);
-					a.var->value = p;
+					a.var->value = b.var->value;
 				}
 
 				break;
@@ -765,9 +737,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 						.data = createDefaultType(a.type),
 					};
 
-					if (isDisposable(a.type.id)) {
-						outv.data._array.arr[i]->refCount++;
-					}
+					outv.data._array.arr[i]->refCount++;
 				}
 
 				// Push
@@ -803,18 +773,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				outv.data._array.len = b.data._int;
 
 				// Populate array
-				if (isDisposable(a.type.id)) {
-					for (int i = 0; i < b.data._int; i++) {
-						Value* v = getValuePtr(c);
-						outv.data._array.arr[i] = v;
-						v->refCount++;
-					}
-				} else {
-					for (int i = 0; i < b.data._int; i++) {
-						Value* p = malloc(sizeof(Value));
-						*p = dupValue(getValue(c));
-						outv.data._array.arr[i] = p;
-					}
+				for (int i = 0; i < b.data._int; i++) {
+					Value* v = getValuePtr(c);
+					outv.data._array.arr[i] = v;
+					v->refCount++;
 				}
 
 				// Push
@@ -852,22 +814,12 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				outv.data._array.len = insts[i].data._int;
 
 				// Populate
-				if (isDisposable(a.type.id)) {
-					for (int j = 0; j < insts[i].data._int; j++) {
-						int arrIndex = insts[i].data._int - j - 1;
+				for (int j = 0; j < insts[i].data._int; j++) {
+					int arrIndex = insts[i].data._int - j - 1;
 
-						Value* v = getValuePtr(arrElements[arrIndex]);
-						outv.data._array.arr[j] = v;
-						v->refCount++;
-					}
-				} else {
-					for (int j = 0; j < insts[i].data._int; j++) {
-						int arrIndex = insts[i].data._int - j - 1;
-
-						Value* p = malloc(sizeof(Value));
-						*p = dupValue(getValue(arrElements[arrIndex]));
-						outv.data._array.arr[j] = p;
-					}
+					Value* v = getValuePtr(arrElements[arrIndex]);
+					outv.data._array.arr[j] = v;
+					v->refCount++;
 				}
 
 				// Push

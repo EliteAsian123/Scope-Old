@@ -45,13 +45,16 @@ typedef Value (*SingleOperation)(Value a);
 typedef Value (*DoubleOperation)(Value a, Value b);
 typedef Value (*CastOperation)(TypeInfo type, Value v);
 
+typedef void (*DisposeFunc)(const TypeInfo type, const Data v);
+typedef Data (*DuplicateFunc)(const TypeInfo type, const Data v);
+typedef Data (*CreateDefaultFunc)(const TypeInfo type);
+
 typedef struct {
 	const char* displayName;
 	size_t (*size)(const void* ptr);
-	Data (*createDefault)(const TypeInfo type);
-	bool disposable;
-	void (*dispose)(const TypeInfo type, const Data v);
-	Data (*duplicate)(const TypeInfo type, const Data v);
+	CreateDefaultFunc createDefault;
+	DisposeFunc dispose;
+	DuplicateFunc duplicate;
 
 	CastOperation castTo;
 	SingleOperation opNot;
@@ -92,7 +95,6 @@ const char* typestr(TypeInfo type);
 Data createDefaultType(TypeInfo type);
 void* typedup(int id, const void* ptr);
 void dispose(Name name);
-bool isDisposable(int id);
 Value dupValue(Value v);
 
 #endif

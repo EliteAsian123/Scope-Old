@@ -15,7 +15,7 @@ func void print(string str) {
 Prints @"str" + `\n` out into `stdout`.
 %/
 func void println(string str) {
-	print(str + "\n");
+	extern(str + "\n", 0);
 }
 
 /%

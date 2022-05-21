@@ -506,7 +506,6 @@ int main(int argc, char** argv) {
 	if (argc >= 3) {
 		showByteCode = strcmp(argv[2], "-b") == 0;
 		showCount = strcmp(argv[2], "-c") == 0;
-		showDisposeInfo = strcmp(argv[2], "-d") == 0;
 	}
 	
 	// Start parser

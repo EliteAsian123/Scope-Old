@@ -10,7 +10,13 @@ static Data createDefaultArray(const TypeInfo type) {
 }
 
 static Data arrayDuplicate(const TypeInfo type, const Data v) {
-	return v;
+	Data out = v;
+
+	int size = sizeof(Value*) * out._array.len;
+	out._array.arr = malloc(size);
+	memcpy(out._array.arr, v._array.arr, size);
+
+	return out;
 }
 
 static void disposeArray(const TypeInfo type, const Data v) {

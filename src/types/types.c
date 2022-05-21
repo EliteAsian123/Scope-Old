@@ -48,7 +48,6 @@ const Type types[] = {
 		.displayName = "string",
 		.createDefault = createDefaultString,
 		.duplicate = stringDuplicate,
-		.disposable = true,
 		.dispose = disposeString,
 		.opEq = stringOpEq,
 		.opAdd = stringOpAdd,
@@ -71,7 +70,6 @@ const Type types[] = {
 		.displayName = "array(?)",
 		.createDefault = createDefaultArray,
 		.duplicate = arrayDuplicate,
-		.disposable = true,
 		.dispose = disposeArray,
 	},
 	{
@@ -95,7 +93,6 @@ const Type types[] = {
 		.displayName = "utility",
 		.createDefault = errorOnDefault,
 		.duplicate = noDuplicate,
-		.disposable = true,
 		.dispose = disposeUtility,
 	},
 };
@@ -138,17 +135,11 @@ void* typedup(int id, const void* ptr) {
 }
 
 void dispose(Name name) {
-	if (types[name.value->type.id].disposable) {
-		if (showDisposeInfo) {
-			printf("Disposing: `%s`\n", name.name);
-		}
+	DisposeFunc t = types[name.value->type.id].dispose;
 
-		types[name.value->type.id].dispose(name.value->type, name.value->data);
+	if (t != NULL) {
+		t(name.value->type, name.value->data);
 	}
-}
-
-bool isDisposable(int id) {
-	return types[id].disposable;
 }
 
 Value dupValue(Value v) {
