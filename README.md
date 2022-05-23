@@ -35,7 +35,7 @@ func void funcWithinFunc() {
 funcWithinFunc(); // Prints "Hello, World!" twice!
 ```
 
-*I don't need `i`...*
+*I don't need `i`...* (temporarily disabled)
 ```cpp
 // No more i!
 repeat(5) {
