@@ -552,13 +552,12 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 
 				if (b.var == NULL) {
-					Value* ptr = malloc(sizeof(Value));
-					*ptr = b.elem;
-					ptr->refCount = 1;
+					Value newValue = b.elem;
+					newValue.refCount = 1;
 
-					a.var->value = ptr;
+					*a.var->value = newValue;
 				} else {
-					a.var->value = b.var->value;
+					*a.var->value = *b.var->value;
 				}
 
 				break;

@@ -15,8 +15,11 @@ static void disposeString(const TypeInfo type, Data v) {
 
 static Data stringDuplicate(const TypeInfo type, Data v) {
 	Data ret = v;
-	ret._string.chars = malloc(v._string.len + 1);
-	memcpy(ret._string.chars, v._string.chars, v._string.len + 1);
+	if (ret._string.chars != NULL) {
+		ret._string.chars = malloc(v._string.len + 1);
+		memcpy(ret._string.chars, v._string.chars, v._string.len + 1);
+	}
+
 	return ret;
 }
 
