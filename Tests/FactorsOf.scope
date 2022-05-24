@@ -2,7 +2,7 @@
 #insert Standard/ArrayUtils.scope
 #insert Standard/Math/Factors.scope
 
-long[] factors = factorsOf(840l);
+long[] factors = Math.factorsOf(840l);
 
 for (int i = 0, i < factors.length, i++) {
 	println((string) factors[i]);

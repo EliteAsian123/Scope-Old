@@ -3,29 +3,29 @@
 
 println("This is normal text...");
 
-print(ansiFgRed + "This " + ansiReset);
-print(ansiFgGreen + "is " + ansiReset);
-print(ansiFgYellow + "colorful " + ansiReset);
-print(ansiFgBlue + "text! " + ansiReset);
-println(ansiFgMagenta + "Wow!" + ansiReset);
+print(Ansi.fgRed + "This " + Ansi.reset);
+print(Ansi.fgGreen + "is " + Ansi.reset);
+print(Ansi.fgYellow + "colorful " + Ansi.reset);
+print(Ansi.fgBlue + "text! " + Ansi.reset);
+println(Ansi.fgMagenta + "Wow!" + Ansi.reset);
 
-println(ansiUnderline + "This is underlined!" + ansiReset);
-println(ansiBold + "This is bold!" + ansiReset);
-println(ansiItalic + "This is italic!" + ansiReset);
-println(ansiInvert + "This is inverted!" + ansiReset);
-println(ansiDim + "This is dimmed!" + ansiReset);
+println(Ansi.underline + "This is underlined!" + Ansi.reset);
+println(Ansi.bold + "This is bold!" + Ansi.reset);
+println(Ansi.italic + "This is italic!" + Ansi.reset);
+println(Ansi.invert + "This is inverted!" + Ansi.reset);
+println(Ansi.dim + "This is dimmed!" + Ansi.reset);
 
-print(ansiBgRed + "This " + ansiReset);
-print(ansiBgGreen + "is " + ansiReset);
-print(ansiBgYellow + "colorful " + ansiReset);
-print(ansiBgBlue + "text! " + ansiReset);
-println(ansiBgMagenta + "Wow!" + ansiReset);
+print(Ansi.bgRed + "This " + Ansi.reset);
+print(Ansi.bgGreen + "is " + Ansi.reset);
+print(Ansi.bgYellow + "colorful " + Ansi.reset);
+print(Ansi.bgBlue + "text! " + Ansi.reset);
+println(Ansi.bgMagenta + "Wow!" + Ansi.reset);
 
 println("Press enter for something awesome!");
 input();
 
-print(ansiClearScreen);
-print(ansiCurGoto(3, 3) + "You didn't expect this!");
-print(ansiCurDown(3) + "Not here either!");
-print(ansiCurLeft(35) + ansiCurDown(6) + "Or here!");
-print(ansiCurGoto(0, 15));
+print(Ansi.clearScreen);
+print(Ansi.curGoto(3, 3) + "You didn't expect this!");
+print(Ansi.curDown(3) + "Not here either!");
+print(Ansi.curLeft(35) + Ansi.curDown(6) + "Or here!");
+print(Ansi.curGoto(0, 15));

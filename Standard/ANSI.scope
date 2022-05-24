@@ -1,67 +1,69 @@
 // This list is handy for how ANSI codes work.
 // https://en.wikipedia.org/wiki/ANSI_escape_code
 
-string ansiReset            = "\u001b[0m";
-string ansiBold             = "\u001b[1m";
-string ansiDim              = "\u001b[2m";
-string ansiItalic           = "\u001b[3m";
-string ansiUnderline        = "\u001b[4m";
-string ansiInvert           = "\u001b[7m";
+utility Ansi {
+	string reset            = "\u001b[0m";
+	string bold             = "\u001b[1m";
+	string dim              = "\u001b[2m";
+	string italic           = "\u001b[3m";
+	string underline        = "\u001b[4m";
+	string invert           = "\u001b[7m";
 
-string ansiFgBlack          = "\u001b[30m";
-string ansiFgRed            = "\u001b[31m";
-string ansiFgGreen          = "\u001b[32m";
-string ansiFgYellow         = "\u001b[33m";
-string ansiFgBlue           = "\u001b[34m";
-string ansiFgMagenta        = "\u001b[35m";
-string ansiFgCyan           = "\u001b[36m";
-string ansiFgWhite          = "\u001b[37m";
-string ansiFgDefault        = "\u001b[39m";
+	string fgBlack          = "\u001b[30m";
+	string fgRed            = "\u001b[31m";
+	string fgGreen          = "\u001b[32m";
+	string fgYellow         = "\u001b[33m";
+	string fgBlue           = "\u001b[34m";
+	string fgMagenta        = "\u001b[35m";
+	string fgCyan           = "\u001b[36m";
+	string fgWhite          = "\u001b[37m";
+	string fgDefault        = "\u001b[39m";
+	
+	string bgBlack          = "\u001b[40m";
+	string bgRed            = "\u001b[41m";
+	string bgGreen          = "\u001b[42m";
+	string bgYellow         = "\u001b[43m";
+	string bgBlue           = "\u001b[44m";
+	string bgMagenta        = "\u001b[45m";
+	string bgCyan           = "\u001b[46m";
+	string bgWhite          = "\u001b[47m";
+	string bgDefault        = "\u001b[49m";
 
-string ansiBgBlack          = "\u001b[40m";
-string ansiBgRed            = "\u001b[41m";
-string ansiBgGreen          = "\u001b[42m";
-string ansiBgYellow         = "\u001b[43m";
-string ansiBgBlue           = "\u001b[44m";
-string ansiBgMagenta        = "\u001b[45m";
-string ansiBgCyan           = "\u001b[46m";
-string ansiBgWhite          = "\u001b[47m";
-string ansiBgDefault        = "\u001b[49m";
+	string clearToEnd       = "\u001b[0J";
+	string clearToStart     = "\u001b[1J";
+	string clearScreen      = "\u001b[2J";
 
-string ansiClearToEnd       = "\u001b[0J";
-string ansiClearToStart     = "\u001b[1J";
-string ansiClearScreen      = "\u001b[2J";
+	string clearLineToEnd   = "\u001b[0K";
+	string clearLineToStart = "\u001b[1K";
+	string clearLine        = "\u001b[2K";
 
-string ansiClearLineToEnd   = "\u001b[0K";
-string ansiClearLineToStart = "\u001b[1K";
-string ansiClearLine        = "\u001b[2K";
+	string curHome          = "\u001b[H";
 
-string ansiCurHome          = "\u001b[H";
+	func string curGoto(int x, int y) {
+		ret "\u001b[" + (string) y + ";" + (string) x + "H";
+	}
 
-func string ansiCurGoto(int x, int y) {
-	ret "\u001b[" + (string) y + ";" + (string) x + "H";
-}
+	func string curUp(int amount) {
+		ret "\u001b[" + (string) amount + "A";
+	}
 
-func string ansiCurUp(int amount) {
-	ret "\u001b[" + (string) amount + "A";
-}
+	func string curDown(int amount) {
+		ret "\u001b[" + (string) amount + "B";
+	}
 
-func string ansiCurDown(int amount) {
-	ret "\u001b[" + (string) amount + "B";
-}
+	func string curRight(int amount) {
+		ret "\u001b[" + (string) amount + "C";
+	}
 
-func string ansiCurRight(int amount) {
-	ret "\u001b[" + (string) amount + "C";
-}
+	func string curLeft(int amount) {
+		ret "\u001b[" + (string) amount + "D";
+	}
 
-func string ansiCurLeft(int amount) {
-	ret "\u001b[" + (string) amount + "D";
-}
+	func string scrollUp(int amount) {
+		ret "\u001b[" + (string) amount + "S";
+	}
 
-func string ansiScrollUp(int amount) {
-	ret "\u001b[" + (string) amount + "S";
-}
-
-func string ansiScrollDown(int amount) {
-	ret "\u001b[" + (string) amount + "T";
+	func string scrollDown(int amount) {
+		ret "\u001b[" + (string) amount + "T";
+	}
 }

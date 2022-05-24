@@ -1,8 +1,8 @@
 #insert Standard/Core.scope
 #insert Standard/Math/Core.scope
 
-println((string) sqrt(5d));
-println((string) sqrt(4d));
-println((string) sqrt(3d));
-println((string) sqrt(2d));
-println((string) sqrt(1d));
+println((string) Math.sqrt(5d));
+println((string) Math.sqrt(4d));
+println((string) Math.sqrt(3d));
+println((string) Math.sqrt(2d));
+println((string) Math.sqrt(1d));

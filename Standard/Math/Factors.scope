@@ -1,140 +1,142 @@
-/%
-@unoptimized: Very slow for large numbers.
-@complexity: O(sqrt(n))
+utility Math {
+	/%
+	@unoptimized: Very slow for large numbers.
+	@complexity: O(sqrt(n))
 
-Returns whether or not @"n" is prime. 
-%/
-func bool isPrime(long n) {
-	// If the number is less than 2, it is not prime
-	if (n < 2l) {
-		ret false;
-	}
-	
-	// Starting at 2 and while i <= sqrt(n) (or i * i <= n)
-	for (long i = 2l, i * i <= n, i += 1l) {
-		// If n is divisible by i, than it is not prime
-		if (n % i == 0l) {
+	Returns whether or not @"n" is prime. 
+	%/
+	func bool isPrime(long n) {
+		// If the number is less than 2, it is not prime
+		if (n < 2l) {
 			ret false;
 		}
-	}
-	
-	// If the loop passed without returning, it is a prime
-	ret true;
-}
-
-/%
-@unoptimized: Very slow for large numbers.
-@complexity: O(sqrt(n))
-
-Returns whether or not @"n" is composite.
-In other words, it is just returns the opposite of @"isPrime".
-%/
-func bool isComposite(long n) {
-	// A composite number is just a number that isn't prime
-	ret !isPrime(n);
-}
-
-/%
-@unoptimized: Very slow for large numbers.
-@complexity: O(sqrt(n))
-
-Returns an array of all of numbers which evenly divide into @"n" without leaving a remainder.
-This is also known as the factors or the divisors of @"n".
-
-Use @"factorCount" if you don't actually need the factors.
-%/
-func long[] factorsOf(long n) {
-	// Create the output array
-	long[] out = new long[0];
-	
-	// Starting at 1 and while i <= sqrt(n) (or i * i <= n)
-	for (long i = 1l, i * i <= n, i += 1l) {
-		// If i is divisible by n, it is a factor
-		if (n % i == 0l) {
-			out = appendLong(out, i);
 		
-			// If n / i is not equal to n, it is also a factor
-			// e.g. n = 10, i = 2
-			// we append i which is 2, and n / i which is 5
-			// we don't reach i = 5 because it is more than sqrt(n)
-			if (n / i != i) {
-				out = appendLong(out, n / i);
+		// Starting at 2 and while i <= sqrt(n) (or i * i <= n)
+		for (long i = 2l, i * i <= n, i += 1l) {
+			// If n is divisible by i, than it is not prime
+			if (n % i == 0l) {
+				ret false;
 			}
 		}
-	}
-	
-	ret out;
-}
-
-/%
-@unoptimized: Very slow for large numbers.
-@complexity: O(sqrt(n))
-
-Returns the count of all of numbers which evenly divide into @"n" without leaving a remainder.
-This is also known as the number of factors or divisors of @"n".
-
-Use @"factorsOf" if you need the factors.
-%/
-func long factorCount(long n) {
-	// Exactly the same as factorsOf but without array.
-	// See factorsOf for explanation of this function.
-
-	long out = 0l;
-	
-	for (long i = 1l, i * i <= n, i += 1l) {
-		if (n % i == 0l) {
-			out += 1l;
 		
-			if (n / i != i) {
+		// If the loop passed without returning, it is a prime
+		ret true;
+	}
+
+	/%
+	@unoptimized: Very slow for large numbers.
+	@complexity: O(sqrt(n))
+
+	Returns whether or not @"n" is composite.
+	In other words, it is just returns the opposite of @"isPrime".
+	%/
+	func bool isComposite(long n) {
+		// A composite number is just a number that isn't prime
+		ret !isPrime(n);
+	}
+
+	/%
+	@unoptimized: Very slow for large numbers.
+	@complexity: O(sqrt(n))
+
+	Returns an array of all of numbers which evenly divide into @"n" without leaving a remainder.
+	This is also known as the factors or the divisors of @"n".
+
+	Use @"factorCount" if you don't actually need the factors.
+	%/
+	func long[] factorsOf(long n) {
+		// Create the output array
+		long[] out = new long[0];
+		
+		// Starting at 1 and while i <= sqrt(n) (or i * i <= n)
+		for (long i = 1l, i * i <= n, i += 1l) {
+			// If i is divisible by n, it is a factor
+			if (n % i == 0l) {
+				out = appendLong(out, i);
+			
+				// If n / i is not equal to n, it is also a factor
+				// e.g. n = 10, i = 2
+				// we append i which is 2, and n / i which is 5
+				// we don't reach i = 5 because it is more than sqrt(n)
+				if (n / i != i) {
+					out = appendLong(out, n / i);
+				}
+			}
+		}
+		
+		ret out;
+	}
+
+	/%
+	@unoptimized: Very slow for large numbers.
+	@complexity: O(sqrt(n))
+
+	Returns the count of all of numbers which evenly divide into @"n" without leaving a remainder.
+	This is also known as the number of factors or divisors of @"n".
+
+	Use @"factorsOf" if you need the factors.
+	%/
+	func long factorCount(long n) {
+		// Exactly the same as factorsOf but without array.
+		// See factorsOf for explanation of this function.
+		
+		long out = 0l;
+		
+		for (long i = 1l, i * i <= n, i += 1l) {
+			if (n % i == 0l) {
 				out += 1l;
+			
+				if (n / i != i) {
+					out += 1l;
+				}
 			}
 		}
+		
+		ret out;
 	}
-	
-	ret out;
-}
 
-/%
-@optimized: Not the *fastest* method, but still very fast.
+	/%
+	@optimized: Not the *fastest* method, but still very fast.
 
-Returns the greatest common divisor/factor (a.k.a. GCD, HCD, GCF, HCF) of @"a" and @"b".
-%/
-func long gcd(long a, long b) {
-	if (b == 0l) {
-		ret a;
+	Returns the greatest common divisor/factor (a.k.a. GCD, HCD, GCF, HCF) of @"a" and @"b".
+	%/
+	func long gcd(long a, long b) {
+		if (b == 0l) {
+			ret a;
+		}
+		
+		ret gcd(b, a % b);
 	}
-	
-	ret gcd(b, a % b);
-}
 
-/%
-@optimized: Uses @"gcd" to find answer.
+	/%
+	@optimized: Uses @"gcd" to find answer.
 
-Returns the least/lowest common multiple (a.k.a. LCM, SCM) of @"a" and @"b".
-%/
-func long lcm(long a, long b) {
-	// Remember, gcd(a, b) * lcm(a, b) = a * b
-	ret a / gcd(a, b) * b;
-}
-
-/%
-Returns true if the three inputs (@"a", @"b", and @"c") are a Pythagorean triplet.
-See @"isPythagoreanTriplet" if @"a", @"b", and @"c" are **not** squared.
-A Pythagorean triplet are a set a three numbers were @"a" < @"b" < @"c" and @"a"^2 + @"b"^2 = @"c"^2.
-%/
-func bool isPythagoreanTripletSqr(long a, long b, long c) {
-	if (a < b && b < c) {
-		ret a + b == c;
+	Returns the least/lowest common multiple (a.k.a. LCM, SCM) of @"a" and @"b".
+	%/
+	func long lcm(long a, long b) {
+		// Remember, gcd(a, b) * lcm(a, b) = a * b
+		ret a / gcd(a, b) * b;
 	}
-	
-	ret false;
-}
 
-/%
-Returns true if the three inputs (@"a", @"b", and @"c") are a Pythagorean triplet.
-See @"isPythagoreanTripletSqr" if @"a", @"b", and @"c" are already squared.
-A Pythagorean triplet are a set a three numbers were @"a" < @"b" < @"c" and @"a"^2 + @"b"^2 = @"c"^2.
-%/
-func bool isPythagoreanTriplet(long a, long b, long c) {
-	ret isPythagoreanTripletSqr(a ^ 2l, b ^ 2l, c ^ 2l);
+	/%
+	Returns true if the three inputs (@"a", @"b", and @"c") are a Pythagorean triplet.
+	See @"isPythagoreanTriplet" if @"a", @"b", and @"c" are **not** squared.
+	A Pythagorean triplet are a set a three numbers were @"a" < @"b" < @"c" and @"a"^2 + @"b"^2 = @"c"^2.
+	%/
+	func bool isPythagoreanTripletSqr(long a, long b, long c) {
+		if (a < b && b < c) {
+			ret a + b == c;
+		}
+		
+		ret false;
+	}
+
+	/%
+	Returns true if the three inputs (@"a", @"b", and @"c") are a Pythagorean triplet.
+	See @"isPythagoreanTripletSqr" if @"a", @"b", and @"c" are already squared.
+	A Pythagorean triplet are a set a three numbers were @"a" < @"b" < @"c" and @"a"^2 + @"b"^2 = @"c"^2.
+	%/
+	func bool isPythagoreanTriplet(long a, long b, long c) {
+		ret isPythagoreanTripletSqr(a ^ 2l, b ^ 2l, c ^ 2l);
+	}
 }

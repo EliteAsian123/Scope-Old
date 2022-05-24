@@ -8,7 +8,7 @@ for (int a = 1, a < number, a++) {
 		// `c = number - a - b` because `a + b + c = number`
 		int c = number - a - b;
 		
-		if (isPythagoreanTriplet((long) a, (long) b, (long) c)) {
+		if (Math.isPythagoreanTriplet((long) a, (long) b, (long) c)) {
 			println((string) (a * b * c));
 			exit(0);
 		}

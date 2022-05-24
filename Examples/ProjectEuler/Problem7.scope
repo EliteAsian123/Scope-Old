@@ -3,7 +3,7 @@
 
 int primes = 0;
 for (int i = 0, true, i++) {
-	if (isPrime((long) i)) {
+	if (Math.isPrime((long) i)) {
 		primes++;
 	}
 	

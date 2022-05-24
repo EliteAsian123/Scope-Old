@@ -1,15 +1,17 @@
-double PI             = 3.1415926535897932384d;
-double E              = 2.7182818284590452353d;
-double GOLDEN_RATIO   = 1.6180339887498948482d;
-double SQRT_2         = 1.4142135623730950488d;
-double SQRT_3         = 1.7320508075688772935d;
-double LN_2           = 0.6931471805599453094d;
-double LN_10          = 2.3025850929940456840d;
-double LOG2_E         = 1.4426950408889634074d;
-double LOG10_E        = 0.4342944819032518271d;
+utility Math {
+	double PI             = 3.1415926535897932384d;
+	double E              = 2.7182818284590452353d;
+	double GOLDEN_RATIO   = 1.6180339887498948482d;
+	double SQRT_2         = 1.4142135623730950488d;
+	double SQRT_3         = 1.7320508075688772935d;
+	double LN_2           = 0.6931471805599453094d;
+	double LN_10          = 2.3025850929940456840d;
+	double LOG2_E         = 1.4426950408889634074d;
+	double LOG10_E        = 0.4342944819032518271d;
 
-double RAD_TO_DEG     = 180.0d / PI;
-double DEG_TO_RAD     = PI / 180.0d;
+	double RAD_TO_DEG     = 180.0d / PI;
+	double DEG_TO_RAD     = PI / 180.0d;
 
-double SPEED_OF_LIGHT = 299792458d;
-double NEWTONIAN_G    = 0.00000000006674315d;
+	double SPEED_OF_LIGHT = 299792458d;
+	double NEWTONIAN_G    = 0.00000000006674315d;
+}

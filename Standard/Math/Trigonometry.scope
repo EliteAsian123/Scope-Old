@@ -1,96 +1,98 @@
-/%
-Finds the sine of @"n".
-%/
-func double sin(double n) {
-	ret extern(n, 5);
-}
+utility Math {
+	/%
+	Finds the sine of @"n".
+	%/
+	func double sin(double n) {
+		ret extern(n, 5);
+	}
 
-/%
-Finds the cosine of @"n".
-%/
-func double cos(double n) {
-	ret extern(n, 6);
-}
+	/%
+	Finds the cosine of @"n".
+	%/
+	func double cos(double n) {
+		ret extern(n, 6);
+	}
 
-/%
-Finds the tangent of @"n".
-%/
-func double tan(double n) {
-	ret extern(n, 7);
-}
+	/%
+	Finds the tangent of @"n".
+	%/
+	func double tan(double n) {
+		ret extern(n, 7);
+	}
 
-/%
-Finds the arc/inverse sine of @"n".
-Returns the result in radians.
-%/
-func double asin(double n) {
-	ret extern(n, 8);
-}
+	/%
+	Finds the arc/inverse sine of @"n".
+	Returns the result in radians.
+	%/
+	func double asin(double n) {
+		ret extern(n, 8);
+	}
 
-/%
-Finds the arc/inverse cosine of @"n".
-Returns the result in radians.
-%/
-func double acos(double n) {
-	ret extern(n, 9);
-}
+	/%
+	Finds the arc/inverse cosine of @"n".
+	Returns the result in radians.
+	%/
+	func double acos(double n) {
+		ret extern(n, 9);
+	}
 
-/%
-Finds the arc/inverse tangent of @"n".
-Returns the result in radians.
-%/
-func double atan(double n) {
-	ret extern(n, 10);
-}
+	/%
+	Finds the arc/inverse tangent of @"n".
+	Returns the result in radians.
+	%/
+	func double atan(double n) {
+		ret extern(n, 10);
+	}
 
-/%
-Finds the cotangent of @"n".
-%/
-func double cot(double n) {
-	ret 1d / tan(n);
-}
+	/%
+	Finds the cotangent of @"n".
+	%/
+	func double cot(double n) {
+		ret 1d / tan(n);
+	}
 
-/%
-Finds the secant of @"n".
-%/
-func double sec(double n) {
-	ret 1d / cos(n);
-}
+	/%
+	Finds the secant of @"n".
+	%/
+	func double sec(double n) {
+		ret 1d / cos(n);
+	}
 
-/%
-Finds the cosecant of @"n".
-%/
-func double csc(double n) {
-	ret 1d / sin(n);
-}
+	/%
+	Finds the cosecant of @"n".
+	%/
+	func double csc(double n) {
+		ret 1d / sin(n);
+	}
 
-/%
-Finds the arc/inverse cotangent of @"n".
-Returns the result in radians.
-%/
-func double acot(double n) {
-	ret atan(1d / n);
-}
+	/%
+	Finds the arc/inverse cotangent of @"n".
+	Returns the result in radians.
+	%/
+	func double acot(double n) {
+		ret atan(1d / n);
+	}
 
-/%
-Finds the arc/inverse secant of @"n".
-Returns the result in radians.
-%/
-func double asec(double n) {
-	ret acos(1d / n);
-}
+	/%
+	Finds the arc/inverse secant of @"n".
+	Returns the result in radians.
+	%/
+	func double asec(double n) {
+		ret acos(1d / n);
+	}
 
-/%
-Finds the arc/inverse cosecant of @"n".
-Returns the result in radians.
-%/
-func double acsc(double n) {
-	ret asin(1d / n);
-}
+	/%
+	Finds the arc/inverse cosecant of @"n".
+	Returns the result in radians.
+	%/
+	func double acsc(double n) {
+		ret asin(1d / n);
+	}
 
-/%
-Returns the hypotenuse of the right triangle with sides @"a" and @"b".
-%/
-func double hypot(double a, double b) {
-	ret sqrt(a ^ 2d + b ^ 2d);
+	/%
+	Returns the hypotenuse of the right triangle with sides @"a" and @"b".
+	%/
+	func double hypot(double a, double b) {
+		ret sqrt(a ^ 2d + b ^ 2d);
+	}
 }

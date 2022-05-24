@@ -9,7 +9,7 @@ println("Warning: This program is slow! Progress will be printed.");
 
 long n = 0l;
 long tri = 0l;
-while (factorCount(tri) <= 500l) {
+while (Math.factorCount(tri) <= 500l) {
 	n += 1l;
 	tri += n;
 

@@ -1,50 +1,52 @@
-/%
-@complexity: O(n)
+utility Math {
+	/%
+	@complexity: O(n)
 
-Function for generating sequences that are Fibonacci-like.
-This function is used in @"fibonacciNumbers", @"lucasNumbers", and more.
+	Function for generating sequences that are Fibonacci-like.
+	This function is used in @"fibonacciNumbers", @"lucasNumbers", and more.
 
-F(@"n") = F(@"n"-1) + F(@"n"-2) with F(0) = @"aStart" and F(1) = @"bStart".
-%/
-func long fibLike(long aStart, long bStart, long n) {
-	// when using repeat, long gets truncated to int
-	
-	long a = aStart;
-	long b = bStart;
-	for (long i = 0l, i < n, i += 1l) {
-		a += b;
-		swap(a, b);
+	F(@"n") = F(@"n"-1) + F(@"n"-2) with F(0) = @"aStart" and F(1) = @"bStart".
+	%/
+	func long fibLike(long aStart, long bStart, long n) {
+		// when using repeat, long gets truncated to int
+		
+		long a = aStart;
+		long b = bStart;
+		for (long i = 0l, i < n, i += 1l) {
+			a += b;
+			swap(a, b);
+		}
+		
+		ret a;
 	}
-	
-	ret a;
-}
 
-/%
-@complexity: O(n)
+	/%
+	@complexity: O(n)
 
-Returns the @"n"th number of [sequence A000032](https://oeis.org/A000032).
-Lucas numbers beginning at 2: L(n) = L(n-1) + L(n-2), L(0) = 2, L(1) = 1.
-%/
-func long lucasNumbers(long n) {
-	ret fibLike(2l, 1l, n);
-}
+	Returns the @"n"th number of [sequence A000032](https://oeis.org/A000032).
+	Lucas numbers beginning at 2: L(n) = L(n-1) + L(n-2), L(0) = 2, L(1) = 1.
+	%/
+	func long lucasNumbers(long n) {
+		ret fibLike(2l, 1l, n);
+	}
 
-/%
-@complexity: O(n)
+	/%
+	@complexity: O(n)
 
-Returns the @"n"th number of [sequence A000045](https://oeis.org/A000045).
-Fibonacci numbers: F(n) = F(n-1) + F(n-2) with F(0) = 0 and F(1) = 1.
-%/
-func long fibonacciNumbers(long n) {
-	ret fibLike(0l, 1l, n);
-}
+	Returns the @"n"th number of [sequence A000045](https://oeis.org/A000045).
+	Fibonacci numbers: F(n) = F(n-1) + F(n-2) with F(0) = 0 and F(1) = 1.
+	%/
+	func long fibonacciNumbers(long n) {
+		ret fibLike(0l, 1l, n);
+	}
 
-/%
-@complexity: O(1)
+	/%
+	@complexity: O(1)
 
-Returns the @"n"th number of [sequence A000217](https://oeis.org/A000217).
-Triangular numbers: a(n) = binomial(n+1,2) = n*(n+1)/2 = 0 + 1 + 2 + ... + n.
-%/
-func long triangularNumber(long n) {
-	ret n * (n + 1l) / 2l;
+	Returns the @"n"th number of [sequence A000217](https://oeis.org/A000217).
+	Triangular numbers: a(n) = binomial(n+1,2) = n*(n+1)/2 = 0 + 1 + 2 + ... + n.
+	%/
+	func long triangularNumber(long n) {
+		ret n * (n + 1l) / 2l;
+	}
 }

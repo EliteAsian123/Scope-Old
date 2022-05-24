@@ -1,69 +1,71 @@
-/%
-Returns the absolute value of @"n".
-%/
-func float fAbs(float n) {
-	if (n < 0f) {
-		ret -n;
+utility Math {
+	/%
+	Returns the absolute value of @"n".
+	%/
+	func float fAbs(float n) {
+		if (n < 0f) {
+			ret -n;
+		}
+		
+		ret n;
 	}
-	
-	ret n;
-}
 
-/%
-Returns whether or not the distance between @"a" and @"b" are within @"error".
+	/%
+	Returns whether or not the distance between @"a" and @"b" are within @"error".
 
-@"error": The maximum distance between @"a" and @"b".
-%/
-func bool fApprox(float a, float b, float error) {
-	float diff = fAbs(a - b);
-	ret diff <= error;
-}
-
-/%
-Returns the absolute value of @"n".
-%/
-func double dAbs(double n) {
-	if (n < 0d) {
-		ret -n;
+	@"error": The maximum distance between @"a" and @"b".
+	%/
+	func bool fApprox(float a, float b, float error) {
+		float diff = fAbs(a - b);
+		ret diff <= error;
 	}
-	
-	ret n;
-}
 
-/%
-Returns whether or not the distance between @"a" and @"b" are within @"error".
-
-@"error": The maximum distance between @"a" and @"b".
-%/
-func bool dApprox(double a, double b, double error) {
-	double diff = dAbs(a - b);
-	ret diff <= error;
-}
-
-/%
-@unoptimized: Square root can be unoptimized. Consider other options.
-
-Returns the square root of @"n".
-%/
-func double sqrt(double n) {
-	if (n < 0d) {
-		throw "Math Error: Cannot get the root of a negative number.";
+	/%
+	Returns the absolute value of @"n".
+	%/
+	func double dAbs(double n) {
+		if (n < 0d) {
+			ret -n;
+		}
+		
+		ret n;
 	}
-	
-	ret extern(n, 3);
-}
 
-/%
-Returns the @"n"th digit of @"a". Right to left, one based.
-This will return zero if the @"n" is out of bounds.
+	/%
+	Returns whether or not the distance between @"a" and @"b" are within @"error".
 
-@"n": The digit you want to get.
-@"a": The number in which the digit will be retrieved from.
-%/
-func int nthDigit(int n, long a) {
-	if (n < 0) {
-		ret 0;
+	@"error": The maximum distance between @"a" and @"b".
+	%/
+	func bool dApprox(double a, double b, double error) {
+		double diff = dAbs(a - b);
+		ret diff <= error;
 	}
-	
-	ret a / (10l ^ (long) (n - 1)) % 10l;
+
+	/%
+	@unoptimized: Square root can be unoptimized. Consider other options.
+
+	Returns the square root of @"n".
+	%/
+	func double sqrt(double n) {
+		if (n < 0d) {
+			throw "Math Error: Cannot get the root of a negative number.";
+		}
+		
+		ret extern(n, 3);
+	}
+
+	/%
+	Returns the @"n"th digit of @"a". Right to left, one based.
+	This will return zero if the @"n" is out of bounds.
+
+	@"n": The digit you want to get.
+	@"a": The number in which the digit will be retrieved from.
+	%/
+	func int nthDigit(int n, long a) {
+		if (n < 0) {
+			ret 0;
+		}
+		
+		ret a / (10l ^ (long) (n - 1)) % 10l;
+	}
 }

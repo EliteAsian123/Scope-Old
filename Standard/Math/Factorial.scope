@@ -1,62 +1,64 @@
 // Translated from: https://rosettacode.org/wiki/Gamma_function#C.23
 
-int      GAMMA_G = 7;
-double[] GAMMA_P = new double[] {
-	0.99999999999980993d, 
-	676.5203681218851d, 
-	-1259.1392167224028d,
-	771.32342877765313d, 
-	-176.61502916214059d, 
-	12.507343278686905d,
-	-0.13857109526572012d, 
-	9.9843695780195716d * 10d ^ -6d, 
-	1.5056327351493116d * 10d ^ -7d
-};
+utility Math {
+	int      GAMMA_G = 7;
+	double[] GAMMA_P = new double[] {
+		0.99999999999980993d, 
+		676.5203681218851d, 
+		-1259.1392167224028d,
+		771.32342877765313d, 
+		-176.61502916214059d, 
+		12.507343278686905d,
+		-0.13857109526572012d, 
+		9.9843695780195716d * 10d ^ -6d, 
+		1.5056327351493116d * 10d ^ -7d
+	};
 
-/%
-@approx: This function uses the [Lanczos approximation](https://en.wikipedia.org/wiki/Lanczos_approximation).
+	/%
+	@approx: This function uses the [Lanczos approximation](https://en.wikipedia.org/wiki/Lanczos_approximation).
 
-Returns GAMMA(@"n") as a @"double". 
-See [this](https://en.wikipedia.org/wiki/Gamma_function) for more information.
-%/
-func double gammaFunction(double n) {
-    if (n < 0.5d) {
-        ret PI / (sin(PI * n) * gammaFunction(1d - n));
-	} else {
-        double z = n - 1d;
-		double x = GAMMA_P[0];
-        for (int i = 1, i < GAMMA_G + 2, i++) {
-            x += GAMMA_P[i] / (z + (double) i);
+	Returns GAMMA(@"n") as a @"double". 
+	See [this](https://en.wikipedia.org/wiki/Gamma_function) for more information.
+	%/
+	func double gammaFunction(double n) {
+		if (n < 0.5d) {
+			ret PI / (sin(PI * n) * gammaFunction(1d - n));
+		} else {
+			double z = n - 1d;
+			double x = GAMMA_P[0];
+			for (int i = 1, i < GAMMA_G + 2, i++) {
+				x += GAMMA_P[i] / (z + (double) i);
+			}
+			
+			double t = z + 0.5d + (double) GAMMA_G;
+			ret sqrt(2d * PI) * (t ^ (z + 0.5d)) * (E ^ -t) * x;
 		}
-        
-        double t = z + 0.5d + (double) GAMMA_G;
-        ret sqrt(2d * PI) * (t ^ (z + 0.5d)) * (E ^ -t) * x;
 	}
-}
 
-/%
-@approx: This function uses the [Lanczos approximation](https://en.wikipedia.org/wiki/Lanczos_approximation).
+	/%
+	@approx: This function uses the [Lanczos approximation](https://en.wikipedia.org/wiki/Lanczos_approximation).
 
-Returns the factorial of @"n" as a @"double".
-This is equal to @"gammaFunction" with @"n" + 1.
-%/
-func double factorial(double n) {
-	ret gammaFunction(n + 1d);
-}
-
-/%
-Returns the factorial of @"n" as a @"long".
-Use @"factorial" for negatives and decimal factorials.
-%/
-func long longFactorial(long n) {
-	if (n < 0) {
-		throw "Use `factorial` for negative numbers.";
+	Returns the factorial of @"n" as a @"double".
+	This is equal to @"gammaFunction" with @"n" + 1.
+	%/
+	func double factorial(double n) {
+		ret gammaFunction(n + 1d);
 	}
-	
-	long output = 1l;
-	for (int i = 2, i < n, i++) {
-		output *= (long) i;	
+
+	/%
+	Returns the factorial of @"n" as a @"long".
+	Use @"factorial" for negatives and decimal factorials.
+	%/
+	func long longFactorial(long n) {
+		if (n < 0) {
+			throw "Use `factorial` for negative numbers.";
+		}
+		
+		long output = 1l;
+		for (int i = 2, i < n, i++) {
+			output *= (long) i;	
+		}
+		
+		ret output;
 	}
-	
-	ret output;
 }

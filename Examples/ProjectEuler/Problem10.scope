@@ -6,7 +6,7 @@ println("Warning: This program is slow! Progress will be printed.");
 long sum = 0l;
 
 for (long p = 1l, p < 2000000l, p += 1l) {
-	if (isPrime(p)) {
+	if (Math.isPrime(p)) {
 		sum += p;
 	}
 	
