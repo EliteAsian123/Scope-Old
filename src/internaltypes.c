@@ -62,17 +62,34 @@ char* strToCstr(const String str) {
 	return cstr;
 }
 
-NamedObject unnamedToNamed(Object obj, char* name, int scope) {
-	return (NamedObject){
-		.name = name,
-		.scope = scope,
-		.o = obj,
-	};
+bool stringEqual(String a, String b) {
+	if (a.len != b.len) {
+		return false;
+	}
+
+	for (size_t i = 0; i < a.len; i++) {
+		if (a.chars[i] != b.chars[i]) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
-Object objdup(Object obj) {
-	Object out = obj;
-	out.type = dupTypeInfo(obj.type);
+Value getValue(StackElem s) {
+	if (s.var == NULL) {
+		return s.elem;
+	} else {
+		return *s.var->value;
+	}
+}
 
-	return out;
+Value* getValuePtr(StackElem s) {
+	if (s.var == NULL) {
+		Value* ptr = malloc(sizeof(Value));
+		*ptr = s.elem;
+		return ptr;
+	} else {
+		return s.var->value;
+	}
 }

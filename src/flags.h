@@ -4,6 +4,5 @@
 #include <stdbool.h>
 
 bool showCount;
-bool showDisposeInfo;
 
 #endif

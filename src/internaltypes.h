@@ -9,60 +9,93 @@
 #define type(...) \
 	(TypeInfo) { .id = __VA_ARGS__ }
 
-typedef struct {
+#define toElem(...) \
+	(StackElem) { .elem = __VA_ARGS__, .var = NULL }
+
+#define toVar(...) \
+	(StackElem) { .elem = (Value){0}, .var = __VA_ARGS__ }
+
+// ==================== //
+
+typedef struct NameList {
+	struct Name* names;
+	size_t len;
+} NameList;
+
+// ==================== //
+
+typedef struct String {
 	char* chars;
 	size_t len;
 } String;
 
-struct Object;
-typedef struct {
-	struct Object* arr;
+typedef struct Array {
+	struct Value** arr;
 	size_t len;
 } Array;
 
-typedef union {
-	void* v_ptr;
-	int v_int;
-	float v_float;
-	long v_long;
-	double v_double;
-	Array v_array;
-	String v_string;
-} ValueHolder;
+typedef struct Utility {
+	struct NameList* members;
+} Utility;
 
-struct TypeInfo {
+typedef union Data {
+	void* _ptr;
+	int _int;
+	float _float;
+	long _long;
+	double _double;
+	struct Array _array;
+	struct String _string;
+	struct Utility _utility;
+} Data;
+
+// ==================== //
+
+typedef struct TypeInfo {
 	int id;
 	struct TypeInfo* args;
 	size_t argsLen;
-};
-typedef struct TypeInfo TypeInfo;
+} TypeInfo;
 
-typedef struct Object {
-	size_t referenceId;
+typedef struct Value {
 	TypeInfo type;
-	ValueHolder v;
-	bool fromArgs;
-} Object;
-
-typedef struct {
-	char* name;
+	union Data data;
+	int refCount;
 	int scope;
-	Object o;
-} NamedObject;
+	bool fromArgs;
+} Value;
 
-typedef struct {
+typedef struct Name {
+	char* name;
+	Value* value;
+} Name;
+
+typedef struct StackElem {
+	Name* var;
+	Value elem;
+} StackElem;
+
+// ==================== //
+
+typedef struct FuncPointer {
 	int location;
 	TypeInfo type;
 	char** args;
 	size_t argsLen;
+	NameList* outer;
 } FuncPointer;
+
+// ==================== //
 
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 void freeTypeInfo(TypeInfo a);
 TypeInfo dupTypeInfo(TypeInfo a);
+
 String cstrToStr(const char* cstr);
 char* strToCstr(const String str);
-NamedObject unnamedToNamed(Object obj, char* name, int scope);
-Object objdup(Object obj);
+bool stringEqual(String a, String b);
+
+Value getValue(StackElem s);
+Value* getValuePtr(StackElem s);
 
 #endif

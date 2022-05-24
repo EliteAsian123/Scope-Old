@@ -4,10 +4,10 @@
 #include <math.h>
 
 #include "bytecode.h"
-#include "references.h"
 
 typedef void (*ExternPtr)();
 
 extern const ExternPtr externs[];
+extern const int externLen;
 
 #endif

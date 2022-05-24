@@ -44,7 +44,7 @@
 
 /* Statement keywords */
 %token S_EXTERN S_IF S_ELSE S_WHILE S_RETURN S_BREAK S_FUNC S_SWAP S_FOR S_THROW
-%token S_REPEAT
+%token S_REPEAT S_UTILITY
 
 /* Expression keywords */
 %token E_NEW E_WITH
@@ -141,6 +141,7 @@ estatement	: if
 			| declaref
 			| for
 			| repeat
+			| utility
 			;
 
 statement	: declare
@@ -151,68 +152,67 @@ statement	: declare
 			| extern
 			| swap
 			| inc_dec
-			| arr_save
 			| throw
 			| op_assign
 			;
 
 expr		: '(' expr ')'
-			| L_NUMBER { pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = $1}); }
-			| L_STRING { pushi({.inst = LOAD, .type = type(TYPE_STR), .a.v_ptr = $1}); }
-			| L_BOOL { pushi({.inst = LOAD, .type = type(TYPE_BOOL), .a.v_int = $1}); }
-			| L_FLOAT { pushi({.inst = LOAD, .type = type(TYPE_FLOAT), .a.v_float = $1}); }
-			| L_LONG { pushi({.inst = LOAD, .type = type(TYPE_LONG), .a.v_long = $1}); }
-			| L_DOUBLE { pushi({.inst = LOAD, .type = type(TYPE_DOUBLE), .a.v_double = $1}); }
-			| IDENTIFIER { pushi({.inst = LOADV, .a.v_ptr = $1}); }
+			| L_NUMBER { pushi({.inst = LOAD, .type = type(TYPE_INT), .data._int = $1}); }
+			| L_STRING { pushi({.inst = LOAD, .type = type(TYPE_STR), .data._ptr = $1}); }
+			| L_BOOL { pushi({.inst = LOAD, .type = type(TYPE_BOOL), .data._int = $1}); }
+			| L_FLOAT { pushi({.inst = LOAD, .type = type(TYPE_FLOAT), .data._float = $1}); }
+			| L_LONG { pushi({.inst = LOAD, .type = type(TYPE_LONG), .data._long = $1}); }
+			| L_DOUBLE { pushi({.inst = LOAD, .type = type(TYPE_DOUBLE), .data._double = $1}); }
+			| IDENTIFIER { pushi({.inst = LOADV, .data._ptr = $1}); }
 			| num_op
 			| bool_op
 			| cast
+			| access
 			| elambda /* Explict Lambda */
 			| invoke_e
 			| extern
 			| arr_init
 			| arr_get
-			| arr_length
 			;
 
 /* Basic Statements */
 
-declare		: type IDENTIFIER '=' expr { pushi({.inst = SAVEV, .a.v_ptr = $2}); }
+declare		: type IDENTIFIER '=' expr { pushi({.inst = SAVEV, .data._ptr = $2}); }
 			| T_AUTO IDENTIFIER {
 					pushi({.inst = LOADT, .type = type(TYPE_UNKNOWN)});
 				} '=' expr {
-					pushi({.inst = SAVEV, .a.v_ptr = $2});
+					pushi({.inst = SAVEV, .data._ptr = $2});
 				}
 			;
 
-assign		: IDENTIFIER '=' expr { 
-					pushi({.inst = RESAVEV, .a.v_ptr = $1}); 
+assign		: expr '=' expr { 
+					pushi({.inst = ASSIGNV}); 
 				}
 			;
 
-op_assign	: IDENTIFIER '+' '=' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+op_assign	: expr '+' '=' {
+					pushi({.inst = DUP});
 				} expr {
 					pushi({.inst = ADD});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
-			| IDENTIFIER '-' '=' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+			| expr '-' '=' {
+					pushi({.inst = DUP});
 				} expr {
 					pushi({.inst = SUB});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
-			| IDENTIFIER '*' '=' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+			| expr '*' '=' {
+					pushi({.inst = DUP});
 				} expr {
 					pushi({.inst = MUL});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
-			| IDENTIFIER '/' '=' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
+			| expr '/' '=' {
+					pushi({.inst = DUP});
 				} expr {
 					pushi({.inst = DIV});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
 			;
 
@@ -224,8 +224,8 @@ while		: S_WHILE {
 					pushi({});
 				} block {
 					popLoop();
-					setInst((Inst){.inst = IFN, .a.v_int = instsCount + 1}, popLoc(), scope);
-					pushi({.inst = GOTO, .a.v_int = popLoc()});
+					setInst((Inst){.inst = IFN, .data._int = instsCount + 1}, popLoc(), scope);
+					pushi({.inst = GOTO, .data._int = popLoc()});
 				}
 			;
 
@@ -244,94 +244,48 @@ for			: S_FOR '(' {
 				} ')' s_block {
 					putMoveBuffer(scope);
 					popLoop();
-					setInst((Inst){.inst = IFN, .a.v_int = instsCount + 1}, popLoc(), scope);
+					setInst((Inst){.inst = IFN, .data._int = instsCount + 1}, popLoc(), scope);
 					scope--;
-					pushi({.inst = GOTO, .a.v_int = popLoc()});
+					pushi({.inst = GOTO, .data._int = popLoc()});
 					scope--;
 					
 					// Push padding to dispose variables
-					pushi({});
+					pushi({.inst = -1});
 				}
 			;
 
-repeat		: S_REPEAT '(' {
-					// Generate variable name
-					int length = snprintf(NULL, 0, "_$_repeatIndex_%d", internalVarId++) + 1;
-					char* str = malloc(length);
-					snprintf(str, length, "_$_repeatIndex_%d", internalVarId);
-					push((Object) {.v.v_ptr = str});
-
-					// Create an internal index
-					scope++;
-					pushi({.inst = LOADT, .type = type(TYPE_INT)});
-					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 0});
-					pushi({.inst = SAVEV, .a.v_ptr = repVarName});
-					
-					pushLoc();
-					scope++;
-					
-					// Create the compare expression
-					pushi({.inst = LOADV, .a.v_ptr = repVarName});
-				} expr ')' {
-					pushi({.inst = LT});
-					
-					// Start the loop
-					pushLoc();
-					pushLoop();
-					pushi({});
-
-				} s_block {
-					// Increment the internal index
-					pushi({.inst = LOADV, .a.v_ptr = repVarName});
-					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
-					pushi({.inst = ADD});
-					pushi({.inst = RESAVEV, .a.v_ptr = repVarName});
-					
-					// End the loop
-					popLoop();
-					setInst((Inst){.inst = IFN, .a.v_int = instsCount + 1}, popLoc(), scope);
-					scope--;
-					pushi({.inst = GOTO, .a.v_int = popLoc()});
-					scope--;
-					
-					// Push padding to dispose variables
-					pushi({});
-
-					// Clean up
-					free(pop().v.v_ptr);
+repeat		: S_REPEAT '(' expr ')' s_block {
+					yyerror("REPEAT will be disabled until preprocessing is added.");
 				}
 			;
 
 break		: S_BREAK {
-					pushi({.inst = LOAD, .type = type(TYPE_BOOL), .a.v_int = 0});
-					pushi({.inst = GOTO, .a.v_int = readLoop()});
+					pushi({.inst = LOAD, .type = type(TYPE_BOOL), .data._int = 0});
+					pushi({.inst = GOTO, .data._int = readLoop()});
 				}
 			;
 
-swap		: S_SWAP '(' IDENTIFIER ',' IDENTIFIER ')' {
-					pushi({.inst = LOADV, .a.v_ptr = $3});
-					pushi({.inst = LOADV, .a.v_ptr = $5});
-					pushi({.inst = RESAVEV, .a.v_ptr = $3});
-					pushi({.inst = RESAVEV, .a.v_ptr = $5});
+swap		: S_SWAP '(' expr ',' expr ')' {
+					pushi({.inst = SWAPV});
 				}
 			;
 
-inc_dec		: IDENTIFIER '+' '+' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
-					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
+inc_dec		: expr '+' '+' {
+					pushi({.inst = DUP});
+					pushi({.inst = LOAD, .type = type(TYPE_INT), .data._int = 1});
 					pushi({.inst = ADD});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
-			| IDENTIFIER '-' '-' {
-					pushi({.inst = LOADV, .a.v_ptr = $1});
-					pushi({.inst = LOAD, .type = type(TYPE_INT), .a.v_int = 1});
+			| expr '-' '-' {
+					pushi({.inst = DUP});
+					pushi({.inst = LOAD, .type = type(TYPE_INT), .data._int = 1});
 					pushi({.inst = SUB});
-					pushi({.inst = RESAVEV, .a.v_ptr = $1});
+					pushi({.inst = ASSIGNV});
 				}
 			;
 
 throw		: S_THROW L_STRING {
-					pushi({.inst = THROW, .a.v_ptr = $2});
+					pushi({.inst = THROW, .data._ptr = $2});
 				}
 			;
 
@@ -357,28 +311,29 @@ bool_op		: expr T_EQ expr { pushi({.inst = EQ}); }
 			| expr T_OR expr { pushi({.inst = OR}); }
 			;
 
-cast		: '(' T_STR ')' expr { pushi({.inst = CAST, .type = type(TYPE_STR)}); } %prec O_CAST
-			| '(' T_INT ')' expr { pushi({.inst = CAST, .type = type(TYPE_INT)}); } %prec O_CAST
-			| '(' T_LONG ')' expr { pushi({.inst = CAST, .type = type(TYPE_LONG)}); } %prec O_CAST
-			| '(' T_FLOAT ')' expr { pushi({.inst = CAST, .type = type(TYPE_FLOAT)}); } %prec O_CAST
-			| '(' T_DOUBLE ')' expr { pushi({.inst = CAST, .type = type(TYPE_DOUBLE)}); } %prec O_CAST
+cast		: '(' type ')' expr { pushi({.inst = CAST}); } %prec O_CAST
+			;
+
+access		: expr '.' IDENTIFIER {
+					pushi({.inst = ACCESS, .data._ptr = $3});
+				}
 			;
 
 /* Arrays */
 
 arr_init_list		: /* Nothing */
 					| expr arr_init_list_elem {
-							Object obj = pop();
-							obj.v.v_int++;
-							push(obj);
+							Value obj = pop().elem;
+							obj.data._int++;
+							push(toElem(obj));
 						}
 					;
 
 arr_init_list_elem	: /* Nothing */
 					| ',' expr arr_init_list_elem {
-							Object obj = pop();
-							obj.v.v_int++;
-							push(obj);
+							Value obj = pop().elem;
+							obj.data._int++;
+							push(toElem(obj));
 						}
 					;
 
@@ -389,9 +344,9 @@ arr_init	: E_NEW type '[' expr ']' {
 					pushi({.inst = ARRAYIW});
 				}
 			| E_NEW type '[' ']' {
-					push((Object) {.v.v_int = 0});
+					push(toElem((Value){ .data._int = 0 }));
 				} '{' arr_init_list '}' {
-					pushi({.inst = ARRAYIL, .a.v_int = pop().v.v_int});
+					pushi({.inst = ARRAYIL, .data._int = pop().elem.data._int});
 				}
 			;
 
@@ -400,27 +355,13 @@ arr_get		: expr '[' expr ']' {
 				} %prec O_ARR_GET
 			;
 
-arr_length	: expr '.' IDENTIFIER {
-					if (strcmp($3, "length") != 0) {
-						yyerror("Accessor must be `length` (for now).");
-					}
-					
-					pushi({.inst = ARRAYL});
-				}
-			;
-
-arr_save	: expr '[' expr ']' '=' expr {
-					pushi({.inst = ARRAYS});
-				}
-			;
-
 /* Functions */
 
 largs_list	: /* Nothing */
 			| type {
 					pushi({.inst = APPENDT});
 				} IDENTIFIER {
-					pushi({.inst = LOADA, .a.v_ptr = $3});
+					pushi({.inst = LOADA, .data._ptr = $3});
 				} lal_elem 
 			;
 
@@ -428,7 +369,7 @@ lal_elem		: /* Nothing */
 			| ',' type {
 					pushi({.inst = APPENDT});
 				} IDENTIFIER {
-					pushi({.inst = LOADA, .a.v_ptr = $4});
+					pushi({.inst = LOADA, .data._ptr = $4});
 				} lal_elem
 			;
 
@@ -442,7 +383,7 @@ elambda		: 	{
 					pushi({});
 				} block {
 					pushi({.inst = ENDF});
-					setInst((Inst){.inst = SAVEF, .a.v_int = instsCount}, popLoc(), scope);
+					setInst((Inst){.inst = SAVEF, .data._int = instsCount}, popLoc(), scope);
 				}
 			;
 
@@ -456,26 +397,30 @@ declaref	: S_FUNC {
 					pushi({});
 				} block {
 					pushi({.inst = ENDF});
-					setInst((Inst){.inst = SAVEF, .a.v_int = instsCount}, popLoc(), scope);
-					pushi({.inst = SAVEV, .a.v_ptr = $5});
+					setInst((Inst){.inst = SAVEF, .data._int = instsCount}, popLoc(), scope);
+					pushi({.inst = SAVEV, .data._ptr = $5});
 				}
 			;
 
 iargs_list	: /* Nothing */
-			| expr ial_elem
+			| expr {
+					pushi({.inst = SWAP});
+				} ial_elem
 			;
 
 ial_elem	: /* Nothing */
-			| ',' expr ial_elem
+			| ',' expr {
+					pushi({.inst = SWAP});
+				} ial_elem
 			;
 
-invoke_s	: IDENTIFIER '(' iargs_list ')' {
-					pushi({.inst = CALLF, .a.v_ptr = $1, .type = type(TYPE_VOID)});
+invoke_s	: expr '(' iargs_list ')' {
+					pushi({.inst = CALLF, .type = type(TYPE_VOID)});
 				}
 			;
 
-invoke_e	: IDENTIFIER '(' iargs_list ')' {
-					pushi({.inst = CALLF, .a.v_ptr = $1, .type = type(TYPE_UNKNOWN)});
+invoke_e	: expr '(' iargs_list ')' {
+					pushi({.inst = CALLF, .type = type(TYPE_UNKNOWN)});
 				}
 			;
 
@@ -487,7 +432,10 @@ return		: S_RETURN {
 				}
 			;
 
-extern		: S_EXTERN '(' iargs_list ')' {
+extern		: S_EXTERN {
+					// Push a dummy item on the stack to swap down
+					pushi({.inst = LOAD, .type = type(TYPE_INT), .data._int = 0});
+				} '(' iargs_list ')' {
 					pushi({.inst = EXTERN});
 				}
 			;
@@ -505,19 +453,35 @@ if_cond		: S_IF '(' expr ')' {
 			;
 
 if_block	: if_cond block {
-					setInst((Inst){.inst = IFN, .a.v_int = instsCount}, popLoc(), scope);
+					setInst((Inst){.inst = IFN, .data._int = instsCount}, popLoc(), scope);
 				}
 			;
 
-else_block	: if_cond block {  
+else_block	: if_cond block {
 					int loc = popLoc();
 					
 					pushLoc();
 					pushi({});
 					
-					setInst((Inst){.inst = IFN, .a.v_int = instsCount}, loc, scope);
+					setInst((Inst){.inst = IFN, .data._int = instsCount}, loc, scope);
 				} S_ELSE block {
-					setInst((Inst){.inst = GOTO, .a.v_int = instsCount}, popLoc(), scope);
+					setInst((Inst){.inst = GOTO, .data._int = instsCount}, popLoc(), scope);
+				}
+			;
+
+/* Utility */
+
+utility_in	: /* Nothing */
+			| utility_in declare EOL
+			| utility_in declaref
+			| utility_in EOL
+
+utility		: S_UTILITY IDENTIFIER {
+					pushi({.inst = LOADA, .data._ptr = $2});
+					pushLoc();
+					pushi({});
+				} '{' utility_in '}' {
+					setInst((Inst){.inst = STARTU, .data._int = instsCount}, popLoc(), scope);
 				}
 			;
 
@@ -542,7 +506,6 @@ int main(int argc, char** argv) {
 	if (argc >= 3) {
 		showByteCode = strcmp(argv[2], "-b") == 0;
 		showCount = strcmp(argv[2], "-c") == 0;
-		showDisposeInfo = strcmp(argv[2], "-d") == 0;
 	}
 	
 	// Start parser
@@ -550,7 +513,7 @@ int main(int argc, char** argv) {
 	
 	// Actually lex/parse
 	int result = yyparse();
-	pushInst((Inst){}, -1); // "end" instruction
+	pushInst((Inst){.inst = -1}, -1); // "end" instruction
 
 	// Interpret
 	bc_run(showByteCode);
