@@ -7,6 +7,7 @@
 #include "double.c"
 #include "float.c"
 #include "function.c"
+#include "initObject.c"
 #include "int.c"
 #include "long.c"
 #include "string.c"
@@ -94,6 +95,18 @@ const Type types[] = {
 		.createDefault = errorOnDefault,
 		.duplicate = noDuplicate,
 		.dispose = disposeUtility,
+	},
+	{
+		.displayName = "object",
+		.createDefault = createDefaultFunction,
+		.duplicate = noDuplicate,
+		.opEq = functionOpEq,
+	},
+	{
+		.displayName = "initilizedObject",
+		.createDefault = errorOnDefault,
+		.duplicate = noDuplicate,
+		.dispose = disposeInitObject,
 	},
 };
 static_assert(sizeof(types) / sizeof(Type) == _TYPES_ENUM_LEN, "Update enum or type array.");

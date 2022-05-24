@@ -38,6 +38,10 @@ typedef struct Utility {
 	struct NameList* members;
 } Utility;
 
+typedef struct InitObject {
+	struct NameList* members;
+} InitObject;
+
 typedef union Data {
 	void* _ptr;
 	int _int;
@@ -47,6 +51,7 @@ typedef union Data {
 	struct Array _array;
 	struct String _string;
 	struct Utility _utility;
+	struct InitObject _initObject;
 } Data;
 
 // ==================== //
@@ -84,6 +89,11 @@ typedef struct FuncPointer {
 	size_t argsLen;
 	NameList* outer;
 } FuncPointer;
+
+typedef struct ObjectPointer {
+	char* name;
+	NameList* defaultMembers;
+} ObjectPointer;
 
 // ==================== //
 

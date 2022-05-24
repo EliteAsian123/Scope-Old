@@ -50,6 +50,7 @@
 "throw"			{ return S_THROW; }
 "repeat"		{ return S_REPEAT; }
 "utility"		{ return S_UTILITY; }
+"object"		{ return S_OBJECT; }
 
 "new"			{ return E_NEW; }
 "with"			{ return E_WITH; }

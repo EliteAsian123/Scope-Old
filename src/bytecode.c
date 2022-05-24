@@ -74,6 +74,10 @@ static size_t argstackCount;
 static FuncPointer* funcs;
 static size_t funcsCount;
 
+// Interpret stage
+static ObjectPointer* objects;
+static size_t objectsCount;
+
 // Parse stage
 static InstBuffer instbuffer[STACK_SIZE];
 static size_t instbufferCount;
@@ -177,6 +181,18 @@ static int pushFunc(int loc, TypeInfo type) {
 	funcs[funcsCount - 1] = f;
 
 	return funcsCount - 1;
+}
+
+static int pushObject(char* name, NameList* defaultMembers) {
+	ObjectPointer o;
+	o.name = name;
+	o.defaultMembers = defaultMembers;
+
+	objectsCount++;
+	objects = realloc(objects, sizeof(ObjectPointer) * objectsCount);
+	objects[objectsCount - 1] = o;
+
+	return objectsCount - 1;
 }
 
 static void delVarAtIndex(NameList* names, size_t i) {
@@ -364,7 +380,7 @@ void bc_init() {
 }
 
 static bool instHasPointer(size_t i) {
-	static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode pointers.");
+	static_assert(_INSTS_ENUM_LEN == 43, "Update bytecode pointers.");
 	switch (insts[i].inst) {
 		case LOAD:
 			return insts[i].type.id == TYPE_STR;
@@ -385,11 +401,12 @@ static void instDump(size_t i) {
 	const char* instName;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 43, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case -1:		instName = "(padding)";	break;
 		case LOAD:      instName = "load";      break;
 		case LOADT: 	instName = "loadt"; 	break;
+		case LOADOT: 	instName = "loadot"; 	break;
 		case LOADV: 	instName = "loadv"; 	break;
 		case LOADA: 	instName = "loada"; 	break;
 		case SAVEV: 	instName = "savev"; 	break;
@@ -399,6 +416,8 @@ static void instDump(size_t i) {
 		case CALLF: 	instName = "callf"; 	break;
 		case ENDF: 		instName = "endf"; 		break;
 		case STARTU: 	instName = "startu"; 	break;
+		case STARTO: 	instName = "starto"; 	break;
+		case NEWO: 		instName = "newo";		break;
 		case EXTERN: 	instName = "extern"; 	break;
 		case APPENDT: 	instName = "appendt"; 	break;
 		case ARRAYI: 	instName = "arrayi"; 	break;
@@ -480,7 +499,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 		}
 		lastKnownScope = curScope;
 
-		static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 43, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD: {
 				Value v = (Value){
@@ -500,6 +519,16 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 			}
 			case LOADT: {
 				push(toElem((Value){.type = dupTypeInfo(insts[i].type)}));
+				break;
+			}
+			case LOADOT: {
+				Value a = getValue(pop());
+
+				if (a.type.id != TYPE_OBJECT) {
+					ierr("Attempted to get a type from a value that isn't an object.");
+				}
+
+				push(toElem((Value){.type = type(_TYPES_ENUM_LEN + a.data._int)}));
 				break;
 			}
 			case LOADV: {
@@ -714,6 +743,62 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 
 				jump(insts[i].data._int);
+
+				break;
+			}
+			case STARTO: {
+				char* arg = popArg();
+
+				if (curScope != 0) {
+					ierr("Objects can currently only be defined at the 0th scope.");
+				}
+
+				if (isVar(frame.names, arg)) {
+					ierr("Redefinition of existing variable in the same scope.");
+				}
+
+				NameList* members = malloc(sizeof(NameList));
+				*members = (NameList){
+					.names = malloc(sizeof(Name)),
+				};
+
+				pushFrame((CallFrame){.names = members, .inner = true});
+				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].data._int);
+				popFrame();
+
+				Value v = (Value){
+					.type = type(TYPE_OBJECT),
+					.data._int = pushObject(strdup(arg), members),
+				};
+
+				createVar(frame.names, strdup(arg), v);
+
+				jump(insts[i].data._int);
+
+				break;
+			}
+			case NEWO: {
+				Value a = pop().elem;
+				int typeIndex = a.type.id - _TYPES_ENUM_LEN;
+
+				if (typeIndex < 0) {
+					ierr("You cannot use the new expression on basic types.");
+				}
+
+				Value v = (Value){
+					.type = type(TYPE_INIT_OBJ),
+					.scope = curScope,
+				};
+
+				ObjectPointer obj = objects[typeIndex];
+
+				NameList* members = malloc(sizeof(NameList));
+				members->len = obj.defaultMembers->len;
+				members->names = malloc(sizeof(Name) * members->len);
+
+				v.data._initObject = (InitObject){
+					.members = NULL,
+				};
 
 				break;
 			}

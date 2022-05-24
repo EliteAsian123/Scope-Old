@@ -44,7 +44,7 @@
 
 /* Statement keywords */
 %token S_EXTERN S_IF S_ELSE S_WHILE S_RETURN S_BREAK S_FUNC S_SWAP S_FOR S_THROW
-%token S_REPEAT S_UTILITY
+%token S_REPEAT S_UTILITY S_OBJECT
 
 /* Expression keywords */
 %token E_NEW E_WITH
@@ -121,6 +121,9 @@ type		: T_VOID {
 					pushi({.inst = SWAP});
 					pushi({.inst = APPENDT});
 				}
+			| expr {
+					pushi({.inst = LOADOT});
+				}
 			;
 
 type_list	: type {
@@ -142,6 +145,7 @@ estatement	: if
 			| for
 			| repeat
 			| utility
+			| object
 			;
 
 statement	: declare
@@ -173,6 +177,7 @@ expr		: '(' expr ')'
 			| extern
 			| arr_init
 			| arr_get
+			| init_object
 			;
 
 /* Basic Statements */
@@ -475,6 +480,7 @@ utility_in	: /* Nothing */
 			| utility_in declare EOL
 			| utility_in declaref
 			| utility_in EOL
+			;
 
 utility		: S_UTILITY IDENTIFIER {
 					pushi({.inst = LOADA, .data._ptr = $2});
@@ -482,6 +488,27 @@ utility		: S_UTILITY IDENTIFIER {
 					pushi({});
 				} '{' utility_in '}' {
 					setInst((Inst){.inst = STARTU, .data._int = instsCount}, popLoc(), scope);
+				}
+			;
+
+/* Object */
+
+object_in	: /* Nothing */
+			| object_in declare EOL
+			| object_in EOL
+			;
+
+object		: S_OBJECT IDENTIFIER {
+					pushi({.inst = LOADA, .data._ptr = $2});
+					pushLoc();
+					pushi({});
+				} '{' object_in '}' {
+					setInst((Inst){.inst = STARTO, .data._int = instsCount}, popLoc(), scope);
+				}
+			;
+
+init_object	: E_NEW type {
+					pushi({.inst = NEWO});
 				}
 			;
 

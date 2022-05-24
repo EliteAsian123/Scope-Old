@@ -26,6 +26,7 @@ typedef struct {
 enum Insts {
 	LOAD = 1,
 	LOADT,
+	LOADOT,
 	LOADV,
 	LOADA,
 	SAVEV,
@@ -35,6 +36,8 @@ enum Insts {
 	CALLF,
 	ENDF,
 	STARTU,
+	STARTO,
+	NEWO,
 	EXTERN,
 	APPENDT,
 	ARRAYI,
