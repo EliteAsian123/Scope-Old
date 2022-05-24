@@ -42,6 +42,7 @@
 
 typedef struct {
 	NameList* names;
+	bool inner;
 } CallFrame;
 
 typedef struct {
@@ -160,6 +161,13 @@ static int pushFunc(int loc, TypeInfo type) {
 	f.type = type;
 	f.argsLen = type.argsLen - 1;
 	f.args = malloc(sizeof(char*) * f.argsLen);
+
+	if (frames[framesCount - 1].inner) {
+		f.outer = frames[framesCount - 1].names;
+	} else {
+		f.outer = NULL;
+	}
+
 	for (int i = f.argsLen - 1; i >= 0; i--) {
 		f.args[i] = popArg();
 	}
@@ -626,6 +634,15 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 				}
 
+				if (f.outer != NULL) {
+					for (size_t v = 0; v < f.outer->len; v++) {
+						Name name = f.outer->names[v];
+						if (name.value->scope < s) {
+							setVar(&names, name.name, &name);
+						}
+					}
+				}
+
 				for (int j = f.argsLen - 1; j >= 0; j--) {
 					StackElem arg = pop();
 					Value argv = getValue(arg);
@@ -659,20 +676,42 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				// RETURN not break
 				return;
 			case STARTU: {
-				pushFrame((CallFrame){0});
+				char* arg = popArg();
+
+				bool shouldVar = false;
+				NameList* members = NULL;
+				if (isVar(frame.names, arg)) {
+					Name* name = getVar(frame.names, arg);
+					if (name->value->type.id != TYPE_UTIL) {
+						ierr("Redefinition of existing variable in the same scope.");
+					} else {
+						members = name->value->data._utility.members;
+					}
+				} else {
+					shouldVar = true;
+
+					members = malloc(sizeof(NameList));
+					*members = (NameList){
+						.names = malloc(sizeof(Name)),
+					};
+				}
+
+				pushFrame((CallFrame){.names = members, .inner = true});
 				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].data._int);
-				NameList* members = popFrame().names;
+				popFrame();
 
-				Value v = (Value){
-					.type = type(TYPE_UTIL),
-					.scope = curScope,
-				};
+				if (shouldVar) {
+					Value v = (Value){
+						.type = type(TYPE_UTIL),
+						.scope = curScope,
+					};
 
-				v.data._utility = (Utility){
-					.members = members,
-				},
+					v.data._utility = (Utility){
+						.members = members,
+					};
 
-				createVar(frame.names, strdup(popArg()), v);
+					createVar(frame.names, strdup(arg), v);
+				}
 
 				jump(insts[i].data._int);
 

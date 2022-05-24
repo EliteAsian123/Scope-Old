@@ -82,6 +82,7 @@ typedef struct FuncPointer {
 	TypeInfo type;
 	char** args;
 	size_t argsLen;
+	NameList* outer;
 } FuncPointer;
 
 // ==================== //
