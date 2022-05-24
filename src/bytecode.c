@@ -528,7 +528,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					ierr("Attempted to get a type from a value that isn't an object.");
 				}
 
-				push(toElem((Value){.type = type(_TYPES_ENUM_LEN + a.data._int)}));
+				push(toElem((Value){.type = type(TYPE_INIT_OBJ), .objectIndex = a.data._int}));
 				break;
 			}
 			case LOADV: {
@@ -779,26 +779,37 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 			}
 			case NEWO: {
 				Value a = pop().elem;
-				int typeIndex = a.type.id - _TYPES_ENUM_LEN;
 
-				if (typeIndex < 0) {
+				if (a.objectIndex < 0) {
 					ierr("You cannot use the new expression on basic types.");
 				}
 
 				Value v = (Value){
 					.type = type(TYPE_INIT_OBJ),
+					.objectIndex = a.objectIndex,
 					.scope = curScope,
 				};
 
-				ObjectPointer obj = objects[typeIndex];
+				ObjectPointer obj = objects[a.objectIndex];
 
 				NameList* members = malloc(sizeof(NameList));
 				members->len = obj.defaultMembers->len;
 				members->names = malloc(sizeof(Name) * members->len);
 
+				for (size_t i = 0; i < members->len; i++) {
+					Value* v = malloc(sizeof(Value));
+					*v = dupValue(*obj.defaultMembers->names[i].value);
+					members->names[i] = (Name){
+						.name = strdup(obj.defaultMembers->names[i].name),
+						.value = v,
+					};
+				}
+
 				v.data._initObject = (InitObject){
-					.members = NULL,
+					.members = members,
 				};
+
+				push(toElem(v));
 
 				break;
 			}
@@ -1002,6 +1013,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					push(toElem(v));
 				} else if (a.type.id == TYPE_UTIL) {
 					push(toVar(getVar(a.data._utility.members, insts[i].data._ptr)));
+				} else if (a.type.id == TYPE_INIT_OBJ) {
+					push(toVar(getVar(a.data._initObject.members, insts[i].data._ptr)));
 				} else {
 					ierr("The object referenced does not have accessible members.");
 				}

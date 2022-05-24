@@ -64,6 +64,7 @@ typedef struct TypeInfo {
 
 typedef struct Value {
 	TypeInfo type;
+	int objectIndex;
 	union Data data;
 	int refCount;
 	int scope;
