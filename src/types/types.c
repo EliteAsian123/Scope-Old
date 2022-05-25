@@ -103,7 +103,7 @@ const Type types[] = {
 		.opEq = functionOpEq,
 	},
 	{
-		.displayName = "initilizedObject",
+		.displayName = "initializedObject",
 		.createDefault = errorOnDefault,
 		.duplicate = noDuplicate,
 		.dispose = disposeInitObject,
@@ -118,8 +118,19 @@ const char* typestr(TypeInfo type) {
 		case TYPE_UNKNOWN:
 			o = strdup("unknown");
 			break;
+		case TYPE_INIT_OBJ:
+			o = strdup(types[type.id].displayName);
+
+			int len = snprintf(NULL, 0, "%s{%d}", o, type.objectIndex) + 1;
+			char* b = malloc(len);
+			snprintf(b, len, "%s{%d}", o, type.objectIndex);
+
+			free(o);
+			o = b;
+
+			break;
 		default:
-			if (type.id >= _TYPES_ENUM_LEN) {
+			if (type.id < 0 || type.id >= _TYPES_ENUM_LEN) {
 				o = strdup("error");
 			} else {
 				o = strdup(types[type.id].displayName);

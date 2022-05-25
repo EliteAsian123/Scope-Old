@@ -9,6 +9,9 @@
 #define type(...) \
 	(TypeInfo) { .id = __VA_ARGS__ }
 
+#define initobj(...) \
+	(TypeInfo) { .id = TYPE_INIT_OBJ, .objectIndex = __VA_ARGS__ }
+
 #define toElem(...) \
 	(StackElem) { .elem = __VA_ARGS__, .var = NULL }
 
@@ -60,11 +63,11 @@ typedef struct TypeInfo {
 	int id;
 	struct TypeInfo* args;
 	size_t argsLen;
+	int objectIndex;
 } TypeInfo;
 
 typedef struct Value {
 	TypeInfo type;
-	int objectIndex;
 	union Data data;
 	int refCount;
 	int scope;

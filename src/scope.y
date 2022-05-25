@@ -64,7 +64,8 @@
 %left '+' '-'
 %left '*' '/' '%'
 %left O_CAST
-%left '!' O_UMINUS
+%left O_INVOKE
+%left '!' O_UMINUS O_NEW
 %left '^'
 %left O_ARR_GET
 %left '.'
@@ -115,13 +116,15 @@ type		: T_VOID {
 				}
 			| T_FUNC {
 					pushi({.inst = LOADT, .type = type(TYPE_FUNC)});
-				} '(' type_list ')'
+				} '<' type_list '>'
 			| type '[' ']' {
 					pushi({.inst = LOADT, .type = type(TYPE_ARRAY)});
 					pushi({.inst = SWAP});
 					pushi({.inst = APPENDT});
 				}
-			| expr {
+			| IDENTIFIER {
+					//TEMP
+					pushi({.inst = LOADV, .data._ptr = $1});
 					pushi({.inst = LOADOT});
 				}
 			;
@@ -161,13 +164,13 @@ statement	: declare
 			;
 
 expr		: '(' expr ')'
+			| IDENTIFIER { pushi({.inst = LOADV, .data._ptr = $1}); }
 			| L_NUMBER { pushi({.inst = LOAD, .type = type(TYPE_INT), .data._int = $1}); }
 			| L_STRING { pushi({.inst = LOAD, .type = type(TYPE_STR), .data._ptr = $1}); }
 			| L_BOOL { pushi({.inst = LOAD, .type = type(TYPE_BOOL), .data._int = $1}); }
 			| L_FLOAT { pushi({.inst = LOAD, .type = type(TYPE_FLOAT), .data._float = $1}); }
 			| L_LONG { pushi({.inst = LOAD, .type = type(TYPE_LONG), .data._long = $1}); }
 			| L_DOUBLE { pushi({.inst = LOAD, .type = type(TYPE_DOUBLE), .data._double = $1}); }
-			| IDENTIFIER { pushi({.inst = LOADV, .data._ptr = $1}); }
 			| num_op
 			| bool_op
 			| cast
@@ -344,15 +347,15 @@ arr_init_list_elem	: /* Nothing */
 
 arr_init	: E_NEW type '[' expr ']' {
 					pushi({.inst = ARRAYI});
-				}
+				} %prec O_NEW
 			| E_NEW type '[' expr ']' E_WITH expr {
 					pushi({.inst = ARRAYIW});
-				}
+				} %prec O_NEW
 			| E_NEW type '[' ']' {
 					push(toElem((Value){ .data._int = 0 }));
 				} '{' arr_init_list '}' {
 					pushi({.inst = ARRAYIL, .data._int = pop().elem.data._int});
-				}
+				} %prec O_NEW
 			;
 
 arr_get		: expr '[' expr ']' {
@@ -426,7 +429,7 @@ invoke_s	: expr '(' iargs_list ')' {
 
 invoke_e	: expr '(' iargs_list ')' {
 					pushi({.inst = CALLF, .type = type(TYPE_UNKNOWN)});
-				}
+				} %prec O_INVOKE
 			;
 
 return		: S_RETURN {
@@ -509,7 +512,7 @@ object		: S_OBJECT IDENTIFIER {
 
 init_object	: E_NEW type {
 					pushi({.inst = NEWO});
-				}
+				} %prec O_NEW
 			;
 
 %%

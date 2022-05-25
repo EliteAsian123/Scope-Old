@@ -528,7 +528,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					ierr("Attempted to get a type from a value that isn't an object.");
 				}
 
-				push(toElem((Value){.type = type(TYPE_INIT_OBJ), .objectIndex = a.data._int}));
+				push(toElem((Value){.type = initobj(a.data._int)}));
 				break;
 			}
 			case LOADV: {
@@ -634,6 +634,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				StackElem a = pop();
 				Value av = getValue(a);
 
+				if (av.type.id != TYPE_FUNC) {
+					ierr("Attempted to call a non-function.");
+				}
+
 				bool dropOutput = false;
 				if (insts[i].type.id == TYPE_UNKNOWN &&
 					av.type.args[0].id == TYPE_VOID) {
@@ -725,9 +729,25 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					};
 				}
 
+				// Add outer Objects
+				for (size_t v = 0; v < frame.names->len; v++) {
+					Name name = frame.names->names[v];
+					if (name.value->type.id == TYPE_OBJECT) {
+						setVar(members, name.name, &name);
+					}
+				}
+
 				pushFrame((CallFrame){.names = members, .inner = true});
 				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].data._int);
 				popFrame();
+
+				// Remove outer Objects
+				for (size_t v = 0; v < members->len; v++) {
+					Name name = frame.names->names[v];
+					if (name.value->scope < curScope) {
+						delVarAtIndex(members, v);
+					}
+				}
 
 				if (shouldVar) {
 					Value v = (Value){
@@ -762,9 +782,25 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					.names = malloc(sizeof(Name)),
 				};
 
+				// Add outer Objects
+				for (size_t v = 0; v < frame.names->len; v++) {
+					Name name = frame.names->names[v];
+					if (name.value->type.id == TYPE_OBJECT) {
+						setVar(members, name.name, &name);
+					}
+				}
+
 				pushFrame((CallFrame){.names = members, .inner = true});
 				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].data._int);
 				popFrame();
+
+				// Remove outer Objects
+				for (size_t v = 0; v < members->len; v++) {
+					Name name = frame.names->names[v];
+					if (name.value->scope < curScope) {
+						delVarAtIndex(members, v);
+					}
+				}
 
 				Value v = (Value){
 					.type = type(TYPE_OBJECT),
@@ -780,17 +816,16 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 			case NEWO: {
 				Value a = pop().elem;
 
-				if (a.objectIndex < 0) {
+				if (a.type.objectIndex < 0) {
 					ierr("You cannot use the new expression on basic types.");
 				}
 
 				Value v = (Value){
-					.type = type(TYPE_INIT_OBJ),
-					.objectIndex = a.objectIndex,
+					.type = initobj(a.type.objectIndex),
 					.scope = curScope,
 				};
 
-				ObjectPointer obj = objects[a.objectIndex];
+				ObjectPointer obj = objects[a.type.objectIndex];
 
 				NameList* members = malloc(sizeof(NameList));
 				members->len = obj.defaultMembers->len;

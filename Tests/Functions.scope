@@ -1,6 +1,6 @@
 #insert Standard/Core.scope
 
-func bool bestBool(function(int) i) {
+func bool bestBool(function<int> i) {
 	ret i() == 123;
 }
 
@@ -13,7 +13,7 @@ func void myFunction() {
 		println("It is the best number!");
 	}
 	
-	function(int) anotherBest = bestNumber;
+	function<int> anotherBest = bestNumber;
 	if (bestNumber == anotherBest) {
 		println("It is the same function!");
 	}
