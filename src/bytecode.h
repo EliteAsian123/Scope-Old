@@ -26,6 +26,7 @@ typedef struct {
 enum Insts {
 	LOAD = 1,
 	LOADT,
+	LOADOT,
 	LOADV,
 	LOADA,
 	SAVEV,
@@ -35,6 +36,8 @@ enum Insts {
 	CALLF,
 	ENDF,
 	STARTU,
+	STARTO,
+	NEWO,
 	EXTERN,
 	APPENDT,
 	ARRAYI,
@@ -68,6 +71,9 @@ enum Insts {
 
 Inst* insts;
 size_t instsCount;
+
+ObjectPointer* objects;
+size_t objectsCount;
 
 void initTypeArgs(TypeInfo* i, TypeInfo args[], size_t len);
 bool typeInfoEqual(TypeInfo a, TypeInfo b);

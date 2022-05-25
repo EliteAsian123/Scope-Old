@@ -179,6 +179,18 @@ static int pushFunc(int loc, TypeInfo type) {
 	return funcsCount - 1;
 }
 
+static int pushObject(char* name, NameList* defaultMembers) {
+	ObjectPointer o;
+	o.name = name;
+	o.defaultMembers = defaultMembers;
+
+	objectsCount++;
+	objects = realloc(objects, sizeof(ObjectPointer) * objectsCount);
+	objects[objectsCount - 1] = o;
+
+	return objectsCount - 1;
+}
+
 static void delVarAtIndex(NameList* names, size_t i) {
 	Name name = names->names[i];
 	Value var = *name.value;
@@ -364,7 +376,7 @@ void bc_init() {
 }
 
 static bool instHasPointer(size_t i) {
-	static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode pointers.");
+	static_assert(_INSTS_ENUM_LEN == 43, "Update bytecode pointers.");
 	switch (insts[i].inst) {
 		case LOAD:
 			return insts[i].type.id == TYPE_STR;
@@ -385,11 +397,12 @@ static void instDump(size_t i) {
 	const char* instName;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 43, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case -1:		instName = "(padding)";	break;
 		case LOAD:      instName = "load";      break;
 		case LOADT: 	instName = "loadt"; 	break;
+		case LOADOT: 	instName = "loadot"; 	break;
 		case LOADV: 	instName = "loadv"; 	break;
 		case LOADA: 	instName = "loada"; 	break;
 		case SAVEV: 	instName = "savev"; 	break;
@@ -399,6 +412,8 @@ static void instDump(size_t i) {
 		case CALLF: 	instName = "callf"; 	break;
 		case ENDF: 		instName = "endf"; 		break;
 		case STARTU: 	instName = "startu"; 	break;
+		case STARTO: 	instName = "starto"; 	break;
+		case NEWO: 		instName = "newo";		break;
 		case EXTERN: 	instName = "extern"; 	break;
 		case APPENDT: 	instName = "appendt"; 	break;
 		case ARRAYI: 	instName = "arrayi"; 	break;
@@ -480,7 +495,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 		}
 		lastKnownScope = curScope;
 
-		static_assert(_INSTS_ENUM_LEN == 40, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 43, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD: {
 				Value v = (Value){
@@ -500,6 +515,16 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 			}
 			case LOADT: {
 				push(toElem((Value){.type = dupTypeInfo(insts[i].type)}));
+				break;
+			}
+			case LOADOT: {
+				Value a = getValue(pop());
+
+				if (a.type.id != TYPE_OBJECT) {
+					ierr("Attempted to get a type from a value that isn't an object.");
+				}
+
+				push(toElem((Value){.type = initobj(a.data._int)}));
 				break;
 			}
 			case LOADV: {
@@ -605,6 +630,10 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				StackElem a = pop();
 				Value av = getValue(a);
 
+				if (av.type.id != TYPE_FUNC) {
+					ierr("Attempted to call a non-function.");
+				}
+
 				bool dropOutput = false;
 				if (insts[i].type.id == TYPE_UNKNOWN &&
 					av.type.args[0].id == TYPE_VOID) {
@@ -696,9 +725,25 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					};
 				}
 
+				// Add outer Objects
+				for (size_t v = 0; v < frame.names->len; v++) {
+					Name name = frame.names->names[v];
+					if (name.value->type.id == TYPE_OBJECT) {
+						setVar(members, name.name, &name);
+					}
+				}
+
 				pushFrame((CallFrame){.names = members, .inner = true});
 				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].data._int);
 				popFrame();
+
+				// Remove outer Objects
+				for (size_t v = 0; v < members->len; v++) {
+					Name name = frame.names->names[v];
+					if (name.value->scope < curScope) {
+						delVarAtIndex(members, v);
+					}
+				}
 
 				if (shouldVar) {
 					Value v = (Value){
@@ -714,6 +759,71 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 
 				jump(insts[i].data._int);
+
+				break;
+			}
+			case STARTO: {
+				char* arg = popArg();
+
+				if (curScope != 0) {
+					ierr("Objects can currently only be defined at the 0th scope.");
+				}
+
+				if (isVar(frame.names, arg)) {
+					ierr("Redefinition of existing variable in the same scope.");
+				}
+
+				NameList* members = malloc(sizeof(NameList));
+				*members = (NameList){
+					.names = malloc(sizeof(Name)),
+				};
+
+				// Add outer Objects
+				for (size_t v = 0; v < frame.names->len; v++) {
+					Name name = frame.names->names[v];
+					if (name.value->type.id == TYPE_OBJECT) {
+						setVar(members, name.name, &name);
+					}
+				}
+
+				pushFrame((CallFrame){.names = members, .inner = true});
+				readByteCode(framesCount - 1, i + 1, instsCount - insts[i].data._int);
+				popFrame();
+
+				// Remove outer Objects
+				for (size_t v = 0; v < members->len; v++) {
+					Name name = frame.names->names[v];
+					if (name.value->scope < curScope) {
+						delVarAtIndex(members, v);
+					}
+				}
+
+				Value v = (Value){
+					.type = type(TYPE_OBJECT),
+					.data._int = pushObject(strdup(arg), members),
+				};
+
+				createVar(frame.names, strdup(arg), v);
+
+				jump(insts[i].data._int);
+
+				break;
+			}
+			case NEWO: {
+				Value a = pop().elem;
+
+				if (a.type.objectIndex < 0) {
+					ierr("You cannot use the new expression on basic types.");
+				}
+
+				Value v = (Value){
+					.type = initobj(a.type.objectIndex),
+					.scope = curScope,
+				};
+
+				v.data._initObject = createInitObject(objects[a.type.objectIndex]);
+
+				push(toElem(v));
 
 				break;
 			}
@@ -788,7 +898,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				break;
 			}
 			case ARRAYIW: {	 // `new a[b] with c`
-				StackElem c = pop();
+				Value c = getValue(pop());
 				Value b = getValue(pop());
 				Value a = pop().elem;
 
@@ -796,7 +906,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					ierr("Expected positive int in array initilization.");
 				}
 
-				if (!typeInfoEqual(a.type, getValue(c).type)) {
+				if (!typeInfoEqual(a.type, c.type)) {
 					ierr("The `with` expression differs in type from the array.");
 				}
 
@@ -816,7 +926,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				// Populate array
 				for (int i = 0; i < b.data._int; i++) {
-					Value* v = getValuePtr(c);
+					Value* v = malloc(sizeof(Value));
+					*v = dupValue(c);
 					outv.data._array.arr[i] = v;
 					v->refCount++;
 				}
@@ -917,6 +1028,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					push(toElem(v));
 				} else if (a.type.id == TYPE_UTIL) {
 					push(toVar(getVar(a.data._utility.members, insts[i].data._ptr)));
+				} else if (a.type.id == TYPE_INIT_OBJ) {
+					push(toVar(getVar(a.data._initObject.members, insts[i].data._ptr)));
 				} else {
 					ierr("The object referenced does not have accessible members.");
 				}

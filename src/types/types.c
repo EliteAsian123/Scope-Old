@@ -7,6 +7,7 @@
 #include "double.c"
 #include "float.c"
 #include "function.c"
+#include "initObject.c"
 #include "int.c"
 #include "long.c"
 #include "string.c"
@@ -14,7 +15,7 @@
 #endif
 
 static Data errorOnDefault(const TypeInfo type) {
-	fprintf(stderr, "Attempted to create a default value of a type that does not have a default value.\n");
+	fprintf(stderr, "Interpret Error: Attempted to create a default value of a type that does not have a default value.\n");
 	exit(-1);
 }
 
@@ -95,6 +96,18 @@ const Type types[] = {
 		.duplicate = noDuplicate,
 		.dispose = disposeUtility,
 	},
+	{
+		.displayName = "object",
+		.createDefault = createDefaultFunction,
+		.duplicate = noDuplicate,
+		.opEq = functionOpEq,
+	},
+	{
+		.displayName = "initializedObject",
+		.createDefault = createDefaultInitObject,
+		.duplicate = initObjectDuplicate,
+		.dispose = disposeInitObject,
+	},
 };
 static_assert(sizeof(types) / sizeof(Type) == _TYPES_ENUM_LEN, "Update enum or type array.");
 
@@ -105,8 +118,19 @@ const char* typestr(TypeInfo type) {
 		case TYPE_UNKNOWN:
 			o = strdup("unknown");
 			break;
+		case TYPE_INIT_OBJ:
+			o = strdup(types[type.id].displayName);
+
+			int len = snprintf(NULL, 0, "%s{%d}", o, type.objectIndex) + 1;
+			char* b = malloc(len);
+			snprintf(b, len, "%s{%d}", o, type.objectIndex);
+
+			free(o);
+			o = b;
+
+			break;
 		default:
-			if (type.id > _TYPES_ENUM_LEN) {
+			if (type.id < 0 || type.id >= _TYPES_ENUM_LEN) {
 				o = strdup("error");
 			} else {
 				o = strdup(types[type.id].displayName);
@@ -149,4 +173,23 @@ Value dupValue(Value v) {
 	out.data = types[out.type.id].duplicate(out.type, out.data);
 
 	return out;
+}
+
+InitObject createInitObject(ObjectPointer obj) {
+	NameList* members = malloc(sizeof(NameList));
+	members->len = obj.defaultMembers->len;
+	members->names = malloc(sizeof(Name) * members->len);
+
+	for (size_t i = 0; i < members->len; i++) {
+		Value* v = malloc(sizeof(Value));
+		*v = dupValue(*obj.defaultMembers->names[i].value);
+		members->names[i] = (Name){
+			.name = strdup(obj.defaultMembers->names[i].name),
+			.value = v,
+		};
+	}
+
+	return (InitObject){
+		.members = members,
+	};
 }

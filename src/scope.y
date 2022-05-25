@@ -44,7 +44,7 @@
 
 /* Statement keywords */
 %token S_EXTERN S_IF S_ELSE S_WHILE S_RETURN S_BREAK S_FUNC S_SWAP S_FOR S_THROW
-%token S_REPEAT S_UTILITY
+%token S_REPEAT S_UTILITY S_OBJECT
 
 /* Expression keywords */
 %token E_NEW E_WITH
@@ -58,9 +58,9 @@
 %token<v_double> L_DOUBLE
 
 /* Operators */
-%token T_EQ T_NE T_AND T_OR T_GTE T_LTE
-%left T_AND T_OR
-%left '>' '<' T_EQ T_NE T_GTE T_LTE
+%token O_EQ O_NE O_AND O_OR O_GTE O_LTE O_EB
+%left O_AND O_OR
+%left '>' '<' O_EQ O_NE O_GTE O_LTE
 %left '+' '-'
 %left '*' '/' '%'
 %left O_CAST
@@ -115,8 +115,13 @@ type		: T_VOID {
 				}
 			| T_FUNC {
 					pushi({.inst = LOADT, .type = type(TYPE_FUNC)});
-				} '(' type_list ')'
-			| type '[' ']' {
+				} '<' type_list '>'
+			| IDENTIFIER {
+					//TEMP
+					pushi({.inst = LOADV, .data._ptr = $1});
+					pushi({.inst = LOADOT});
+				}
+			| type O_EB {
 					pushi({.inst = LOADT, .type = type(TYPE_ARRAY)});
 					pushi({.inst = SWAP});
 					pushi({.inst = APPENDT});
@@ -142,6 +147,7 @@ estatement	: if
 			| for
 			| repeat
 			| utility
+			| object
 			;
 
 statement	: declare
@@ -173,6 +179,7 @@ expr		: '(' expr ')'
 			| extern
 			| arr_init
 			| arr_get
+			| init_object
 			;
 
 /* Basic Statements */
@@ -300,15 +307,15 @@ num_op		: expr '+' expr { pushi({.inst = ADD}); }
 			| '-' expr { pushi({.inst = NEG}); } %prec O_UMINUS
 			;
 
-bool_op		: expr T_EQ expr { pushi({.inst = EQ}); }
-			| expr T_NE expr { pushi({.inst = EQ}); pushi({.inst = NOT}); }
+bool_op		: expr O_EQ expr { pushi({.inst = EQ}); }
+			| expr O_NE expr { pushi({.inst = EQ}); pushi({.inst = NOT}); }
 			| expr '>' expr { pushi({.inst = GT}); }
 			| expr '<' expr { pushi({.inst = LT}); }
-			| expr T_GTE expr { pushi({.inst = GTE}); }
-			| expr T_LTE expr { pushi({.inst = LTE}); }
+			| expr O_GTE expr { pushi({.inst = GTE}); }
+			| expr O_LTE expr { pushi({.inst = LTE}); }
 			| '!' expr { pushi({.inst = NOT}); }
-			| expr T_AND expr { pushi({.inst = AND}); }
-			| expr T_OR expr { pushi({.inst = OR}); }
+			| expr O_AND expr { pushi({.inst = AND}); }
+			| expr O_OR expr { pushi({.inst = OR}); }
 			;
 
 cast		: '(' type ')' expr { pushi({.inst = CAST}); } %prec O_CAST
@@ -343,7 +350,7 @@ arr_init	: E_NEW type '[' expr ']' {
 			| E_NEW type '[' expr ']' E_WITH expr {
 					pushi({.inst = ARRAYIW});
 				}
-			| E_NEW type '[' ']' {
+			| E_NEW type O_EB {
 					push(toElem((Value){ .data._int = 0 }));
 				} '{' arr_init_list '}' {
 					pushi({.inst = ARRAYIL, .data._int = pop().elem.data._int});
@@ -475,6 +482,7 @@ utility_in	: /* Nothing */
 			| utility_in declare EOL
 			| utility_in declaref
 			| utility_in EOL
+			;
 
 utility		: S_UTILITY IDENTIFIER {
 					pushi({.inst = LOADA, .data._ptr = $2});
@@ -482,6 +490,27 @@ utility		: S_UTILITY IDENTIFIER {
 					pushi({});
 				} '{' utility_in '}' {
 					setInst((Inst){.inst = STARTU, .data._int = instsCount}, popLoc(), scope);
+				}
+			;
+
+/* Object */
+
+object_in	: /* Nothing */
+			| object_in declare EOL
+			| object_in EOL
+			;
+
+object		: S_OBJECT IDENTIFIER {
+					pushi({.inst = LOADA, .data._ptr = $2});
+					pushLoc();
+					pushi({});
+				} '{' object_in '}' {
+					setInst((Inst){.inst = STARTO, .data._int = instsCount}, popLoc(), scope);
+				}
+			;
+
+init_object	: E_NEW type {
+					pushi({.inst = NEWO});
 				}
 			;
 

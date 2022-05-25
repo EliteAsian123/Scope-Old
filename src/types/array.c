@@ -14,7 +14,11 @@ static Data arrayDuplicate(const TypeInfo type, const Data v) {
 
 	int size = sizeof(Value*) * out._array.len;
 	out._array.arr = malloc(size);
-	memcpy(out._array.arr, v._array.arr, size);
+	for (size_t i = 0; i < out._array.len; i++) {
+		Value* val = malloc(sizeof(Value));
+		*val = dupValue(*v._array.arr[i]);
+		out._array.arr[i] = val;
+	}
 
 	return out;
 }

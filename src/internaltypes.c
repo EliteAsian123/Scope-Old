@@ -5,6 +5,10 @@ bool typeInfoEqual(TypeInfo a, TypeInfo b) {
 		return false;
 	}
 
+	if (a.objectIndex != b.objectIndex) {
+		return false;
+	}
+
 	if (a.argsLen != b.argsLen) {
 		return false;
 	}

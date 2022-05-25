@@ -86,6 +86,8 @@ enum Types {
 	TYPE_LONG,
 	TYPE_DOUBLE,
 	TYPE_UTIL,
+	TYPE_OBJECT,
+	TYPE_INIT_OBJ,
 	_TYPES_ENUM_LEN
 };
 
@@ -96,5 +98,7 @@ Data createDefaultType(TypeInfo type);
 void* typedup(int id, const void* ptr);
 void dispose(Name name);
 Value dupValue(Value v);
+
+InitObject createInitObject(ObjectPointer obj);
 
 #endif
