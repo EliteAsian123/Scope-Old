@@ -65,12 +65,13 @@
 "long"			{ return T_LONG; }
 "double"		{ return T_DOUBLE; }
 
-"=="			{ return T_EQ; }
-"!="			{ return T_NE; }
-"&&"			{ return T_AND; }
-"||"			{ return T_OR; }
-">="			{ return T_GTE; }
-"<="			{ return T_LTE; }
+"=="			{ return O_EQ; }
+"!="			{ return O_NE; }
+"&&"			{ return O_AND; }
+"||"			{ return O_OR; }
+">="			{ return O_GTE; }
+"<="			{ return O_LTE; }
+"[]"			{ return O_EB; }
 
 \"(\\.|[^"\\])*\" {
 	// Copy, remove quotes, and unescape

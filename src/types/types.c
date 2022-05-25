@@ -15,7 +15,7 @@
 #endif
 
 static Data errorOnDefault(const TypeInfo type) {
-	fprintf(stderr, "Attempted to create a default value of a type that does not have a default value.\n");
+	fprintf(stderr, "Interpret Error: Attempted to create a default value of a type that does not have a default value.\n");
 	exit(-1);
 }
 
@@ -104,7 +104,7 @@ const Type types[] = {
 	},
 	{
 		.displayName = "initializedObject",
-		.createDefault = errorOnDefault,
+		.createDefault = createDefaultInitObject,
 		.duplicate = noDuplicate,
 		.dispose = disposeInitObject,
 	},
@@ -173,4 +173,23 @@ Value dupValue(Value v) {
 	out.data = types[out.type.id].duplicate(out.type, out.data);
 
 	return out;
+}
+
+InitObject createInitObject(ObjectPointer obj) {
+	NameList* members = malloc(sizeof(NameList));
+	members->len = obj.defaultMembers->len;
+	members->names = malloc(sizeof(Name) * members->len);
+
+	for (size_t i = 0; i < members->len; i++) {
+		Value* v = malloc(sizeof(Value));
+		*v = dupValue(*obj.defaultMembers->names[i].value);
+		members->names[i] = (Name){
+			.name = strdup(obj.defaultMembers->names[i].name),
+			.value = v,
+		};
+	}
+
+	return (InitObject){
+		.members = members,
+	};
 }

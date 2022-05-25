@@ -72,6 +72,9 @@ enum Insts {
 Inst* insts;
 size_t instsCount;
 
+ObjectPointer* objects;
+size_t objectsCount;
+
 void initTypeArgs(TypeInfo* i, TypeInfo args[], size_t len);
 bool typeInfoEqual(TypeInfo a, TypeInfo b);
 

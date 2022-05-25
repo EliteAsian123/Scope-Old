@@ -99,4 +99,6 @@ void* typedup(int id, const void* ptr);
 void dispose(Name name);
 Value dupValue(Value v);
 
+InitObject createInitObject(ObjectPointer obj);
+
 #endif

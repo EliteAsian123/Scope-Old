@@ -58,14 +58,13 @@
 %token<v_double> L_DOUBLE
 
 /* Operators */
-%token T_EQ T_NE T_AND T_OR T_GTE T_LTE
-%left T_AND T_OR
-%left '>' '<' T_EQ T_NE T_GTE T_LTE
+%token O_EQ O_NE O_AND O_OR O_GTE O_LTE O_EB
+%left O_AND O_OR
+%left '>' '<' O_EQ O_NE O_GTE O_LTE
 %left '+' '-'
 %left '*' '/' '%'
 %left O_CAST
-%left O_INVOKE
-%left '!' O_UMINUS O_NEW
+%left '!' O_UMINUS
 %left '^'
 %left O_ARR_GET
 %left '.'
@@ -117,15 +116,15 @@ type		: T_VOID {
 			| T_FUNC {
 					pushi({.inst = LOADT, .type = type(TYPE_FUNC)});
 				} '<' type_list '>'
-			| type '[' ']' {
-					pushi({.inst = LOADT, .type = type(TYPE_ARRAY)});
-					pushi({.inst = SWAP});
-					pushi({.inst = APPENDT});
-				}
 			| IDENTIFIER {
 					//TEMP
 					pushi({.inst = LOADV, .data._ptr = $1});
 					pushi({.inst = LOADOT});
+				}
+			| type O_EB {
+					pushi({.inst = LOADT, .type = type(TYPE_ARRAY)});
+					pushi({.inst = SWAP});
+					pushi({.inst = APPENDT});
 				}
 			;
 
@@ -164,13 +163,13 @@ statement	: declare
 			;
 
 expr		: '(' expr ')'
-			| IDENTIFIER { pushi({.inst = LOADV, .data._ptr = $1}); }
 			| L_NUMBER { pushi({.inst = LOAD, .type = type(TYPE_INT), .data._int = $1}); }
 			| L_STRING { pushi({.inst = LOAD, .type = type(TYPE_STR), .data._ptr = $1}); }
 			| L_BOOL { pushi({.inst = LOAD, .type = type(TYPE_BOOL), .data._int = $1}); }
 			| L_FLOAT { pushi({.inst = LOAD, .type = type(TYPE_FLOAT), .data._float = $1}); }
 			| L_LONG { pushi({.inst = LOAD, .type = type(TYPE_LONG), .data._long = $1}); }
 			| L_DOUBLE { pushi({.inst = LOAD, .type = type(TYPE_DOUBLE), .data._double = $1}); }
+			| IDENTIFIER { pushi({.inst = LOADV, .data._ptr = $1}); }
 			| num_op
 			| bool_op
 			| cast
@@ -308,15 +307,15 @@ num_op		: expr '+' expr { pushi({.inst = ADD}); }
 			| '-' expr { pushi({.inst = NEG}); } %prec O_UMINUS
 			;
 
-bool_op		: expr T_EQ expr { pushi({.inst = EQ}); }
-			| expr T_NE expr { pushi({.inst = EQ}); pushi({.inst = NOT}); }
+bool_op		: expr O_EQ expr { pushi({.inst = EQ}); }
+			| expr O_NE expr { pushi({.inst = EQ}); pushi({.inst = NOT}); }
 			| expr '>' expr { pushi({.inst = GT}); }
 			| expr '<' expr { pushi({.inst = LT}); }
-			| expr T_GTE expr { pushi({.inst = GTE}); }
-			| expr T_LTE expr { pushi({.inst = LTE}); }
+			| expr O_GTE expr { pushi({.inst = GTE}); }
+			| expr O_LTE expr { pushi({.inst = LTE}); }
 			| '!' expr { pushi({.inst = NOT}); }
-			| expr T_AND expr { pushi({.inst = AND}); }
-			| expr T_OR expr { pushi({.inst = OR}); }
+			| expr O_AND expr { pushi({.inst = AND}); }
+			| expr O_OR expr { pushi({.inst = OR}); }
 			;
 
 cast		: '(' type ')' expr { pushi({.inst = CAST}); } %prec O_CAST
@@ -347,15 +346,15 @@ arr_init_list_elem	: /* Nothing */
 
 arr_init	: E_NEW type '[' expr ']' {
 					pushi({.inst = ARRAYI});
-				} %prec O_NEW
+				}
 			| E_NEW type '[' expr ']' E_WITH expr {
 					pushi({.inst = ARRAYIW});
-				} %prec O_NEW
-			| E_NEW type '[' ']' {
+				}
+			| E_NEW type O_EB {
 					push(toElem((Value){ .data._int = 0 }));
 				} '{' arr_init_list '}' {
 					pushi({.inst = ARRAYIL, .data._int = pop().elem.data._int});
-				} %prec O_NEW
+				}
 			;
 
 arr_get		: expr '[' expr ']' {
@@ -429,7 +428,7 @@ invoke_s	: expr '(' iargs_list ')' {
 
 invoke_e	: expr '(' iargs_list ')' {
 					pushi({.inst = CALLF, .type = type(TYPE_UNKNOWN)});
-				} %prec O_INVOKE
+				}
 			;
 
 return		: S_RETURN {
@@ -512,7 +511,7 @@ object		: S_OBJECT IDENTIFIER {
 
 init_object	: E_NEW type {
 					pushi({.inst = NEWO});
-				} %prec O_NEW
+				}
 			;
 
 %%

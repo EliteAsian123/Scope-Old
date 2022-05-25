@@ -74,10 +74,6 @@ static size_t argstackCount;
 static FuncPointer* funcs;
 static size_t funcsCount;
 
-// Interpret stage
-static ObjectPointer* objects;
-static size_t objectsCount;
-
 // Parse stage
 static InstBuffer instbuffer[STACK_SIZE];
 static size_t instbufferCount;
@@ -825,24 +821,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					.scope = curScope,
 				};
 
-				ObjectPointer obj = objects[a.type.objectIndex];
-
-				NameList* members = malloc(sizeof(NameList));
-				members->len = obj.defaultMembers->len;
-				members->names = malloc(sizeof(Name) * members->len);
-
-				for (size_t i = 0; i < members->len; i++) {
-					Value* v = malloc(sizeof(Value));
-					*v = dupValue(*obj.defaultMembers->names[i].value);
-					members->names[i] = (Name){
-						.name = strdup(obj.defaultMembers->names[i].name),
-						.value = v,
-					};
-				}
-
-				v.data._initObject = (InitObject){
-					.members = members,
-				};
+				v.data._initObject = createInitObject(objects[a.type.objectIndex]);
 
 				push(toElem(v));
 
