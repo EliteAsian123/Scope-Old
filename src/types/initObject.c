@@ -12,11 +12,24 @@ static Data createDefaultInitObject(TypeInfo type) {
 }
 
 static Data initObjectDuplicate(const TypeInfo type, const Data v) {
-	Data out = v;
+	InitObject obj = v._initObject;
 
-	int size = sizeof(Value*) * out._array.len;
-	out._array.arr = malloc(size);
-	memcpy(out._array.arr, v._array.arr, size);
+	obj.members = malloc(sizeof(NameList));
+	memcpy(obj.members, v._initObject.members, sizeof(NameList));
+	obj.members->names = malloc(sizeof(Name) * obj.members->len);
+	for (size_t i = 0; i < obj.members->len; i++) {
+		Name original = v._initObject.members->names[i];
 
-	return out;
+		Value* ptr = malloc(sizeof(Value));
+		*ptr = dupValue(*original.value);
+
+		obj.members->names[i] = (Name){
+			.name = strdup(original.name),
+			.value = ptr,
+		};
+	}
+
+	return (Data){
+		._initObject = obj,
+	};
 }

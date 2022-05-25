@@ -898,7 +898,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				break;
 			}
 			case ARRAYIW: {	 // `new a[b] with c`
-				StackElem c = pop();
+				Value c = getValue(pop());
 				Value b = getValue(pop());
 				Value a = pop().elem;
 
@@ -906,7 +906,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					ierr("Expected positive int in array initilization.");
 				}
 
-				if (!typeInfoEqual(a.type, getValue(c).type)) {
+				if (!typeInfoEqual(a.type, c.type)) {
 					ierr("The `with` expression differs in type from the array.");
 				}
 
@@ -926,7 +926,8 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				// Populate array
 				for (int i = 0; i < b.data._int; i++) {
-					Value* v = getValuePtr(c);
+					Value* v = malloc(sizeof(Value));
+					*v = dupValue(c);
 					outv.data._array.arr[i] = v;
 					v->refCount++;
 				}

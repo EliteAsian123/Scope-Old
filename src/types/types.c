@@ -105,7 +105,7 @@ const Type types[] = {
 	{
 		.displayName = "initializedObject",
 		.createDefault = createDefaultInitObject,
-		.duplicate = noDuplicate,
+		.duplicate = initObjectDuplicate,
 		.dispose = disposeInitObject,
 	},
 };
