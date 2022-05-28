@@ -518,13 +518,15 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				break;
 			}
 			case LOADOT: {
-				Value a = getValue(pop());
+				StackElem a = pop();
+				Value av = getValue(a);
 
-				if (a.type.id != TYPE_OBJECT) {
-					ierr("Attempted to get a type from a value that isn't an object.");
+				if (av.type.id != TYPE_OBJECT) {
+					ierr("Attempted to convert a non-type into a type.");
 				}
 
-				push(toElem((Value){.type = initobj(a.data._int)}));
+				push(toElem((Value){.type = initobj(av.data._int)}));
+
 				break;
 			}
 			case LOADV: {

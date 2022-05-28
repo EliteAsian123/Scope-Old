@@ -116,9 +116,7 @@ type		: T_VOID {
 			| T_FUNC {
 					pushi({.inst = LOADT, .type = type(TYPE_FUNC)});
 				} '<' type_list '>'
-			| IDENTIFIER {
-					//TEMP
-					pushi({.inst = LOADV, .data._ptr = $1});
+			| expr {
 					pushi({.inst = LOADOT});
 				}
 			| type O_EB {
@@ -184,7 +182,9 @@ expr		: '(' expr ')'
 
 /* Basic Statements */
 
-declare		: type IDENTIFIER '=' expr { pushi({.inst = SAVEV, .data._ptr = $2}); }
+declare		: type IDENTIFIER '=' expr { 
+					pushi({.inst = SAVEV, .data._ptr = $2});
+				}
 			| T_AUTO IDENTIFIER {
 					pushi({.inst = LOADT, .type = type(TYPE_UNKNOWN)});
 				} '=' expr {
@@ -481,6 +481,7 @@ else_block	: if_cond block {
 utility_in	: /* Nothing */
 			| utility_in declare EOL
 			| utility_in declaref
+			| utility_in object
 			| utility_in EOL
 			;
 
