@@ -2,57 +2,25 @@
 
 *Scope* is an interpreted, object oriented programming language that I am in the process of creating. So far, it isn't even object oriented, but I am working on it. I promise.
 
-```cpp
-#insert Standard/Core.scope
-
-println("Hello, World!");
-```
+<img src="img/HelloWorld.png" alt="Hello World in Scope" width="362"/>
 
 ## Cool Features
 
 *Temporary variables are boring...*
-```cpp
-int a = 512;
-int b = 256;
-swap(a, b); // Swap them around!
 
-println((string) a); // Prints "256"
-println((string) b); // Prints "512"
-```
+<img src="img/Swap.png" alt="Hello World in Scope" width="453"/>
 
 *Function bloat...*
-```cpp
-func void funcWithinFunc() {
-    // Only acessible within this function!
-    func void theFunc() {
-        println("Hello, World!");
-    }
-    
-    theFunc();
-    theFunc();
-}
 
-funcWithinFunc(); // Prints "Hello, World!" twice!
-```
+<img src="img/Func.png" alt="Hello World in Scope" width="604"/>
 
 *I don't need `i`...* (temporarily disabled)
-```cpp
-// No more i!
-repeat(5) {
-    println("Hello, World!");
-}
-```
+
+<img src="img/Repeat.png" alt="Hello World in Scope" width="382"/>
 
 *Initilizing an array is annoying...*
 
-```cpp
-// with?
-
-int[] arr = new int[100] with 1;
-string[] helloWorlds = new string[5] with "Hello, World!";
-
-// with!
-```
+<img src="img/With.png" alt="Hello World in Scope" width="678"/>
 
 ## Installation
 
