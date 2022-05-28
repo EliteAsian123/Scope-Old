@@ -1,0 +1,17 @@
+#insert Standard/Core.scope
+#insert Standard/Math/Core.scope
+#insert Standard/Math/Vec.scope
+
+auto a = Math.vec3(1.3d, 24.6d, 4.2d);
+auto b = Math.vec3(3.7d, -5.34d, 0.4d);
+auto c = Math.vecAdd(a, b);
+auto d = Math.vecMulDouble(c, -5d);
+auto e = Math.vecMagnitude(d);
+auto f = Math.vecDivDouble(a, e);
+
+println(Math.vecToStr(a));
+println(Math.vecToStr(b));
+println(Math.vecToStr(c));
+println(Math.vecToStr(d));
+println((string) e);
+println(Math.vecToStr(f));

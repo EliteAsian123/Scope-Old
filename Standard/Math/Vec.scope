@@ -1,0 +1,187 @@
+utility Math {
+	/%
+	A vector (double) with a variable length.
+	%/
+	object Vec {
+		/%
+		The contents of the vector.
+		%/
+		double[] v = new double[0];
+	}
+	
+	/%
+	Creates a vector with 2 elements.
+	%/
+	func Vec vec2(double x, double y) {
+		Vec v = new Vec;
+		v.v = new double[] { x, y };
+		ret v;
+	}
+	
+	/%
+	Creates a vector with 3 elements.
+	%/
+	func Vec vec3(double x, double y, double z) {
+		Vec v = new Vec;
+		v.v = new double[] { x, y, z };
+		ret v;
+	}
+	
+	/%
+	Creates a vector with 4 elements.
+	%/
+	func Vec vec4(double x, double y, double z, double w) {
+		Vec v = new Vec;
+		v.v = new double[] { x, y, z, w };
+		ret v;
+	}
+	
+	/%
+	Calculates the square magnitude (a.k.a square length) of @"v".
+	%/
+	func double vecMagnitudeSqr(Vec v) {
+		double out = 0d;
+		for (int i = 0, i < v.v.length, i++) {
+			out += v.v[i] ^ 2d;
+		}
+		ret out;
+	}
+
+	/%
+	@unoptimized: This function uses square root which can be slow. Consider using @"vecMagnitudeSqr" instead.
+	
+	Calculates the magnitude (a.k.a. length) of @"v".
+	%/
+	func double vecMagnitude(Vec v) {
+		ret Math.sqrt(vecMagnitudeSqr(v));
+	}
+	
+	/%
+	Returns whether or not @"a" and @"b" are the same size.
+	%/
+	func bool vecSameSize(Vec a, Vec b) {
+		ret a.v.length == b.v.length;
+	}
+	
+	/%
+	A base all simple vector operations (Vec, Vec).
+	@"a" and @"b" must be the same size.
+	Each element of each vector is put into @"op" and returned into a new vector.
+	%/
+	func Vec vecOperation(Vec a, Vec b, function<double, double, double> op) {
+		if (!vecSameSize(a, b)) {
+			throw "The vectors given are not the same size.";
+		}
+		
+		Vec out = new Vec;
+		out.v = new double[a.v.length];
+		for (int i = 0, i < a.v.length, i++) {
+			out.v[i] = op(a.v[i], b.v[i]);
+		}
+
+		ret out;
+	}
+	
+	/%
+	A base all simple vector operations (Vec, double).
+	Each element of the vector is put into @"op" and returned into a new vector.
+	The second argument of @"op" is always @"b".
+	%/
+	func Vec vecOperationDouble(Vec a, double b, function<double, double, double> op) {
+		Vec out = new Vec;
+		out.v = new double[a.v.length];
+		for (int i = 0, i < a.v.length, i++) {
+			out.v[i] = op(a.v[i], b);
+		}
+		
+		ret out;
+	}
+	
+	/%
+	Adds each element of @"a" and @"b" together into a new vector.
+	%/
+	func Vec vecAdd(Vec a, Vec b) {
+		ret vecOperation(a, b, double (double a, double b) { 
+			ret a + b;
+		});
+	}
+	
+	/%
+	Subtracts each element of @"a" and @"b" together into a new vector.
+	%/
+	func Vec vecSub(Vec a, Vec b) {
+		ret vecOperation(a, b, double (double a, double b) { 
+			ret a - b;
+		});
+	}
+	
+	/%
+	Multiplies each element of @"a" and @"b" together into a new vector.
+	%/
+	func Vec vecMul(Vec a, Vec b) {
+		ret vecOperation(a, b, double (double a, double b) { 
+			ret a * b;
+		});
+	}
+	
+	/%
+	Divides each element of @"a" and @"b" together into a new vector.
+	%/
+	func Vec vecDiv(Vec a, Vec b) {
+		ret vecOperation(a, b, double (double a, double b) { 
+			ret a / b;
+		});
+	}
+	
+	/%
+	Adds each element of @"a" to @"b" into a new vector.
+	%/
+	func Vec vecAddDouble(Vec a, double b) {
+		ret vecOperationDouble(a, b, double (double a, double b) { 
+			ret a + b;
+		});
+	}
+
+	/%
+	Subtracts each element of @"a" to @"b" into a new vector.
+	%/
+	func Vec vecSubDouble(Vec a, double b) {
+		ret vecOperationDouble(a, b, double (double a, double b) { 
+			ret a - b;
+		});
+	}
+	
+	/%
+	Multiples each element of @"a" to @"b" into a new vector.
+	%/
+	func Vec vecMulDouble(Vec a, double b) {
+		ret vecOperationDouble(a, b, double (double a, double b) { 
+			ret a * b;
+		});
+	}
+	
+	/%
+	Divides each element of @"a" to @"b" into a new vector.
+	%/
+	func Vec vecDivDouble(Vec a, double b) {
+		ret vecOperationDouble(a, b, double (double a, double b) { 
+			ret a / b;
+		});
+	}
+	
+	/%
+	Converts @"v" into a string. In the `(x, y, z)` format.
+	%/
+	func string vecToStr(Vec v) {
+		if (v.v.length <= 0) {
+			ret "";
+		}
+		
+		string output = "(";
+		for (int i = 0, i < v.v.length - 1, i++) {
+			output += (string) v.v[i] + ", ";
+		}
+		output += (string) v.v[v.v.length - 1] + ")";
+		ret output;
+	}
+}
