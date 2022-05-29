@@ -37,6 +37,15 @@ utility Math {
 	}
 	
 	/%
+	Creates a vector with @"n" elements (initilized to 0).
+	%/
+	func Vec vecn(int n) {
+		Vec v = new Vec;
+		v.v = new double[n];
+		ret v;
+	}
+	
+	/%
 	Calculates the square magnitude (a.k.a square length) of @"v".
 	%/
 	func double vecMagnitudeSqr(Vec v) {
@@ -57,6 +66,51 @@ utility Math {
 	}
 	
 	/%
+	@unoptimized: This function uses @"vecMagnitude" which can be slow.
+	
+	Returns @"v" with a magnitude of @"m".
+	%/
+	func Vec vecSetMagnitude(Vec v, double m) {
+		Vec out = vecn(v.v.length);
+		double mag = vecMagnitude(v);
+
+		for (int i = 0, i < v.v.length, i++) {
+			out.v[i] = v.v[i] / mag * m;
+		}
+		
+		ret out;
+	}
+	
+	/%
+	@unoptimized: This function uses @"vecMagnitude" which can be slow.
+	
+	Returns @"v" with a magnitude of 1.
+	%/
+	func Vec vecNormalize(Vec v) {
+		ret vecSetMagnitude(v, 1d);
+	}
+
+	
+	/%
+	@unoptimized: This function uses @"vecMagnitude" which can be slow.
+
+	Returns @"v" with a maximum magnitude of @"m".
+	%/
+	func Vec vecMaxMagnitude(Vec v, double m) {
+		double mag = vecMagnitude(v);
+		
+		if (mag > m) {
+			ret vecSetMagnitude(v, m);
+		} else {
+			Vec out = vecn(v.v.length);
+			for (int i = 0, i < v.v.length, i++) {
+				out.v[i] = v.v[i];
+			}
+			ret out;
+		}
+	}
+	
+	/%
 	Returns whether or not @"a" and @"b" are the same size.
 	%/
 	func bool vecSameSize(Vec a, Vec b) {
@@ -73,8 +127,7 @@ utility Math {
 			throw "The vectors given are not the same size.";
 		}
 		
-		Vec out = new Vec;
-		out.v = new double[a.v.length];
+		Vec out = vecn(a.v.length);
 		for (int i = 0, i < a.v.length, i++) {
 			out.v[i] = op(a.v[i], b.v[i]);
 		}
@@ -88,8 +141,7 @@ utility Math {
 	The second argument of @"op" is always @"b".
 	%/
 	func Vec vecOperationDouble(Vec a, double b, function<double, double, double> op) {
-		Vec out = new Vec;
-		out.v = new double[a.v.length];
+		Vec out = vecn(a.v.length);
 		for (int i = 0, i < a.v.length, i++) {
 			out.v[i] = op(a.v[i], b);
 		}
