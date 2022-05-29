@@ -1,0 +1,14 @@
+auto INT          =   123              ;
+auto LONG         =   12345l           ;
+
+auto FLOAT        =   123.456f         ;
+auto FLOAT_INF    =   fInf             ;
+auto FLOAT_NAN    =   fNan             ;
+
+auto DOUBLE       =   123.456d         ;
+auto DOUBLE_INF   =   dInf             ;
+auto DOUBLE_NAN   =   dNan             ;
+
+auto BOOL         =   true && false    ;
+
+auto STRING       =   "Hello, World!"  ;

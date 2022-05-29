@@ -11,7 +11,7 @@ utility Math {
 
 	double RAD_TO_DEG     = 180.0d / PI;
 	double DEG_TO_RAD     = PI / 180.0d;
-
+	
 	double SPEED_OF_LIGHT = 299792458d;
 	double NEWTONIAN_G    = 0.00000000006674315d;
 }

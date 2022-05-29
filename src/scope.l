@@ -124,6 +124,23 @@
 	yylval.v_int = 0;
 	return L_BOOL;
 }
+"fInf" {
+	yylval.v_float = INFINITY;
+	return L_FLOAT;
+}
+"dInf" {
+	yylval.v_double = INFINITY;
+	return L_DOUBLE;
+}
+"fNan" {
+	yylval.v_float = NAN;
+	return L_FLOAT;
+}
+"dNan" {
+	yylval.v_double = NAN;
+	return L_DOUBLE;
+}
+
 [a-zA-Z_][a-zA-Z0-9_]* {
 	yylval.v_str = strdup(yytext);
 	return IDENTIFIER;

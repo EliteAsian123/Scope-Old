@@ -61,6 +61,10 @@
 				{
 					"name": "constant.numeric.scope",
 					"match": "-?\\b([0-9]*[.])?[0-9]+(f|d)\\b"
+				},
+				{
+					"name": "constant.number.scope",
+					"match": "\\b(fInf|dInf|fNan|dNan)\\b"
 				}
 			]
 		},
