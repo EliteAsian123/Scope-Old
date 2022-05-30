@@ -5,6 +5,11 @@ long LONG_MAX = 9223372036854775807l;
 long LONG_MIN = LONG_MAX + 1l;
 
 /%
+A second in microseconds.
+%/
+long SECOND = 1000000l;
+
+/%
 Prints @"str" out into `stdout`.
 %/
 func void print(string str) {
@@ -53,4 +58,24 @@ clears the screen and returns the cursor to 0, 0.
 %/
 func void clear() {
 	print("\u001b[2J\u001b[H");
+}
+
+/%
+Pauses execution for @"time" microseconds.
+
+Use @"sleep" to pause for seconds.
+Use @"SECOND" to get 1 second in microseconds.
+%/
+func void usleep(long time) {
+	extern(time, 11);
+}
+
+/%
+Pauses execution for @"time" seconds.
+
+Use @"usleep" to pause for microseconds.
+%/
+func void sleep(float time) {
+	float t = time * (float) SECOND;
+	extern((long) t, 11);
 }

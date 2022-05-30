@@ -48,7 +48,7 @@
 			"patterns": [
 				{
 					"name": "variable.function.scope",
-					"match": "\\b(print|println|input|atoi|exit)\\b"
+					"match": "\\b(print|println|input|atoi|exit|usleep|sleep)\\b"
 				}
 			]
 		},

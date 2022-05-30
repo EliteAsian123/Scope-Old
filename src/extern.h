@@ -2,6 +2,7 @@
 #define S_EXTERN_H
 
 #include <math.h>
+#include <unistd.h>
 
 #include "bytecode.h"
 

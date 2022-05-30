@@ -9,14 +9,14 @@
 		.data._double = f(a.data._double), \
 	}));
 
-static void _print() {
+static void e_print() {
 	Value a = getValue(pop());
 	char* cstr = strToCstr(a.data._string);
 	printf("%s", cstr);
 	free(cstr);
 }
 
-static void _input() {
+static void e_input() {
 	// Get the input
 	char in[INPUT_BUFFER_SIZE];
 	fgets(in, INPUT_BUFFER_SIZE, stdin);
@@ -34,7 +34,7 @@ static void _input() {
 	}));
 }
 
-static void _stringToInt() {
+static void e_stringToInt() {
 	Value a = getValue(pop());
 
 	// Convert str to cstr then use atoi
@@ -46,35 +46,35 @@ static void _stringToInt() {
 	free(str);
 }
 
-static void _sqrt() {
+static void e_sqrt() {
 	mathFunc(sqrt);
 }
 
-static void _sin() {
+static void e_sin() {
 	mathFunc(sin);
 }
 
-static void _cos() {
+static void e_cos() {
 	mathFunc(cos);
 }
 
-static void _tan() {
+static void e_tan() {
 	mathFunc(tan);
 }
 
-static void _asin() {
+static void e_asin() {
 	mathFunc(asin);
 }
 
-static void _acos() {
+static void e_acos() {
 	mathFunc(acos);
 }
 
-static void _atan() {
+static void e_atan() {
 	mathFunc(atan);
 }
 
-static void _exit() {
+static void e_exit() {
 	Value a = getValue(pop());
 
 	if (a.data._int != 0) {
@@ -84,19 +84,25 @@ static void _exit() {
 	exit(a.data._int);
 }
 
+static void e_sleep() {
+	Value a = getValue(pop());
+	usleep(a.data._long);
+}
+
 const ExternPtr externs[] = {
-	_print,
-	_input,
-	_stringToInt,
-	_sqrt,
-	_exit,
-	_sin,
-	_cos,
-	_tan,
-	_asin,
-	_acos,
-	_atan,
+	e_print,
+	e_input,
+	e_stringToInt,
+	e_sqrt,
+	e_exit,
+	e_sin,
+	e_cos,
+	e_tan,
+	e_asin,
+	e_acos,
+	e_atan,
+	e_sleep,
 };
-const int externLen = 11;
+const int externLen = 12;
 
 #undef mathFunc
