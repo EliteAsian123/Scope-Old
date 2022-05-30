@@ -1,7 +1,21 @@
-// For now, minimum values cannot be represented by literals
+/%
+The maximum value that an int can represent.
+%/
 int  INT_MAX  = 2147483647;
+
+/%
+The minimum value that an int can represent.
+%/
 int  INT_MIN  = INT_MAX + 1;
+
+/%
+The maxmimum value that a long can represent.
+%/
 long LONG_MAX = 9223372036854775807l;
+
+/%
+The minimum value that a long can represent.
+%/
 long LONG_MIN = LONG_MAX + 1l;
 
 /%
@@ -26,7 +40,7 @@ func void println(string str) {
 /%
 @bug: The maximum input size is currently 256.
 
-Takes the input from `stdout`.
+Takes the input from `stdin`.
 %/
 func string input() {
 	ret extern(1);
