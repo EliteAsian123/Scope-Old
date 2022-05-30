@@ -1,0 +1,684 @@
+#insert Standard/Core.scope
+#insert Standard/ANSI.scope
+
+// DialogOption definition
+object DialogOption {
+	string text = "";
+	int dialogIndex = 0;
+	int endingIndex = -1;
+	int useItem = 0;
+}
+
+// Constructor for DialogOption
+func DialogOption ctorDialogOption(string text, int dialogIndex, int useItem) {
+	DialogOption me = new DialogOption;
+	me.text = text;
+	me.dialogIndex = dialogIndex;
+	me.useItem = useItem;
+	ret me;
+}
+
+// Constructor for DialogOption (with ending)
+func DialogOption ctorDialogOptionEnding(string text, int endingIndex) {
+	DialogOption me = new DialogOption;
+	me.text = text;
+	me.endingIndex = endingIndex;
+	ret me;
+}
+
+// Dialog definition
+object Dialog {
+	string text = "";
+	DialogOption[] options = new DialogOption[0];
+	int getItem = 0;
+}
+
+// Constructor for Dialog
+func Dialog ctorDialog(string text, DialogOption[] options, int getItem) {
+	Dialog me = new Dialog;
+	me.text = text;
+	me.options = options;
+	me.getItem = getItem;
+	ret me;
+}
+
+// All of the story
+Dialog[] story = new Dialog[] {
+	// 0
+	ctorDialog("I am alone. In this room with... nothing. Nothing but me.", new DialogOption[] {
+		ctorDialogOption("Look around more.", 1, 0),
+		ctorDialogOption("Sit and wait.", 2, 0),
+		ctorDialogOption("Yell for help.", 3, 0)
+	}, 0),
+	// 1
+	ctorDialog("Nope. I've checked every corner there is nothing here.", new DialogOption[] {
+		ctorDialogOption("Sit and wait.", 2, 0),
+		ctorDialogOption("Yell for help.", 3, 0)
+	}, 0),
+	// 2
+	ctorDialog("Prison is prison. I must act like a prisoner. I cannot escape anyways.\n" + 
+			   "About an hour or so later, I heard a voice. 'Whatcha in for?'", new DialogOption[] {
+		ctorDialogOption("I tried to stop the MECHV-06.", 4, 0),
+		ctorDialogOption("Murder.", 5, 0)
+	}, 0),
+	// 3
+	ctorDialog("'HELP!' I hear a voice. 'There is no point in yelling.\n" + 
+			   "No one will help you. What are you in for?'", new DialogOption[] {
+		ctorDialogOption("I tried to stop the MECHV-06.", 4, 0),
+		ctorDialogOption("Murder.", 5, 0)
+	}, 0),
+	// 4
+	ctorDialog("'MECHV-06 already killed my family, but sometimes you must let go.\n" + 
+			   "You just can't stop somethings.'", new DialogOption[] {
+		ctorDialogOption("MECHV-06 deserves to be eradicated.", 6, 0),
+		ctorDialogOption("Screw you!", 7, 0),
+		ctorDialogOption("I realize my mistake now...", 8, 0)
+	}, 0),
+	// 5
+	ctorDialog("'Murder? Who did you murder? And why are you in a temporal prison\n" + 
+			   "for it?'", new DialogOption[] {
+		ctorDialogOption("I was lying. I tried to stop the MECHV-06.", 4, 0),
+		ctorDialogOption("I murdered someone important to the timeline.", 66, 0)
+	}, 0),
+	// 6
+	ctorDialog("'No I totally agree with you, but TMP prevents you from changing\n" + 
+			   "the past.'", new DialogOption[] {
+		ctorDialogOption("Screw you!", 7, 0),
+		ctorDialogOption("I realize my mistake now...", 8, 0)
+	}, 0),
+	// 7
+	ctorDialog("'Screw you too! I was planning to let you escape with me, but\n" + 
+			   "I'll just do it on my own.'", new DialogOption[] {
+		ctorDialogOptionEnding("...", 0)
+	}, 0),
+	// 8
+	ctorDialog("'Yeah I would too. Grief does weird things. I have a plan to escape\n" + 
+			   "prison. You want in?'", new DialogOption[] {
+		ctorDialogOptionEnding("No thanks", 0),
+		ctorDialogOption("Of course! I don't deserve to be here.", 9, 0)
+	}, 0),
+	// 9
+	ctorDialog("'Okay. Take this key and keep it close to you. DON'T LOSE IT.'", new DialogOption[] {
+		ctorDialogOption("Throw the key out of the cell", 10, 1),
+		ctorDialogOption("What do I do with the key?", 11, 0)
+	}, 1),
+	// 10
+	ctorDialog("'You idiot.' he said. 'I'm turning you in.'", new DialogOption[] {
+		ctorDialogOption("...", 62, 0)
+	}, 0),
+	// 11
+	ctorDialog("'They are going to search me soon. While they're distracted,\n" + 
+			   "open your cell up and kill 'em with this fork!'", new DialogOption[] {
+		ctorDialogOption("I don't want to do it.", 12, 0),
+		ctorDialogOption("Okay.", 13, 0)
+	}, 2),
+	// 12
+	ctorDialog("'You want to escape or what?'", new DialogOption[] {
+		ctorDialogOption("Fine", 13, 0)
+	}, 0),
+	// 13
+	ctorDialog("I turn around and I see a guard coming up to us.\n" + 
+			   "'Time for a search Ted!' 'K boss, you do you.'\n" + 
+			   "The guard opens up 'Ted's' cell and begins searching him.", new DialogOption[] {
+		ctorDialogOption("Open the door with key.", 14, 1),
+		ctorDialogOption("Threaten the guard with the fork.", 15, 2)
+	}, 0),
+	// 14
+	ctorDialog("I unlock the door with the key and swung it open.\n" + 
+			   "The guard turns around. 'What do you think you are doing?'", new DialogOption[] {
+		ctorDialogOption("Kick the guard.", 16, 0),
+		ctorDialogOption("Stab the guard with fork.", 17, 2),
+		ctorDialogOption("Punch the guard in the face.", 18, 0)
+	}, 0),
+	// 15
+	ctorDialog("'I kill you' I heard my mouth say. 'Okay.\n" + 
+			   "Down to solitary. That fork won't killed me!'", new DialogOption[] {
+		ctorDialogOptionEnding("...", 1)
+	}, 0),
+	// 16
+	ctorDialog("'Ughgg, what was that for?' The guard takes his taser and tases me.", new DialogOption[] {
+		ctorDialogOption("...", 20, 0)
+	}, 0),
+	// 17
+	ctorDialog("'Ahhhh!' yelled the guard. I stab him again. 'Ahhhhh...'\n" + 
+			   "He's dead, but the fork is destroyed.", new DialogOption[] {
+		ctorDialogOption("...", 19, 0)
+	}, 0),
+	// 18
+	ctorDialog("'Uhhhh!' I knocked the guard out. Out cold. 'You didn't even\n" +
+			   "need the fork!' said Ted.", new DialogOption[] {
+		ctorDialogOption("...", 19, 0)
+	}, 0),
+	// 19
+	ctorDialog("'Good job. I'm proud of you'", new DialogOption[] {
+		ctorDialogOption("Stab Ted with the fork.", 21, 2),
+		ctorDialogOption("I am too.", 33, 0),
+		ctorDialogOption("Thanks.", 33, 0)
+	}, 0),
+	// 20
+	ctorDialog("I awake in solitary confinement. My heart is burning.\n" + 
+			   "My heart is in pain. 2 weeks go by. My heart still hearts,\n" + 
+			   "but it's too much to handle for my body.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 2)
+	}, 0),
+	// 21
+	ctorDialog("'AHHH WHAT? WHY I HELPED YOU!!!' Ted passes out.\n" + 
+			   "Not dead yet, but dead soon.", new DialogOption[] {
+		ctorDialogOption("Get out of here.", 23, 0),
+		ctorDialogOption("Search Ted.", 22, 0)
+	}, 0),
+	// 22
+	ctorDialog("A gun? Ted had a loaded gun on him the whole time and he\n" + 
+			   "told ME to kill the guard?", new DialogOption[] {
+		ctorDialogOption("Get out of here.", 23, 0)
+	}, 3),
+	// 23
+	ctorDialog("'Just what do you think you're doing' said the guard at the\n" + 
+			   "end of the hallway.", new DialogOption[] {
+		ctorDialogOption("Kill the guard.", 24, 3),
+		ctorDialogOption("'I killed the them.'", 27, 0)
+	}, 0),
+	// 24
+	ctorDialog("'BANG!' The guard drops dead, and I better run.\n" + 
+			   "Surely more are coming.", new DialogOption[] {
+		ctorDialogOption("Play dead.", 25, 0),
+		ctorDialogOption("Run.", 26, 0)
+	}, 0),
+	// 25
+	ctorDialog("About 2 minutes later, some guards come running over.\n" + 
+			   "'What the heck happened?'", new DialogOption[] {
+		ctorDialogOption("Continue playing dead.", 29, 0),
+		ctorDialogOption("Get up and run.", 30, 0)
+	}, 0),
+	// 26
+	ctorDialog("I run into a group of guards. Just like that, I'm surrounded.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 3)
+	}, 0),
+	// 27
+	ctorDialog("'GUARDS! You're dead man. Dead'", new DialogOption[] {
+		ctorDialogOption("Kill the guard.", 28, 3),
+		ctorDialogOption("Run.", 26, 0)
+	}, 0),
+	// 28
+	ctorDialog("I shoot the guard and kill him, but it's too late.\n" + 
+			   "I'm already surrounded.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 3)
+	}, 0),
+	// 29
+	ctorDialog("'Let's take them to the incinerator. There not much else\n" + 
+			   "we can do.' About 3 minutes later, they pick me and put me\n" + 
+			   "in a body bag. I'm screwed.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 4)
+	}, 0),
+	// 30
+	ctorDialog("'Get him!' yelled the guards. I kept on running and was met\n" +
+			   "with a split in the hallway. Which way do I go?", new DialogOption[] {
+		ctorDialogOption("Left.", 31, 0),
+		ctorDialogOption("Right.", 32, 0),
+		ctorDialogOption("Turn around and run back.", 26, 0)
+	}, 0),
+	// 31
+	ctorDialog("I continue to the left and was met with guards. Lots of them.\n" + 
+			   "They put me back into my cell.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 5)
+	}, 0),
+	// 32
+	ctorDialog("It was a way out! I am free! I am free to-'BANG!'", new DialogOption[] {
+		ctorDialogOptionEnding("...", 6)
+	}, 0),
+	// 33
+	ctorDialog("'Okay. Let's continue on.'", new DialogOption[] {
+		ctorDialogOption("After you.", 34, 0)
+	}, 0),
+	// 34
+	ctorDialog("We continue on into the twisted and dark halls of the\n" + 
+			   "temporal prison—the walls look futuristic and old at the\n" + 
+			   "same time—it is a sight to behold.", new DialogOption[] {
+		ctorDialogOption("Continue following Ted.", 35, 0)
+	}, 0),
+	// 35
+	ctorDialog("We eventually spot a guard at the end of the hall. Ted then\n" + 
+			   "pulls out a gun and shoots him. He drops dead.", new DialogOption[] {
+		ctorDialogOption("You had a gun the whole time?!?!?", 36, 0),
+		ctorDialogOption("Good work.", 38, 0)
+	}, 0),
+	// 36
+	ctorDialog("'Well the plan worked didn't it?'", new DialogOption[] {
+		ctorDialogOption("Stab Ted with the fork.", 37, 2),
+		ctorDialogOption("...", 39, 0)
+	}, 0),
+	// 37
+	ctorDialog("'WHAT DO YOU THINK YOU ARE DOING!!!!' Ted shoot the gun at me,\n" + 
+			   "and it hits me straight in the leg. I'm going to die soon. Ted\n" + 
+			   "shoots me again, this time in the head.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 6)
+	}, 0),
+	// 38
+	ctorDialog("Thanks.", new DialogOption[] {
+		ctorDialogOption("You're welcome.", 39, 0)
+	}, 0),
+	// 39
+	ctorDialog("'Okay. Let's search him,' Ted takes off the guard uniform and puts\n" + 
+			   "it on. 'Which one do you want?'", new DialogOption[] {
+		ctorDialogOption("The taser", 40, 0),
+		ctorDialogOption("The baton", 41, 0)
+	}, 0),
+	// 40
+	ctorDialog("'Use it wisely. It only has one shot.'", new DialogOption[] {
+		ctorDialogOption("Thanks", 42, 0)
+	}, 4),
+	// 41
+	ctorDialog("'You'll have to hit them hard in the head if you want to kill someone.'", new DialogOption[] {
+		ctorDialogOption("Thanks", 42, 0)
+	}, 5),
+	// 42
+	ctorDialog("We continue onwards. 'Okay Mr. MECHV-06. We have a split. They both\n" + 
+			   "lead in the same direction, but one way might have a little more fight\n" + 
+			   "then the other.'", new DialogOption[] {
+		ctorDialogOption("Go left.", 43, 0),
+		ctorDialogOption("Go right.", 58, 0)
+	}, 0),
+	// 43
+	ctorDialog("'Left we go...'' We continue walking down the hallway and turn to the\n" + 
+			   "left. We enter a room with no guards in it, but merchandise covers to\n" + 
+			   "room. 'Okay bud. Let's search her. We only have a little bit of time\n" +
+			   "though.'", new DialogOption[] {
+		ctorDialogOption("Search desk.", 44, 0),
+		ctorDialogOption("Search cabinet.", 45, 0)
+	}, 0),
+	// 44
+	ctorDialog("I search the desk and find a lockpick. I can't see that being useful.\n" +
+			   "'K boss let's head out' said Ted.", new DialogOption[] {
+		ctorDialogOption("Okay.", 46, 0)
+	}, 6),
+	// 45
+	ctorDialog("I search the cabinet and find a diagram of the whole prison.\n" + 
+			   "This might be useful. 'K boss let's head out' said Ted.", new DialogOption[] {
+		ctorDialogOption("Okay.", 46, 0)
+	}, 7),
+	// 46
+	ctorDialog("We exit the room and turn the corner, only to see a group of guards.", new DialogOption[] {
+		ctorDialogOption("Taze them.", 49, 4),
+		ctorDialogOption("Beat them with batton.", 50, 5),
+		ctorDialogOption("Stab them with fork.", 47, 2),
+		ctorDialogOption("Run.", 48, 0)
+	}, 0),
+	// 47
+	ctorDialog("I run up and stab one of them with my fork. He drops to the ground\n" + 
+			   "but the other one shots me.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 6)
+	}, 0),
+	// 48
+	ctorDialog("I run away but the guard shoots me. I'm dying.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 6)
+	}, 0),
+	// 49
+	ctorDialog("I taze the guards and all of them drop to the ground.\n" + 
+			   "'Good job bud' says Ted.", new DialogOption[] {
+		ctorDialogOption("Let's go on the move.", 51, 0)
+	}, 0),
+	// 50
+	ctorDialog("I run up hit one hard in the head with my batton.\n" + 
+			   "He drops to the ground. Ted runs up and tazes the other.\n" + 
+			   "'Nice' he says.", new DialogOption[] {
+		ctorDialogOption("Let's go on the move.", 51, 0)
+	}, 0),
+	// 51
+	ctorDialog("We find the exit but the door is locked. 'Crap!' yelled Ted.\n" + 
+			   "Maybe a little too loud.", new DialogOption[] {
+		ctorDialogOption("Kill Ted.", 52, 2),
+		ctorDialogOption("Pick the door open.", 55, 6),
+		ctorDialogOption("Look for another way out.", 56, 7)
+	}, 0),
+	// 52
+	ctorDialog("'WHY!!!' Ted yells. He drops dead.", new DialogOption[] {
+		ctorDialogOption("Pick the door open.", 53, 6),
+		ctorDialogOption("Look for another way out.", 54, 7)
+	}, 0),
+	// 53
+	ctorDialog("I successfully pick the door, and open it. I am free.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 7)
+	}, 0),
+	// 54
+	ctorDialog("I look at the map but can't figure out where I am.\n" + 
+			   "A group of guards eventually catch me, and I get captured.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 8)
+	}, 0),
+	// 55
+	ctorDialog("I successfully pick the door, and open it. We are free.\n" + 
+			   "'Good job buddy' says Ted. But then he shoots me. He betrayed me.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 9)
+	}, 0),
+	// 56
+	ctorDialog("I look at the map but can't figure out where we are.\n" + 
+			   "'I think we are here' says Ted. I'm glad he is with me. 'This way!'", new DialogOption[] {
+		ctorDialogOption("Follow Ted.", 57, 0)
+	}, 0),
+	// 57
+	ctorDialog("We find the exit and escape. 'Good job friend' says Ted.\n" + 
+			   "He pulls a gun on me. 'I'm sorry, this has to be done.'", new DialogOption[] {
+		ctorDialogOptionEnding("...", 9)
+	}, 0),
+	// 58
+	ctorDialog("'Right is always right' says Ted. But maybe not this time.\n" + 
+			   "We walk into a group of guards, discussing about whether Ban Johnson\n" +
+			   "or Charles the Fat would win in a MMA street fight. Ted pulls out his\n" + 
+			   "gun and shoots two of them, but runs out of ammo.", new DialogOption[] {
+		ctorDialogOption("Taze the last one.", 59, 4),
+		ctorDialogOption("Beat the last one.", 59, 5),
+		ctorDialogOption("Stab them with fork.", 60, 2)
+	}, 0),
+	// 59
+	ctorDialog("I knock the guard out. 'Good job kid' says Ted, in a\n" + 
+			   "suspicious voice. 'Thankfully this guy has more ammo for my gun.'", new DialogOption[] {
+		ctorDialogOption("Thanks", 61, 0)
+	}, 0),
+	// 60
+	ctorDialog("I stab tha guard in the neck and he falls to the ground with a yell.\n" +
+			   "'Good job kid' says Ted, in a suspicious voice. 'Thankfully this guy\n" +
+			   "has more ammo for my gun.'", new DialogOption[] {
+		ctorDialogOption("Thanks", 61, 0)
+	}, 0),
+	// 61
+	ctorDialog("We continue down the hallway but it is a dead end.\n" + 
+			   "There is nothing there. 'I was wrong kid.'", new DialogOption[] {
+		ctorDialogOption("Turn back and turn left instead.", 43, 0)
+	}, 0),
+	// 62
+	ctorDialog("A guard walks over to us. 'Why is there a key here?'", new DialogOption[] {
+		ctorDialogOption("I don't know.", 63, 0),
+		ctorDialogOption("This guy to my left was trying to escape and dropped the key.", 64, 0)
+	}, 0),
+	// 63
+	ctorDialog("'It was him! He was trying to unlock the door and\n" + 
+			   "the key slipped out of his hand!' I froze. He told the guard.", new DialogOption[] {
+		ctorDialogOption("False!", 65, 0)
+	}, 0),
+	// 64
+	ctorDialog("'ME??' he said. 'Alright. You're going to solitary'\n" + 
+			   "said the guard. 'That wasn't me that was him!!' yelled the prisoner.", new DialogOption[] {
+		ctorDialogOption("False!", 65, 0)
+	}, 0),
+	// 65
+	ctorDialog("'Okay, okay. You two shut up. I'm going to search you both and-'\n" +
+			   "'BANG!' a shot goes off and the other prisoner runs. I'm left\n" + 
+			   "alone. By myself. No way to escape.", new DialogOption[] {
+		ctorDialogOptionEnding("...", 10)
+	}, 0),
+	// 66
+	ctorDialog("'Who? John Voronoi or something? Prove it.'", new DialogOption[] {
+		ctorDialogOption("No I was kidding. I tried to stop the MECHV-06.", 4, 0),
+		ctorDialogOption("Yeah. I killed 'John Voronoi.'", 67, 0),
+		ctorDialogOption("How am I supposed to prove it?", 68, 0)
+	}, 0),
+	// 67
+	ctorDialog("'What do you think I'm dumb or something? EMIT did you numbskull!'", new DialogOption[] {
+		ctorDialogOption("I didn't know that.", 70, 0)
+	}, 0),
+	// 68
+	ctorDialog("'I don't know. Tell the story. If you are making it up at least\n" +
+			   "make it interesting.'", new DialogOption[] {
+		ctorDialogOption("I killed someone with a gun...", 69, 0),
+		ctorDialogOption("I killed someone with a knife...", 69, 0)
+	}, 0),
+	// 69 (nice)
+	ctorDialog("'Very interesting. I almost fell asleep thinking about how\n" + 
+			   "complex your story was. Wow you killed someone with a knife\n" + 
+			   "or a gun or whatever you said.'", new DialogOption[] {
+		ctorDialogOption("...", 71, 0)
+	}, 0),
+	// 70
+	ctorDialog("'Everyone who gets into temporal prison surely knows that.\n" + 
+			   "You're lying.'", new DialogOption[] {
+		ctorDialogOption("...", 71, 0)
+	}, 0),
+	// 71
+	ctorDialog("I turn around and I see a guard coming up to us. 'What are you\n" + 
+			   "idiots arguing about.' 'This moron says he killed someone and\n" + 
+			   "I don't believe it.'", new DialogOption[] {
+		ctorDialogOption("I didn't say that!", 72, 0),
+		ctorDialogOption("...", 73, 0)
+	}, 0),
+	// 72
+	ctorDialog("'Shut up you loudmouth.' Said the guard, waving his batton at me.\n" + 
+			   "'Do you want to go to solitary confinement or something?'", new DialogOption[] {
+		ctorDialogOption("I want to go to solitary.", 74, 0),
+		ctorDialogOption("I'm sorry, we'll stop arguing.", 75, 0)
+	}, 0),
+	// 73
+	ctorDialog("'Stop arguing you loudmouths.' Said the guard, 'Do you want to go\n" + 
+			   "to solitary confinement or something?'", new DialogOption[] {
+		ctorDialogOption("I want to go to solitary.", 74, 0),
+		ctorDialogOption("I'm sorry, we'll stop arguing.", 75, 0)
+	}, 0),
+	// 74
+	ctorDialog("'I'll teach you.'", new DialogOption[] {
+		ctorDialogOptionEnding("...", 1)
+	}, 0),
+	// 75
+	ctorDialog("'You know what. I'm going to split you two up. Come with me you dunce.'", new DialogOption[] {
+		ctorDialogOptionEnding("...", 11)
+	}, 0)
+};
+
+// All of the item names (with their colours)
+string[] itemNames = new string[] {
+	Ansi.italic + "None" + Ansi.reset,
+	// 1
+	Ansi.fgYellow + "Key" + Ansi.reset,
+	// 2
+	Ansi.fgYellow + "Fork" + Ansi.reset,
+	// 3
+	Ansi.fgYellow + "Gun" + Ansi.reset,
+	// 4
+	Ansi.fgCyan + "Taser" + Ansi.reset,
+	// 5
+	Ansi.fgCyan + "Baton" + Ansi.reset,
+	// 6
+	Ansi.fgCyan + "Lockpick" + Ansi.reset,
+	// 7
+	Ansi.fgCyan + "Map" + Ansi.reset
+};
+
+// All of the endings (with the formatting)
+string[] endings = new string[] {
+	// 0
+	"       =-=-=-              THE BORING ENDING.               -=-=-=",
+	// 1
+	"       =-=-=-             SOLITARY CONFINEMENT              -=-=-=",
+	// 2
+	"       =-=-=-                 HEART ATTACK                  -=-=-=",
+	// 3
+	"       =-=-=-                 OVERWHELMED                   -=-=-=",
+	// 4
+	"       =-=-=-                    BURNED                     -=-=-=",
+	// 5
+	"       =-=-=-          BACK TO WHERE I CAME FROM            -=-=-=",
+	// 6
+	"       =-=-=-                 SHOT TO DEATH                 -=-=-=",
+	// 7
+	"       =-=-=-                OUT ON YOUR OWN                -=-=-=",
+	// 8
+	"       =-=-=-             SO CLOSE, YET SO FAR              -=-=-=",
+	// 9
+	"       =-=-=-                   BETRAYED                    -=-=-=",
+	// 10
+	"       =-=-=-                  LEFT ALONE                   -=-=-=",
+	// 11
+	"       =-=-=-                   SPLIT UP                    -=-=-="
+};
+
+// Game variables
+
+int[] inventory = new int[5] with 0;
+bool[] newItems = new bool[5] with false;
+int storyIndex = 0;
+
+// Game
+
+func void printInv() {
+	// Header
+	println(Ansi.fgGreen + Ansi.bold + Ansi.underline + "Items:" + Ansi.reset);
+	
+	// Print each of the items
+	for (int i = 0, i < inventory.length, i++) {
+		// Add a "notification" if the item has just been added
+		if (newItems[i]) {
+			print("  " + Ansi.reset + Ansi.invert);
+			newItems[i] = false;
+		}
+		
+		// Print out the item in `n - Item` format 
+		println((string) (i + 1) + Ansi.reset + " - " + itemNames[inventory[i]]);
+	}
+
+	// Newline after the inventory
+	print("\n");
+}
+
+func void printSep() {
+	print(Ansi.reset + "\n");
+	print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+	print("\n\n");
+}
+
+func void printPanel() {
+	clear();
+
+	// Print the top (seperator + inventory)
+	printSep();
+	printInv();
+	
+	// Print out the story section
+	println(Ansi.fgGreen + Ansi.bold + Ansi.underline + "\nStory:" + Ansi.reset);
+	println(story[storyIndex].text);
+	println("");
+	for (int i = 0, i < story[storyIndex].options.length, i++) {
+		int item = story[storyIndex].options[i].useItem;
+		bool dim = false;
+		if (item != 0) {
+			dim = true;
+			for (int j = 0, j < inventory.length, j++) {
+				if (inventory[j] == item) {
+					dim = false;
+					break;
+				}
+			}
+		}
+
+		if (dim) {
+			print(Ansi.dim);
+		}
+		
+		print((string) (i + 1) + " - " + story[storyIndex].options[i].text);
+		
+		if (item != 0) {
+			print(Ansi.fgRed + Ansi.bold + " (Requires "); 
+			print(itemNames[item]);
+			if (dim) {
+				print(Ansi.dim);
+			}
+			print(Ansi.fgRed + Ansi.bold + ")" + Ansi.reset);
+		}
+
+		print("\n");
+	}
+	
+	// Print out the action section (where the input will be written)
+	println(Ansi.fgGreen + Ansi.bold + Ansi.underline + "\n\nAction:" + Ansi.reset + "\n");
+	
+	// Print out the end
+	printSep();
+	
+	// Move the cursor back up to the action section
+	print(Ansi.curUp(4));
+	
+	// Get the input (returns 0 if invalid)
+	int option = atoi(input());
+	
+	// Process the input
+	if (option > 0 && option <= story[storyIndex].options.length) {
+		DialogOption op = story[storyIndex].options[option - 1];
+		if (op.useItem != 0) {
+			bool found = false;
+			for (int i = 0, i < inventory.length, i++) {
+				if (inventory[i] == op.useItem) {
+					inventory[i] = 0;
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				printPanel();
+				ret;
+			}
+		}
+		
+		if (op.endingIndex == 7) {
+			clear();
+			printSep();
+			print(Ansi.bold + Ansi.fgGreen);
+			println(endings[op.endingIndex]);
+			println(Ansi.reset);
+			println("            Good job. You've completed the game successfully.\n");
+			print(Ansi.bold + Ansi.fgGreen);
+			println("       =-=-=-                                               -=-=-=");
+			printSep();
+			ret;
+		} else { // I haven't added "else if" yet
+			if (op.endingIndex != -1) {
+				clear();
+				printSep();
+				print(Ansi.bold + Ansi.fgRed);
+				println(endings[op.endingIndex]);
+				println(Ansi.reset);
+				println("       Nice try. Better luck next time... If there is a next time.\n");
+				print(Ansi.bold + Ansi.fgRed);
+				println("       =-=-=-                                               -=-=-=");
+				printSep();
+				ret;
+			} else {
+				storyIndex = op.dialogIndex;
+				
+				Dialog d = story[storyIndex];
+				if (d.getItem != 0) {
+					for (int i = 0, i <= inventory.length, i++) {
+						if (inventory[i] == 0) {
+							inventory[i] = d.getItem;
+							newItems[i] = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	// Loop
+	printPanel();
+}
+
+// Start warning
+clear();
+println(Ansi.bold + Ansi.fgCyan + "\nCurrent, Scope (this programming language) is incredibly unstable.");
+println("You can see the source code for it here:");
+println("https://github.com/EliteAsian123/Scope.");
+println(Ansi.bold + Ansi.fgGreen + "\nMake sure the text below is all on the same line.");
+println("Press enter to continue." + Ansi.reset);
+printSep();
+input();
+
+// Prolouge
+clear();
+printSep();
+println(Ansi.bold + "Mission failed. I wasn't able to stop " + Ansi.fgRed + "MECHV-06" + Ansi.fgDefault + " and I may have it.");
+println("My afforts required me to time travel. The TMP didn't like that and");
+println("imprisoned me. Now I'm trapped, with no way out. At least not an " + Ansi.italic + "easy");
+println("way out." + Ansi.reset);
+println("\nPress enter to continue.");
+printSep();
+input();
+
+// Start the game
+printPanel();
