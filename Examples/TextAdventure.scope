@@ -29,7 +29,9 @@ func DialogOption ctorDialogOptionEnding(string text, int endingIndex) {
 // Dialog definition
 object Dialog {
 	string text = "";
-	DialogOption[] options = new DialogOption[0];
+	// new DialogOption[0] doesn't work at the moment due to  
+	// parsing conflicts. Will be fixed soon.
+	DialogOption[] options = new DialogOption[] { };
 	int getItem = 0;
 }
 

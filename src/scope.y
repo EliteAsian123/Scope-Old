@@ -67,6 +67,7 @@
 %left '!' O_UMINUS
 %left '^'
 %left O_ARR_GET
+%left O_ARR_INIT
 %left '.'
 
 %%
@@ -346,15 +347,15 @@ arr_init_list_elem	: /* Nothing */
 
 arr_init	: E_NEW type '[' expr ']' {
 					pushi({.inst = ARRAYI});
-				}
+				} %prec O_ARR_INIT
 			| E_NEW type '[' expr ']' E_WITH expr {
 					pushi({.inst = ARRAYIW});
-				}
+				} %prec O_ARR_INIT
 			| E_NEW type O_EB {
 					push(toElem((Value){ .data._int = 0 }));
 				} '{' arr_init_list '}' {
 					pushi({.inst = ARRAYIL, .data._int = pop().elem.data._int});
-				}
+				} %prec O_ARR_INIT
 			;
 
 arr_get		: expr '[' expr ']' {
