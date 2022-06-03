@@ -1,0 +1,45 @@
+utility Units {
+	// Metric
+	int METERS = 0;
+	int DECIMETERS = 1;
+	int CENTIMETERS = 2;
+	int MILLIMETERS = 3;
+	int MICROMETERS = 4;
+	int NANOMETERS = 5;
+	int PICOMETERS = 6;
+	int DECAMETERS = 7;
+	int HECTOMETERS = 8;
+	int KILOMETERS = 9;
+	
+	// Imperial
+	int MILES = 10;
+	int YARDS = 11;
+	int FEET = 12;
+	int INCHS = 13;
+	int PICAS = 14;
+	int POINTS = 15; 
+	
+	double[] IN_METERS = new double[] {
+		10d ^  0d, // m
+		10d ^ -1d, // dm
+		10d ^ -2d, // cm
+		10d ^ -3d, // mm
+		10d ^ -6d, // um
+		10d ^ -9d, // nm
+		10d ^ -12d, // pm
+		10d ^  1d, // dam
+		10d ^  2d, // hm
+		10d ^  3d, // km
+
+		1609.344d, // mile
+		0.9144d, // yard
+		0.3048d, // foot
+		0.0254d, // inch
+		0.00423333333d, // pica
+		0.000352777778d // point
+	};
+	
+	func double distance(double dist, int unit, int newUnit) {
+		ret dist * IN_METERS[unit] / IN_METERS[newUnit];
+	}
+}
