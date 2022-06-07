@@ -15,7 +15,7 @@ utility Units {
 	int MILES = 10;
 	int YARDS = 11;
 	int FEET = 12;
-	int INCHS = 13;
+	int INCHES = 13;
 	int PICAS = 14;
 	int POINTS = 15; 
 	
@@ -35,11 +35,27 @@ utility Units {
 		0.9144d, // yard
 		0.3048d, // foot
 		0.0254d, // inch
-		0.00423333333d, // pica
-		0.000352777778d // point
+		0.00423333333333333d, // pica
+		0.00035277777777778d // point
 	};
 	
-	func double distance(double dist, int unit, int newUnit) {
-		ret dist * IN_METERS[unit] / IN_METERS[newUnit];
+	object DistUnits {
+		double value = 0d;
+		
+		func double to(int unit) {
+			ret value / Units.IN_METERS[unit];
+		}
+		
+		/*func DistUnits and(double dist, int unit) {
+			auto me = Units.distance(dist, unit);
+			me.value += value;
+			ret me;
+		}*/
+	}
+	
+	func DistUnits distance(double dist, int unit) {
+		auto me = new DistUnits;
+		me.value = dist * Units.IN_METERS[unit];
+		ret me;
 	}
 }
