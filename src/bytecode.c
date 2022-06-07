@@ -171,10 +171,10 @@ static FuncPointer createFunc(int loc, TypeInfo type) {
 	return f;
 }
 
-static int pushObject(char* name, NameList* defaultMembers) {
+static int pushObject(char* name) {
 	ObjectPointer o;
 	o.name = name;
-	o.defaultMembers = defaultMembers;
+	o.defaultMembers = NULL;
 
 	objectsCount++;
 	objects = realloc(objects, sizeof(ObjectPointer) * objectsCount);
@@ -761,10 +761,25 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					ierr("Objects can currently only be defined at the 0th scope.");
 				}
 
+				int objectId;
 				if (isVar(frame.names, arg)) {
-					if (getVar(frame.names, arg)->value->data._int != -1) {
+					Name* n = getVar(frame.names, arg);
+					if (n->value->type.id != TYPE_OBJECT) {
 						ierr("Redefinition of existing variable in the same scope.");
 					}
+
+					objectId = n->value->data._int;
+					if (objects[objectId].defaultMembers != NULL) {
+						ierr("Redefinition of existing object.");
+					}
+				} else {
+					objectId = pushObject(strdup(arg));
+					Value v = (Value){
+						.type = type(TYPE_OBJECT),
+						.data._int = objectId,
+					};
+
+					createVar(frame.names, strdup(arg), v);
 				}
 
 				NameList* members = malloc(sizeof(NameList));
@@ -792,27 +807,22 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					}
 				}
 
-				Value v = (Value){
-					.type = type(TYPE_OBJECT),
-					.data._int = pushObject(strdup(arg), members),
-				};
-
-				createVar(frame.names, strdup(arg), v);
+				// Set the default members
+				objects[objectId].defaultMembers = members;
 
 				jump(insts[i].data._int);
 
 				break;
 			}
 			case FWDO: {
+				// Skip if already forward declared
 				if (isVar(frame.names, insts[i].data._ptr)) {
-					if (getVar(frame.names, insts[i].data._ptr)->value->data._int != -1) {
-						ierr("Attempted to forward declare an already declared variable.");
-					}
+					break;
 				}
 
 				Value v = (Value){
 					.type = type(TYPE_OBJECT),
-					.data._int = -1,
+					.data._int = pushObject(insts[i].data._ptr),
 				};
 
 				createVar(frame.names, strdup(insts[i].data._ptr), v);
