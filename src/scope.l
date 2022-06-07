@@ -1,12 +1,16 @@
 %{
 	#include "scope.tab.h"
 	#include "../unescape.h"
+
+	char** importedFiles = NULL;
+	size_t importedFilesCount = 0;
 %}
 
 %x BIG_COMMENT
 %x DOC_COMMENT
 %x COMMENT
 %x INSERT
+%x IMPORT
 
 %%
 
@@ -37,6 +41,34 @@
 	yypush_buffer_state(yy_create_buffer(yyin, YY_BUF_SIZE));
 	BEGIN(INITIAL);
 }
+
+"import" 		{ BEGIN(IMPORT); }
+<IMPORT>[^ ;\t\r\n]* {
+	// Skip if the file was already imported
+	for (size_t i = 0; i < importedFilesCount; i++) {
+		if (strcmp(importedFiles[i], yytext) == 0) {
+			BEGIN(INITIAL);
+			return EOL; // Just do nothing.
+		}
+	}
+	
+	// Add file to list
+	importedFiles = realloc(importedFiles, sizeof(char*) * importedFilesCount++);
+	importedFiles[importedFilesCount - 1] = strdup(yytext);
+	
+	// Read file
+	yyin = fopen(yytext, "r+");
+	if (yyin == NULL) {
+		fprintf(stderr, "Lex Error: Could not open file `%s`.\n", yytext);
+		yyterminate();
+	}
+	
+	// Finish
+	yypush_buffer_state(yy_create_buffer(yyin, YY_BUF_SIZE));
+	BEGIN(INITIAL);
+	return EOL; // Just do nothing.
+}
+<IMPORT>.		{ }
 
 "extern"		{ return S_EXTERN; }
 "if"			{ return S_IF; }

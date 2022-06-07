@@ -32,7 +32,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.scope",
-					"match": "\\b(extern|if|else|while|ret|break|func|swap|new|for|throw|repeat|with|utility|object)\\b"
+					"match": "\\b(extern|if|else|while|ret|break|func|swap|new|for|throw|repeat|with|utility|object|import)\\b"
 				}
 			]
 		},
