@@ -37,6 +37,7 @@ enum Insts {
 	ENDF,
 	STARTU,
 	STARTO,
+	FWDO,
 	NEWO,
 	EXTERN,
 	APPENDT,

@@ -365,7 +365,7 @@ void bc_init() {
 }
 
 static bool instHasPointer(size_t i) {
-	static_assert(_INSTS_ENUM_LEN == 43, "Update bytecode pointers.");
+	static_assert(_INSTS_ENUM_LEN == 44, "Update bytecode pointers.");
 	switch (insts[i].inst) {
 		case LOAD:
 			return insts[i].type.id == TYPE_STR;
@@ -373,9 +373,9 @@ static bool instHasPointer(size_t i) {
 		case LOADV:
 		case LOADA:
 		case SAVEV:
-		case ARRAYG:
 		case THROW:
 		case ACCESS:
+		case FWDO:
 			return true;
 		default:
 			return false;
@@ -386,7 +386,7 @@ static void instDump(size_t i) {
 	const char* instName;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 43, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 44, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case -1:		instName = "(padding)";	break;
 		case LOAD:      instName = "load";      break;
@@ -402,6 +402,7 @@ static void instDump(size_t i) {
 		case ENDF: 		instName = "endf"; 		break;
 		case STARTU: 	instName = "startu"; 	break;
 		case STARTO: 	instName = "starto"; 	break;
+		case FWDO:	 	instName = "fwdo"; 		break;
 		case NEWO: 		instName = "newo";		break;
 		case EXTERN: 	instName = "extern"; 	break;
 		case APPENDT: 	instName = "appendt"; 	break;
@@ -484,7 +485,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 		}
 		lastKnownScope = curScope;
 
-		static_assert(_INSTS_ENUM_LEN == 43, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 44, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD: {
 				Value v = (Value){
@@ -761,7 +762,9 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				}
 
 				if (isVar(frame.names, arg)) {
-					ierr("Redefinition of existing variable in the same scope.");
+					if (getVar(frame.names, arg)->value->data._int != -1) {
+						ierr("Redefinition of existing variable in the same scope.");
+					}
 				}
 
 				NameList* members = malloc(sizeof(NameList));
@@ -800,11 +803,27 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				break;
 			}
+			case FWDO: {
+				if (isVar(frame.names, insts[i].data._ptr)) {
+					if (getVar(frame.names, insts[i].data._ptr)->value->data._int != -1) {
+						ierr("Attempted to forward declare an already declared variable.");
+					}
+				}
+
+				Value v = (Value){
+					.type = type(TYPE_OBJECT),
+					.data._int = -1,
+				};
+
+				createVar(frame.names, strdup(insts[i].data._ptr), v);
+
+				break;
+			}
 			case NEWO: {
 				Value a = pop().elem;
 
 				if (a.type.objectIndex < 0) {
-					ierr("You cannot use the new expression on basic types.");
+					ierr("You cannot use the new expression on basic types or forward declared objects that haven't been declared yet.");
 				}
 
 				Value v = (Value){

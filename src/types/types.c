@@ -10,6 +10,7 @@
 #include "initObject.c"
 #include "int.c"
 #include "long.c"
+#include "object.c"
 #include "string.c"
 #include "utility.c"
 #endif
@@ -98,9 +99,8 @@ const Type types[] = {
 	},
 	{
 		.displayName = "object",
-		.createDefault = createDefaultFunction,
+		.createDefault = createDefaultObject,
 		.duplicate = noDuplicate,
-		.opEq = functionOpEq,
 	},
 	{
 		.displayName = "initializedObject",

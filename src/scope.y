@@ -159,6 +159,7 @@ statement	: declare
 			| inc_dec
 			| throw
 			| op_assign
+			| fwd_object
 			;
 
 expr		: '(' expr ')'
@@ -509,6 +510,11 @@ object		: S_OBJECT IDENTIFIER {
 					pushi({});
 				} '{' object_in '}' {
 					setInst((Inst){.inst = STARTO, .data._int = instsCount}, popLoc(), scope);
+				}
+			;
+
+fwd_object	: S_OBJECT IDENTIFIER {
+					pushi({.inst = FWDO, .data._ptr = $2});
 				}
 			;
 
