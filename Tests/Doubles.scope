@@ -1,4 +1,4 @@
-#insert Standard/Core.scope
+import Standard/Core;
 
 double a = 1d / 3d;
 println((string) a);

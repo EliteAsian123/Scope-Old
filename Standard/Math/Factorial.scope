@@ -1,5 +1,9 @@
 // Translated from: https://rosettacode.org/wiki/Gamma_function#C.23
 
+import Standard/Math/Core;
+import Standard/Math/Consts;
+import Standard/Math/Trigonometry;
+
 utility Math {
 	int      GAMMA_G = 7;
 	double[] GAMMA_P = new double[] {

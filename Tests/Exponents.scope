@@ -1,4 +1,4 @@
-#insert Standard/Core.scope
+import Standard/Core;
 
 println((string) (2 ^ 8));
 println((string) (5l ^ 6l));

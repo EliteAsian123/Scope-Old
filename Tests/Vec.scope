@@ -1,6 +1,5 @@
-#insert Standard/Core.scope
-#insert Standard/Math/Core.scope
-#insert Standard/Math/Vec.scope
+import Standard/Core;
+import Standard/Math/Vec;
 
 auto a = Math.vec3(1.3d, 24.6d, 4.2d);
 auto b = Math.vec3(3.7d, -5.34d, 0.4d);

@@ -1,4 +1,4 @@
-#insert Standard/Core.scope
+import Standard/Core;
 
 string a = "This is";
 println(a);

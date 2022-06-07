@@ -1,5 +1,5 @@
-#insert Standard/Core.scope
-#insert Standard/ANSI.scope
+import Standard/Core;
+import Standard/ANSI;
 
 println("This is normal text...");
 

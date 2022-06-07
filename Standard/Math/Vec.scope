@@ -1,3 +1,5 @@
+import Standard/Math/Core;
+
 utility Math {
 	/%
 	A vector (double) with a variable length.

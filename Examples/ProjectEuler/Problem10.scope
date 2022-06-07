@@ -1,5 +1,5 @@
-#insert Standard/Core.scope
-#insert Standard/Math/Factors.scope
+import Standard/Core;
+import Standard/Math/Factors;
 
 println("Warning: This program is slow! Progress will be printed.");
 

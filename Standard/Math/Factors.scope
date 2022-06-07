@@ -1,3 +1,5 @@
+import Standard/ArrayUtils;
+
 utility Math {
 	/%
 	@unoptimized: Very slow for large numbers.

@@ -1,6 +1,5 @@
-#insert Standard/Core.scope
-#insert Standard/ArrayUtils.scope
-#insert Standard/Math/Factors.scope
+import Standard/Core;
+import Standard/Math/Factors;
 
 // We could use sequences, but that is unoptimized.
 // #insert Standard/Math/Sequences.scope

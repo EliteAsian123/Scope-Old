@@ -1,4 +1,4 @@
-#insert Standard/Core.scope
+import Standard/Core;
 
 int total = 0;
 

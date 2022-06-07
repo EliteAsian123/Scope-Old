@@ -1,5 +1,5 @@
-#insert Standard/Core.scope
-#insert Standard/Math/Factors.scope
+import Standard/Core;
+import Standard/Math/Factors;
 
 long answer = 1l;
 for (int i = 1, i <= 20, i++) {

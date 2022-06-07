@@ -1,4 +1,4 @@
-#insert Standard/Core.scope
+import Standard/Core;
 
 for (int i = 0, i < 5, i++) {
 	println("Loop " + (string) i);

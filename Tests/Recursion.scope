@@ -1,4 +1,4 @@
-#insert Standard/Core.scope
+import Standard/Core;
 
 func long factorial(long n) {
 	// if n <= 1, the answer is 1 (in this case)

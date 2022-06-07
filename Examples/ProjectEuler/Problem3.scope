@@ -1,6 +1,5 @@
-#insert Standard/Core.scope
-#insert Standard/ArrayUtils.scope
-#insert Standard/Math/Factors.scope
+import Standard/Core;
+import Standard/Math/Factors;
 
 long number = 600851475143l;
 long[] factors = Math.factorsOf(number);
