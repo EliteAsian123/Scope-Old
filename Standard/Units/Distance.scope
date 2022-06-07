@@ -1,3 +1,6 @@
+import Standard/Units/Time;
+import Standard/Units/Velocity;
+
 utility Units {
 	// Metric
 	int PICOMETERS = 0;
@@ -39,23 +42,33 @@ utility Units {
 		1609.344d // mile
 	};
 	
-	object DistUnits {
-		double value = 0d; // In meters
+	object Distance {
+		double v = 0d; // In meters
 		
 		func double to(int unit) {
-			ret value / Units.IN_METERS[unit];
+			ret v / Units.IN_METERS[unit];
+		}
+
+		func Velocity per(double time, int unit) {
+			auto me = new Velocity;
+			me.v = v / Units.inSeconds(time, unit);
+			ret me;
 		}
 		
-		/*func DistUnits and(double dist, int unit) {
+		/*func Distance and(double dist, int unit) {
 			auto me = Units.distance(dist, unit);
-			me.value += value;
+			me.v += v;
 			ret me;
 		}*/
 	}
 	
-	func DistUnits distance(double dist, int unit) {
-		auto me = new DistUnits;
-		me.value = dist * Units.IN_METERS[unit];
+	func Distance distance(double dist, int unit) {
+		auto me = new Distance;
+		me.v = Units.inMeters(dist, unit);
 		ret me;
+	}
+
+	func double inMeters(double dist, int unit) {
+		ret dist * Units.IN_METERS[unit];
 	}
 }

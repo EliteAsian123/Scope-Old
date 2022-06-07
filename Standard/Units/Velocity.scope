@@ -1,0 +1,18 @@
+import Standard/Units/Time;
+
+utility Units {
+	object Distance;
+	
+	object Velocity {
+		double v = 0d; // In meters/second
+		
+		func Distance in(double time, int unit) {
+			auto me = new Distance;
+			me.v = v * Units.inSeconds(time, unit);
+			ret me;
+		}
+	}
+}
+
+// Compensate for forward declaration
+import Standard/Units/Distance;

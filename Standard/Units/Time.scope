@@ -29,17 +29,21 @@ utility Units {
 		31536000000d // millennium 
 	};
 
-	object TimeUnits {
-		double value = 0d; // In seconds
+	object Time {
+		double v = 0d; // In seconds
 		
 		func double to(int unit) {
-			ret value / Units.IN_SECONDS[unit];
+			ret v / Units.IN_SECONDS[unit];
 		}
 	}
 	
-	func TimeUnits time(double time, int unit) {
-		auto me = new TimeUnits;
-		me.value = time * Units.IN_SECONDS[unit];
+	func Time time(double time, int unit) {
+		auto me = new Time;
+		me.v = Units.inSeconds(time, unit);
 		ret me;
+	}
+
+	func double inSeconds(double time, int unit) {
+		ret time * Units.IN_SECONDS[unit];
 	}
 }
