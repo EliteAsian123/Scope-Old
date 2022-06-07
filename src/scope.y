@@ -484,6 +484,7 @@ utility_in	: /* Nothing */
 			| utility_in declare EOL
 			| utility_in declaref
 			| utility_in object
+			| utility_in fwd_object EOL
 			| utility_in EOL
 			;
 
