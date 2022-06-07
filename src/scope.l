@@ -57,7 +57,8 @@
 	}
 	
 	// Add file to list
-	importedFiles = realloc(importedFiles, sizeof(char*) * importedFilesCount++);
+	importedFilesCount++;
+	importedFiles = realloc(importedFiles, sizeof(char*) * importedFilesCount);
 	importedFiles[importedFilesCount - 1] = fileName;
 	
 	// Read file
