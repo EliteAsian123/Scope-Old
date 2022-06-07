@@ -44,9 +44,13 @@
 
 "import" 		{ BEGIN(IMPORT); }
 <IMPORT>[^ ;\t\r\n]* {
+	char* fileName = malloc(strlen(yytext) + 7);
+	strcpy(fileName, yytext);
+	strcat(fileName, ".scope");
+	
 	// Skip if the file was already imported
 	for (size_t i = 0; i < importedFilesCount; i++) {
-		if (strcmp(importedFiles[i], yytext) == 0) {
+		if (strcmp(importedFiles[i], fileName) == 0) {
 			BEGIN(INITIAL);
 			return EOL; // Just do nothing.
 		}
@@ -54,12 +58,12 @@
 	
 	// Add file to list
 	importedFiles = realloc(importedFiles, sizeof(char*) * importedFilesCount++);
-	importedFiles[importedFilesCount - 1] = strdup(yytext);
+	importedFiles[importedFilesCount - 1] = fileName;
 	
 	// Read file
-	yyin = fopen(yytext, "r+");
+	yyin = fopen(fileName, "r+");
 	if (yyin == NULL) {
-		fprintf(stderr, "Lex Error: Could not open file `%s`.\n", yytext);
+		fprintf(stderr, "Lex Error: Could not open file `%s`.\n", fileName);
 		yyterminate();
 	}
 	
