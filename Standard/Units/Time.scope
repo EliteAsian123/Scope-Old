@@ -1,0 +1,45 @@
+utility Units {
+	int NANOSECONDS = 0;
+	int MICROSECONDS = 1;
+	int MILLISECONDS = 2;
+	int SECONDS = 3;
+	int MINUTES = 4;
+	int HOURS = 5;
+	int DAYS = 6;
+	int WEEKS = 7;
+	int MONTHS = 8;
+	int YEARS = 9;
+	int DECADES = 10;
+	int CENTURIES = 11;
+	int MILLENNIA = 12;
+	
+	double[] IN_SECONDS = new double[] {
+		0.000000001d, // nanosecond
+		0.000001d, // microsecond
+		0.001d, // millisecond
+		1d, // second
+		60d, // minute
+		3600d, // hour
+		86400d, // day
+		604800d, // week
+		2628000d, // month
+		31536000d, // year
+		315360000d, // decade
+		3153600000d, // century
+		31536000000d // millennium 
+	};
+
+	object TimeUnits {
+		double value = 0d; // In seconds
+		
+		func double to(int unit) {
+			ret value / Units.IN_SECONDS[unit];
+		}
+	}
+	
+	func TimeUnits time(double time, int unit) {
+		auto me = new TimeUnits;
+		me.value = time * Units.IN_SECONDS[unit];
+		ret me;
+	}
+}

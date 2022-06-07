@@ -1,46 +1,46 @@
 utility Units {
 	// Metric
-	int METERS = 0;
-	int DECIMETERS = 1;
-	int CENTIMETERS = 2;
+	int PICOMETERS = 0;
+	int NANOMETERS = 1;
+	int MICROMETERS = 2;
 	int MILLIMETERS = 3;
-	int MICROMETERS = 4;
-	int NANOMETERS = 5;
-	int PICOMETERS = 6;
+	int CENTIMETERS = 4;
+	int DECIMETERS = 5;
+	int METERS = 6;
 	int DECAMETERS = 7;
 	int HECTOMETERS = 8;
 	int KILOMETERS = 9;
 	
 	// Imperial
-	int MILES = 10;
-	int YARDS = 11;
-	int FEET = 12;
-	int INCHES = 13;
-	int PICAS = 14;
-	int POINTS = 15; 
+	int POINTS = 10; 
+	int PICAS = 11;
+	int INCHES = 12;
+	int FEET = 13;
+	int YARDS = 14;
+	int MILES = 15;
 	
 	double[] IN_METERS = new double[] {
-		10d ^  0d, // m
-		10d ^ -1d, // dm
-		10d ^ -2d, // cm
-		10d ^ -3d, // mm
-		10d ^ -6d, // um
-		10d ^ -9d, // nm
 		10d ^ -12d, // pm
+		10d ^ -9d, // nm
+		10d ^ -6d, // um
+		10d ^ -3d, // mm
+		10d ^ -2d, // cm
+		10d ^ -1d, // dm
+		10d ^  0d, // m
 		10d ^  1d, // dam
 		10d ^  2d, // hm
 		10d ^  3d, // km
 
-		1609.344d, // mile
-		0.9144d, // yard
-		0.3048d, // foot
-		0.0254d, // inch
+		0.00035277777777778d, // point
 		0.00423333333333333d, // pica
-		0.00035277777777778d // point
+		0.0254d, // inch
+		0.3048d, // foot
+		0.9144d, // yard
+		1609.344d // mile
 	};
 	
 	object DistUnits {
-		double value = 0d;
+		double value = 0d; // In meters
 		
 		func double to(int unit) {
 			ret value / Units.IN_METERS[unit];
