@@ -25,6 +25,13 @@ typedef struct NameList {
 	size_t len;
 } NameList;
 
+typedef struct TypeInfo {
+	int id;
+	struct TypeInfo* args;
+	size_t argsLen;
+	int objectIndex;
+} TypeInfo;
+
 // ==================== //
 
 typedef struct String {
@@ -45,6 +52,14 @@ typedef struct InitObject {
 	struct NameList* members;
 } InitObject;
 
+typedef struct FuncPointer {
+	int location;
+	struct TypeInfo type;
+	char** args;
+	size_t argsLen;
+	struct NameList* outer;
+} FuncPointer;
+
 typedef union Data {
 	void* _ptr;
 	int _int;
@@ -55,16 +70,10 @@ typedef union Data {
 	struct String _string;
 	struct Utility _utility;
 	struct InitObject _initObject;
+	struct FuncPointer _func;
 } Data;
 
 // ==================== //
-
-typedef struct TypeInfo {
-	int id;
-	struct TypeInfo* args;
-	size_t argsLen;
-	int objectIndex;
-} TypeInfo;
 
 typedef struct Value {
 	TypeInfo type;
@@ -85,14 +94,6 @@ typedef struct StackElem {
 } StackElem;
 
 // ==================== //
-
-typedef struct FuncPointer {
-	int location;
-	TypeInfo type;
-	char** args;
-	size_t argsLen;
-	NameList* outer;
-} FuncPointer;
 
 typedef struct ObjectPointer {
 	char* name;

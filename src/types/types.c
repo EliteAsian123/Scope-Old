@@ -62,13 +62,13 @@ const Type types[] = {
 		.opPow = floatOpPow,
 	},
 	{
-		.displayName = "function(?,...)",
+		.displayName = "function<?,...>",
 		.createDefault = createDefaultFunction,
 		.duplicate = noDuplicate,
 		.opEq = functionOpEq,
 	},
 	{
-		.displayName = "array(?)",
+		.displayName = "array<?>",
 		.createDefault = createDefaultArray,
 		.duplicate = arrayDuplicate,
 		.dispose = disposeArray,
@@ -183,6 +183,11 @@ InitObject createInitObject(ObjectPointer obj) {
 	for (size_t i = 0; i < members->len; i++) {
 		Value* v = malloc(sizeof(Value));
 		*v = dupValue(*obj.defaultMembers->names[i].value);
+
+		if (v->type.id == TYPE_FUNC) {
+			v->data._func.outer = members;
+		}
+
 		members->names[i] = (Name){
 			.name = strdup(obj.defaultMembers->names[i].name),
 			.value = v,

@@ -499,6 +499,7 @@ utility		: S_UTILITY IDENTIFIER {
 
 object_in	: /* Nothing */
 			| object_in declare EOL
+			| object_in declaref
 			| object_in EOL
 			;
 

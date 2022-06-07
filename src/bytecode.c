@@ -70,10 +70,6 @@ static size_t loopstackCount;
 static char* argstack[STACK_SIZE];
 static size_t argstackCount;
 
-// Interpret stage
-static FuncPointer* funcs;
-static size_t funcsCount;
-
 // Parse stage
 static InstBuffer instbuffer[STACK_SIZE];
 static size_t instbufferCount;
@@ -155,7 +151,7 @@ char* popArg() {
 	return argstack[--argstackCount];
 }
 
-static int pushFunc(int loc, TypeInfo type) {
+static FuncPointer createFunc(int loc, TypeInfo type) {
 	FuncPointer f;
 	f.location = loc;
 	f.type = type;
@@ -172,11 +168,7 @@ static int pushFunc(int loc, TypeInfo type) {
 		f.args[i] = popArg();
 	}
 
-	funcsCount++;
-	funcs = realloc(funcs, sizeof(FuncPointer) * funcsCount);
-	funcs[funcsCount - 1] = f;
-
-	return funcsCount - 1;
+	return f;
 }
 
 static int pushObject(char* name, NameList* defaultMembers) {
@@ -370,9 +362,6 @@ void bc_init() {
 	instsCount = 0;
 
 	stackCount = 0;
-
-	funcs = NULL;
-	funcsCount = 0;
 }
 
 static bool instHasPointer(size_t i) {
@@ -620,7 +609,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				Value v = (Value){
 					.type = dupTypeInfo(a.type),
-					.data._int = pushFunc(i + 1, a.type),
+					.data._func = createFunc(i + 1, a.type),
 				};
 
 				push(toElem(v));
@@ -645,7 +634,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 					dropOutput = true;
 				}
 
-				FuncPointer f = funcs[av.data._int];
+				FuncPointer f = av.data._func;
 				int s = insts[f.location].scope;
 
 				NameList names;
@@ -1202,9 +1191,4 @@ void bc_end() {
 	}
 
 	free(insts);
-
-	// End
-
-	free(funcs);
-	// malloc_stats();
 }
