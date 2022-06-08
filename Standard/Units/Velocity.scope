@@ -3,12 +3,31 @@ import Standard/Units/Time;
 utility Units {
 	object Distance;
 	
+	/%
+	Stores a distance, distance unit, time, and time unit.
+	%/
 	object Velocity {
-		double v = 0d; // In meters/second
+		double dist = 0d;
+		int dUnit = -1;
+		double time = 0d;
+		int tUnit = -1;
 		
-		func Distance in(double time, int unit) {
+		/%
+		Returns the distance an object with this velocity will travel in the given time.
+		
+		@"inTime": The amount of time to travel.
+		@"inUnit": The unit of @"inTime".
+		%/
+		func Distance in(double inTime, int inUnit) {
+			double seconds = Units.inSeconds(inTime, inUnit);
+			double thisTime = Units.inSeconds(time, tUnit);
+			double distInSecond = dist / thisTime; 
+			
 			auto me = new Distance;
-			me.v = v * Units.inSeconds(time, unit);
+			
+			me.value = distInSecond * seconds;
+			me.unit = dUnit;
+
 			ret me;
 		}
 	}

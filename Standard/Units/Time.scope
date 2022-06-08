@@ -13,6 +13,9 @@ utility Units {
 	int CENTURIES = 11;
 	int MILLENNIA = 12;
 	
+	/%
+	Corresponding units in seconds.
+	%/
 	double[] IN_SECONDS = new double[] {
 		0.000000001d, // nanosecond
 		0.000001d, // microsecond
@@ -28,22 +31,83 @@ utility Units {
 		3153600000d, // century
 		31536000000d // millennium 
 	};
-
+	
+	/%
+	Stores a value and a unit for time.
+	%/
 	object Time {
-		double v = 0d; // In seconds
+		double value = 0d;
+		int unit = -1;
 		
-		func double to(int unit) {
-			ret v / Units.IN_SECONDS[unit];
+		/%
+		Get the value of the time in the unit it is stored in.
+		@"value" can also be used.
+		%/
+		func double get() {
+			ret value;
+		}
+		
+		/%
+		Get the value of the time in microseconds as a long.
+		Used for @"usleep".
+		%/
+		func long getAsMicro() {
+			ret (long) Units.secondsTo(Units.inSeconds(value, unit), Units.MICROSECONDS); 
+		}
+		
+		/%
+		Convert this time object to another with a new unit.
+
+		@"newUnit": The unit you want to convert to.
+		%/
+		func Time to(int newUnit) {
+			auto me = new Time;
+			
+			me.value = Units.secondsTo(Units.inSeconds(value, unit), newUnit);
+			me.unit = newUnit;
+			
+			ret me;
+		}
+		
+		/%
+		Combine two times together. Example: 6 minutes and 54 seconds.
+		
+		@"otherTime": The time you want to add.
+		@"otherUnit": The unit of @"otherTime".
+		%/
+		func Time and(double otherTime, int otherUnit) {
+			auto me = new Time;
+			
+			double thisSeconds = Units.inSeconds(value, unit);
+			double otherSeconds = Units.inSeconds(otherTime, otherUnit);
+			me.value = Units.secondsTo(thisSeconds + otherSeconds, unit);
+			me.unit = unit;
+			
+			ret me;
 		}
 	}
 	
+	/%
+	Creates a time object.
+	%/
 	func Time time(double time, int unit) {
 		auto me = new Time;
-		me.v = Units.inSeconds(time, unit);
+		me.value = time;
+		me.unit = unit;
 		ret me;
 	}
-
+	
+	/%
+	Time and unit in seconds.
+	%/
 	func double inSeconds(double time, int unit) {
 		ret time * Units.IN_SECONDS[unit];
+	}
+	
+	/%
+	Seconds to a time with the specified units.
+	%/
+	func double secondsTo(double seconds, int newUnit) {
+		ret seconds / Units.IN_SECONDS[newUnit];
 	}
 }

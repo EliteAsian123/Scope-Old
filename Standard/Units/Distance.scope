@@ -3,6 +3,7 @@ import Standard/Units/Velocity;
 
 utility Units {
 	// Metric
+	
 	int PICOMETERS = 0;
 	int NANOMETERS = 1;
 	int MICROMETERS = 2;
@@ -15,6 +16,7 @@ utility Units {
 	int KILOMETERS = 9;
 	
 	// Imperial
+
 	int POINTS = 10; 
 	int PICAS = 11;
 	int INCHES = 12;
@@ -22,6 +24,9 @@ utility Units {
 	int YARDS = 14;
 	int MILES = 15;
 	
+	/%
+	Corresponding units in meters.
+	%/
 	double[] IN_METERS = new double[] {
 		10d ^ -12d, // pm
 		10d ^ -9d, // nm
@@ -42,33 +47,89 @@ utility Units {
 		1609.344d // mile
 	};
 	
+	/%
+	Stores a value and a unit for distance.
+	%/
 	object Distance {
-		double v = 0d; // In meters
+		double value = 0d;
+		int unit = -1;
 		
-		func double to(int unit) {
-			ret v / Units.IN_METERS[unit];
+		/%
+		Get the value of the distance in the unit it is stored in.
+		@"value" can also be used.
+		%/
+		func double get() {
+			ret value;
 		}
+		
+		/%
+		Convert this distance object to another with a new unit.
 
-		func Velocity per(double time, int unit) {
-			auto me = new Velocity;
-			me.v = v / Units.inSeconds(time, unit);
+		@"newUnit": The unit you want to convert to.
+		%/
+		func Distance to(int newUnit) {
+			auto me = new Distance;
+			me.value = Units.metersTo(Units.inMeters(value, unit), newUnit);
+			me.unit = newUnit;
 			ret me;
 		}
 		
-		/*func Distance and(double dist, int unit) {
-			auto me = Units.distance(dist, unit);
-			me.v += v;
+		/%
+		Combine two distances together. Example: 5 feet and 10 inches.
+		
+		@"otherDist": The distance you want to add.
+		@"otherUnit": The unit of @"otherDist".
+		%/
+		func Distance and(double otherDist, int otherUnit) {
+			auto me = new Distance;
+			
+			double thisMeters = Units.inMeters(value, unit);
+			double otherMeters = Units.inMeters(otherDist, otherUnit);
+			me.value = Units.metersTo(thisMeters + otherMeters, unit);
+			me.unit = unit;
+			
 			ret me;
-		}*/
+		}
+		
+		/%
+		Convert this distance along with a time to a velocity.
+
+		@"time": The time it took to travel this distance.
+		@"u": The unit of @"time".
+		%/
+		func Velocity per(double time, int u) {
+			auto me = new Velocity;
+			
+			me.dist = value;
+			me.dUnit = unit;
+			me.time = time;
+			me.tUnit = u;
+			
+			ret me;
+		}
 	}
 	
+	/%
+	Creates a distance object.
+	%/
 	func Distance distance(double dist, int unit) {
 		auto me = new Distance;
-		me.v = Units.inMeters(dist, unit);
+		me.value = dist;
+		me.unit = unit;
 		ret me;
 	}
-
+	
+	/%
+	Distance and unit in meters.
+	%/
 	func double inMeters(double dist, int unit) {
 		ret dist * Units.IN_METERS[unit];
+	}
+	
+	/%
+	Meters to a distance with the specified units.
+	%/
+	func double metersTo(double meters, int newUnit) {
+		ret meters / Units.IN_METERS[newUnit];
 	}
 }
