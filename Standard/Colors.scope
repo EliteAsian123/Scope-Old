@@ -1,0 +1,61 @@
+import Standard/ANSI;
+
+utility Colors {
+	object Color {
+		float r = 0f;
+		float g = 0f;
+		float b = 0f;
+		float a = 1f;
+		
+		func string toAnsi() {
+			string rs = (string) (int) (r * 255f);
+			string gs = (string) (int) (g * 255f);
+			string bs = (string) (int) (b * 255f);
+			
+			ret "\u001b[38;2;" + rs + ";" + gs + ";" + bs + "m";
+		}
+	}
+
+	func Color fromFloatRGB(float r, float g, float b) {
+		auto c = new Color;
+		c.r = r;
+		c.g = g;
+		c.b = b;
+		ret c;
+	}
+
+	func Color fromFloatHSV(float h, float s, float v) {
+		float i = h * 6f;
+		float f = h * 6f - i;
+		float p = v * (1f - s);
+		float q = v * (1f - f * s);
+		float t = v * (1f - (1f - f) * s);
+		
+		int ii = (int) i % 6;
+		if (ii == 0) {
+			ret fromFloatRGB(v, t, p);
+		} else {
+			if (ii == 1) {
+				ret fromFloatRGB(q, v, p);
+			} else {
+				if (ii == 2) {
+					ret fromFloatRGB(p, v, t);
+				} else {
+					if (ii == 3) {
+						ret fromFloatRGB(p, q, v);
+					} else {
+						if (ii == 4) {
+							ret fromFloatRGB(t, p, v);
+						} else {
+							ret fromFloatRGB(v, p, q);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	func void printColor(Color c) {
+		print(c.toAnsi() + "\u2588\u2588" + Ansi.reset);
+	}
+}
