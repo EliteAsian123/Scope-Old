@@ -27,7 +27,26 @@ utility Units {
 			
 			me.value = distInSecond * seconds;
 			me.unit = dUnit;
+			
+			ret me;
+		}
+		
+		/%
+		Returns the time it will take an object to travel the given distance.
 
+		@"inDist": The distance to travel.
+		@"inUnit": The unit of @"inDist".
+		%/
+		func Time timeFor(double inDist, int inUnit) {
+			double distance = Units.inMeters(inDist, inUnit);
+			double thisTime = Units.inSeconds(time, tUnit);
+			double distInSecond = Units.inMeters(dist / thisTime, dUnit); 
+			
+			auto me = new Time;
+			
+			me.value = Units.secondsTo(distance / distInSecond, tUnit);
+			me.unit = tUnit;
+			
 			ret me;
 		}
 	}
