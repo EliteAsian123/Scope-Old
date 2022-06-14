@@ -801,7 +801,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 
 				// Remove outer Objects
 				for (size_t v = 0; v < members->len; v++) {
-					Name name = frame.names->names[v];
+					Name name = members->names[v];
 					if (name.value->scope < curScope) {
 						delVarAtIndex(members, v);
 					}
