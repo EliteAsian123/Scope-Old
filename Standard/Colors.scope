@@ -25,13 +25,13 @@ utility Colors {
 	}
 
 	func Color fromFloatHSV(float h, float s, float v) {
-		float i = h * 6f;
-		float f = h * 6f - i;
+		int i = (int) (h * 6f);
+		float f = h * 6f - (float) i;
 		float p = v * (1f - s);
 		float q = v * (1f - f * s);
 		float t = v * (1f - (1f - f) * s);
 		
-		int ii = (int) i % 6;
+		int ii = i % 6;
 		if (ii == 0) {
 			ret fromFloatRGB(v, t, p);
 		} else {

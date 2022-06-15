@@ -1,0 +1,9 @@
+import Standard/Core;
+import Standard/Colors;
+
+clear();
+for (int i = 0, i < 100, i++) {
+	for (float h = 0f, h < 1f, h += 0.017f) {
+		Colors.printColor(Colors.fromFloatHSV(h, 1f, 1f));
+	}
+}
