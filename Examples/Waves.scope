@@ -1,0 +1,29 @@
+import Standard/Core;
+import Standard/Colors;
+import Standard/Math/Trigonometry;
+
+for (int h = 0, h < 32, h++) {
+	for (int w = 0, w < 32, w++) {
+		double v = Math.cos((double) (w - 16) / 4d) * 8d;
+		int vh = (int) v;
+		double b = Math.cos((double) (w - 8) / 4d) * 8d;
+		int bh = (int) b;
+		double r = Math.cos((double) (w - 0) / 4d) * 8d;
+		int rh = (int) r;
+		
+		if (h - 16 == vh || h - 17 == vh) {
+			Colors.printColor(Colors.fromFloatHSV(0f, 1f, 1f));
+		} else {
+			if (h - 16 == bh || h - 17 == bh) {
+				Colors.printColor(Colors.fromFloatHSV(1f / 3f, 1f, 1f));
+			} else {
+				if (h - 16 == rh || h - 17 == rh) {
+					Colors.printColor(Colors.fromFloatHSV(2f / 3f, 1f, 1f));
+				} else {
+					Colors.printColor(Colors.fromFloatHSV(0f, 0f, 0.25f));
+				}
+			}
+		}
+	}
+	print("\n");
+}
