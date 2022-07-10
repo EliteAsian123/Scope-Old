@@ -1,0 +1,35 @@
+import Standard/Core;
+import Standard/Units/Time;
+import Standard/Units/Distance;
+import Standard/Units/Velocity;
+
+// The speed of my spaceship (500 km in 10 seconds)
+auto velocity = Units.distance(500d, Units.KILOMETERS).per(10d, Units.SECONDS);
+
+// How long for the Moon?
+double timeForMoon = velocity
+	.timeFor(384400d, Units.KILOMETERS)
+	.to(Units.DAYS)
+	.get();
+println((string) timeForMoon + " days for the Moon");
+
+// How long for the Sun?
+double timeForSun = velocity
+	.timeFor(152090000d, Units.KILOMETERS)
+	.to(Units.DAYS)
+	.get();
+println((string) timeForSun + " days for the Sun");
+
+// How long for Mars?
+double timeForMars = velocity
+	.timeFor(187200000d, Units.KILOMETERS)
+	.to(Units.DAYS)
+	.get();
+println((string) timeForMars + " days for Mars");
+
+// How long for Pluto?
+double timeForPluto = velocity
+	.timeFor(5019400000d, Units.KILOMETERS)
+	.to(Units.DAYS)
+	.get();
+println((string) timeForPluto + " days for Pluto");
