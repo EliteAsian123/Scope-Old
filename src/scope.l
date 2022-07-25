@@ -45,7 +45,7 @@
 "import" 		{ BEGIN(IMPORT); }
 <IMPORT>[^ ;\t\r\n]* {
 	if (yytext[0] != '\"' || yytext[strlen(yytext) - 1] != '\"') {
-		fprintf(stderr, "Lex Error: import "statement must be followed by a string.\n")";
+		fprintf(stderr, "Lex Error: import statement must be followed by a string.\n");
 		yyterminate();
 	}
 
