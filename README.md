@@ -2,7 +2,7 @@
 
 *Scope* is an interpreted, object oriented programming language that I am in the process of creating.
 
-<img src="img/HelloWorld.png" alt="Hello World in Scope" width="362"/>
+<img src="img/HelloWorld.png" alt="Hello World in Scope" width="332"/>
 
 ## Cool Features
 
