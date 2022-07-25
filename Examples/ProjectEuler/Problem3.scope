@@ -1,5 +1,5 @@
-import Standard/Core;
-import Standard/Math/Factors;
+import "Standard/Core";
+import "Standard/Math/Factors";
 
 long number = 600851475143l;
 long[] factors = Math.factorsOf(number);

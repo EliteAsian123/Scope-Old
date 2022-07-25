@@ -1,4 +1,4 @@
-import Standard/Core;
+import "Standard/Core";
 
 long sumOfSquares = 0l;
 for (long i = 1l, i <= 100l, i += 1l) {

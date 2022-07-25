@@ -1,4 +1,4 @@
-import Standard/Core;
+import "Standard/Core";
 
 int a = (int) 123l;
 long b = (long) -532;

@@ -1,4 +1,4 @@
-import Standard/Math/Core;
+import "Standard/Math/Core";
 
 utility Math {
 	/%

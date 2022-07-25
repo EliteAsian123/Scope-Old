@@ -1,4 +1,4 @@
-import Standard/ANSI;
+import "Standard/ANSI";
 
 utility Colors {
 	object Color {

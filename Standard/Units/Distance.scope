@@ -1,5 +1,5 @@
-import Standard/Units/Time;
-import Standard/Units/Velocity;
+import "Standard/Units/Time";
+import "Standard/Units/Velocity";
 
 utility Units {
 	// Metric

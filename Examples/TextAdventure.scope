@@ -1,5 +1,5 @@
-import Standard/Core;
-import Standard/ANSI;
+import "Standard/Core";
+import "Standard/ANSI";
 
 // DialogOption definition
 object DialogOption {

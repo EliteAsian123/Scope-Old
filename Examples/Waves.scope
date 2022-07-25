@@ -1,6 +1,6 @@
-import Standard/Core;
-import Standard/Colors;
-import Standard/Math/Trigonometry;
+import "Standard/Core";
+import "Standard/Colors";
+import "Standard/Math/Trigonometry";
 
 for (int h = 0, h < 32, h++) {
 	for (int w = 0, w < 32, w++) {

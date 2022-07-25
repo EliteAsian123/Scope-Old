@@ -44,8 +44,13 @@
 
 "import" 		{ BEGIN(IMPORT); }
 <IMPORT>[^ ;\t\r\n]* {
-	char* fileName = malloc(strlen(yytext) + 7);
-	strcpy(fileName, yytext);
+	if (yytext[0] != '\"' || yytext[strlen(yytext) - 1] != '\"') {
+		fprintf(stderr, "Lex Error: import "statement must be followed by a string.\n")";
+		yyterminate();
+	}
+
+	char* fileName = malloc(strlen(yytext) - 2 + 7);
+	strncpy(fileName, yytext + 1, strlen(yytext) - 2);
 	strcat(fileName, ".scope");
 	
 	// Skip if the file was already imported

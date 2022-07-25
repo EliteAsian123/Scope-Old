@@ -1,4 +1,4 @@
-import Standard/Core;
+import "Standard/Core";
 
 long a = 32l + 64l * 23l - 15l;
 println((string) a);

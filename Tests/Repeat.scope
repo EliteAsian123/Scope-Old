@@ -1,4 +1,4 @@
-import Standard/Core;
+import "Standard/Core";
 
 repeat(5) {
 	repeat(5) {

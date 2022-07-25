@@ -1,4 +1,4 @@
-import Standard/Core;
+import "Standard/Core";
 
 if (true) {
 	println("Yay!");

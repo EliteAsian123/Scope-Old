@@ -1,7 +1,7 @@
-import Standard/Core;
-import Standard/Units/Time;
-import Standard/Units/Distance;
-import Standard/Units/Velocity;
+import "Standard/Core";
+import "Standard/Units/Time";
+import "Standard/Units/Distance";
+import "Standard/Units/Velocity";
 
 // The speed of my spaceship (500 km in 10 seconds)
 auto velocity = Units.distance(500d, Units.KILOMETERS).per(10d, Units.SECONDS);

@@ -1,4 +1,4 @@
-import Standard/Core;
+import "Standard/Core";
 
 int[] intArray = new int[] {
 	12,

@@ -1,4 +1,4 @@
-import Standard/Core;
+import "Standard/Core";
 
 func bool bestBool(function<int> i) {
 	ret i() == 123;

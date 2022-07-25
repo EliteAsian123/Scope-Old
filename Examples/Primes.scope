@@ -1,5 +1,5 @@
-import Standard/Core;
-import Standard/Math/Factors;
+import "Standard/Core";
+import "Standard/Math/Factors";
 	
 for (int p = 0, p <= 20, p++) {
 	if (Math.isPrime((long) p)) {

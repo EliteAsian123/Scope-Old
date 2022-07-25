@@ -1,4 +1,4 @@
-import Standard/Units/Time;
+import "Standard/Units/Time";
 
 utility Units {
 	object Distance;
@@ -53,4 +53,4 @@ utility Units {
 }
 
 // Compensate for forward declaration
-import Standard/Units/Distance;
+import "Standard/Units/Distance";

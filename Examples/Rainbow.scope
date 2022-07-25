@@ -1,5 +1,5 @@
-import Standard/Core;
-import Standard/Colors;
+import "Standard/Core";
+import "Standard/Colors";
 
 clear();
 for (int i = 0, i < 100, i++) {

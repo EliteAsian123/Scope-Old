@@ -1,4 +1,4 @@
-import Standard/Core;
+import "Standard/Core";
 
 int[] arr = new int[1];
 arr[0] = 450;

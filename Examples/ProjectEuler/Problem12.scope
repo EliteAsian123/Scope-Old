@@ -1,5 +1,5 @@
-import Standard/Core;
-import Standard/Math/Factors;
+import "Standard/Core";
+import "Standard/Math/Factors";
 
 // We could use sequences, but that is unoptimized.
 // #insert Standard/Math/Sequences.scope

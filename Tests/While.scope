@@ -1,4 +1,4 @@
-import Standard/Core;
+import "Standard/Core";
 
 int i = 0;
 while (i < 5) {
