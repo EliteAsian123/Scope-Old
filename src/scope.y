@@ -47,7 +47,7 @@
 %token S_REPEAT S_UTILITY S_OBJECT
 
 /* Expression keywords */
-%token E_NEW E_WITH
+%token E_NEW E_WITH E_COPY
 
 /* Built-in types & literals */
 %token T_AUTO T_VOID T_STR T_INT T_BOOL T_FLOAT T_FUNC T_LONG T_DOUBLE
@@ -180,6 +180,7 @@ expr		: '(' expr ')'
 			| arr_init
 			| arr_get
 			| init_object
+			| copy
 			;
 
 /* Basic Statements */
@@ -325,6 +326,11 @@ cast		: '(' type ')' expr { pushi({.inst = CAST}); } %prec O_CAST
 
 access		: expr '.' IDENTIFIER {
 					pushi({.inst = ACCESS, .data._ptr = $3});
+				}
+			;
+
+copy		: E_COPY '(' expr ')' {
+					pushi({.inst = COPY}); 
 				}
 			;
 

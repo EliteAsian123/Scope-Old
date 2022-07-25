@@ -365,7 +365,7 @@ void bc_init() {
 }
 
 static bool instHasPointer(size_t i) {
-	static_assert(_INSTS_ENUM_LEN == 44, "Update bytecode pointers.");
+	static_assert(_INSTS_ENUM_LEN == 45, "Update bytecode pointers.");
 	switch (insts[i].inst) {
 		case LOAD:
 			return insts[i].type.id == TYPE_STR;
@@ -386,7 +386,7 @@ static void instDump(size_t i) {
 	const char* instName;
 
 	// clang-format off
-	static_assert(_INSTS_ENUM_LEN == 44, "Update bytecode strings.");
+	static_assert(_INSTS_ENUM_LEN == 45, "Update bytecode strings.");
 	switch (insts[i].inst) {
 		case -1:		instName = "(padding)";	break;
 		case LOAD:      instName = "load";      break;
@@ -411,6 +411,7 @@ static void instDump(size_t i) {
 		case ARRAYIL: 	instName = "arrayil"; 	break;
 		case ARRAYG: 	instName = "arrayg"; 	break;
 		case ACCESS: 	instName = "access"; 	break;
+		case COPY: 		instName = "copy"; 		break;
 		case SWAP: 		instName = "swap"; 		break;
 		case DUP: 		instName = "dup"; 		break;
 		case NOT: 		instName = "not"; 		break;
@@ -485,7 +486,7 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 		}
 		lastKnownScope = curScope;
 
-		static_assert(_INSTS_ENUM_LEN == 44, "Update bytecode interpreting.");
+		static_assert(_INSTS_ENUM_LEN == 45, "Update bytecode interpreting.");
 		switch (insts[i].inst) {
 			case LOAD: {
 				Value v = (Value){
@@ -1053,6 +1054,12 @@ static void readByteCode(size_t frameIndex, size_t start, size_t endOffset) {
 				} else {
 					ierr("The object referenced does not have accessible members.");
 				}
+
+				break;
+			}
+			case COPY: {  // `copy(a)`
+				Value a = getValue(pop());
+				push(toElem(dupValue(a)));
 
 				break;
 			}

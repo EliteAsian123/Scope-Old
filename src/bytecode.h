@@ -46,6 +46,7 @@ enum Insts {
 	ARRAYIL,
 	ARRAYG,
 	ACCESS,
+	COPY,
 	SWAP,
 	DUP,
 	NOT,

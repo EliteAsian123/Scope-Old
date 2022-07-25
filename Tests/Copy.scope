@@ -1,0 +1,9 @@
+import "Standard/Core";
+
+int[] arr = new int[1];
+arr[0] = 450;
+
+int[] dup = copy(arr);
+dup[0] = 123;
+
+println((string) arr[0]);

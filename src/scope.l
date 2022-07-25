@@ -96,6 +96,7 @@
 
 "new"			{ return E_NEW; }
 "with"			{ return E_WITH; }
+"copy"			{ return E_COPY; }
 
 "auto"			{ return T_AUTO; }
 "void"			{ return T_VOID; }
