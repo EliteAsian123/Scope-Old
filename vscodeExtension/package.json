@@ -1,25 +1,46 @@
 {
-    "name": "scope-language",
-    "displayName": "Scope Language",
-    "description": "Syntax highlighting for the Scope programming language.",
-    "version": "0.0.1",
-    "engines": {
-        "vscode": "^1.65.0"
-    },
-    "categories": [
-        "Programming Languages"
-    ],
-    "contributes": {
-        "languages": [{
-            "id": "scope",
-            "aliases": ["Scope", "scope"],
-            "extensions": [".scope"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "scope",
-            "scopeName": "source.scope",
-            "path": "./syntaxes/scope.tmLanguage.json"
-        }]
-    }
+	"name": "scope-language",
+	"displayName": "Scope Language",
+	"description": "Syntax highlighting for the Scope programming language.",
+	"version": "0.1.0",
+	"engines": {
+		"vscode": "^1.69.0"
+	},
+	"categories": [
+		"Programming Languages"
+	],
+	"scripts": {
+		"build": "tsc -p ./"
+	},
+	"activationEvents": [
+		"onLanguage:scope"
+	],
+	"main": "out/extension.js",
+	"contributes": {
+		"languages": [
+			{
+				"id": "scope",
+				"aliases": [
+					"Scope",
+					"scope"
+				],
+				"extensions": [
+					".scope"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "scope",
+				"scopeName": "source.scope",
+				"path": "./syntaxes/scope.tmLanguage.json"
+			}
+		]
+	},
+	"devDependencies": {
+		"@types/node": "^16.11.45",
+		"@types/vscode": "^1.69.0",
+		"typescript": "^4.7.4"
+	}
 }
