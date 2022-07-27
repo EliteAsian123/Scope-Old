@@ -7,7 +7,8 @@
 		"vscode": "^1.69.0"
 	},
 	"categories": [
-		"Programming Languages"
+		"Programming Languages",
+		"Snippets"
 	],
 	"scripts": {
 		"build": "tsc -p ./"
@@ -27,7 +28,7 @@
 				"extensions": [
 					".scope"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./other/language-configuration.json"
 			}
 		],
 		"grammars": [
@@ -35,6 +36,12 @@
 				"language": "scope",
 				"scopeName": "source.scope",
 				"path": "./syntaxes/scope.tmLanguage.json"
+			}
+		],
+		"snippets": [
+			{
+				"language": "scope",
+				"path": "./other/snippets.json"
 			}
 		]
 	},

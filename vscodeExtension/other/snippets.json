@@ -1,0 +1,11 @@
+{
+	"Import Statement": {
+		"prefix": [
+			"import"
+		],
+		"body": [
+			"import \"${1:Standard/}\";"
+		],
+		"description": "An import statement."
+	}
+}
