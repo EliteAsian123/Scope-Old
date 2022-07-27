@@ -48,8 +48,10 @@
 		fprintf(stderr, "Lex Error: import statement must be followed by a string.\n");
 		yyterminate();
 	}
-
-	char* fileName = malloc(strlen(yytext) - 2 + 7);
+	
+	// "TEST.scope"N
+	// x    ++++++x+
+	char* fileName = calloc(strlen(yytext) - 2 + 6 + 1, 1);
 	strncpy(fileName, yytext + 1, strlen(yytext) - 2);
 	strcat(fileName, ".scope");
 	
@@ -67,7 +69,7 @@
 	importedFiles[importedFilesCount - 1] = fileName;
 	
 	// Read file
-	yyin = fopen(fileName, "r+");
+	yyin = fopen(fileName, "r");
 	if (yyin == NULL) {
 		fprintf(stderr, "Lex Error: Could not open file `%s`.\n", fileName);
 		yyterminate();
