@@ -36,10 +36,6 @@ $ sudo apt install bison
 
 ## Building
 
-> **Note**
->
-> Make sure to remove `example.c` from the `c_escape` submodule as it could cause problems.
-
 ```bash
 # These warnings are normal
 $ sh build.sh
