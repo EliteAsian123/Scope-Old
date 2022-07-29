@@ -1,0 +1,3 @@
+[submodule "src/c_escape"]
+	path = src/c_escape
+	url = https://github.com/EliteAsian123/c_escape

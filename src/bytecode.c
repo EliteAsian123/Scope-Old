@@ -441,8 +441,9 @@ static void instDump(size_t i) {
 	// clang-format on
 
 	if (instHasPointer(i)) {
-		printf("[%ld, %d] %s: \"%s\", %s\n", i, insts[i].scope, instName,
-			   (char*) insts[i].data._ptr, typestr(insts[i].type));
+		char* escaped = escape((char*) insts[i].data._ptr, CE_C);
+		printf("[%ld, %d] %s: \"%s\", %s\n", i, insts[i].scope, instName, escaped, typestr(insts[i].type));
+		free(escaped);
 	} else {
 		printf("[%ld, %d] %s: %d, %s\n", i, insts[i].scope, instName,
 			   insts[i].data._int, typestr(insts[i].type));

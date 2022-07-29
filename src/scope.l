@@ -1,6 +1,6 @@
 %{
 	#include "scope.tab.h"
-	#include "../unescape.h"
+	#include "../c_escape/c_escape.h"
 
 	char** importedFiles = NULL;
 	size_t importedFilesCount = 0;
@@ -124,16 +124,13 @@
 	size_t len = strlen(yytext) - 1;
 	char* in = strndup(yytext + 1, len);
 	in[len - 1] = '\0';
-	
-	char* out = malloc(len);
-	if (unescape(in, out, len) == NULL) {
-		fprintf(stderr, "Lex Error: Failed to unescape.\n");
+
+	int errloc = 0;
+	char* out = unescape(in, CE_C, &errloc);
+	if (out == NULL) {
+		fprintf(stderr, "Lex Error: Failed to unescape. Error at character %d.\n", errloc);
 		exit(-1);
 	}
-	
-	len = strlen(out) + 1;
-	out = realloc(out, len);
-	out[len - 1] = '\0';
 	
 	yylval.v_str = out;
 	

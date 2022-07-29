@@ -36,6 +36,10 @@ $ sudo apt install bison
 
 ## Building
 
+> **Note**
+>
+> Make sure to remove `example.c` from the `c_escape` submodule as it could cause problems.
+
 ```bash
 # These warnings are normal
 $ sh build.sh
@@ -56,10 +60,3 @@ Testing `Tests/For.scope`
 ...
 Done!
 ```
-
-
-## Credits
-
-- [`unescape.c`](https://github.com/yasuoka/unescape/blob/master/unescape.c): Copyright (c) 2019 YASUOKA Masahiko <yasuoka@yasuoka.net>
-
-

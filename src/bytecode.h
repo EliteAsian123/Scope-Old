@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "c_escape/c_escape.h"
 #include "extern.h"
 #include "flags.h"
 #include "internaltypes.h"
