@@ -1,5 +1,10 @@
 <img src="img/Logo.svg" alt="Scope Logo"/>
 
+> **Warning**
+>
+> What started off as a small project has become something bloated and badly-written.
+> I am in the process of re-writing Scope, so until then, be aware of bugs!
+
 *Scope* is an interpreted, object oriented programming language that I am in the process of creating.
 
 <img src="img/HelloWorld.png" alt="Hello World in Scope" width="332"/>
