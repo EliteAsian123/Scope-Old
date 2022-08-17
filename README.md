@@ -3,7 +3,7 @@
 > **Warning**
 >
 > What started off as a small project has become something bloated and badly-written.
-> I am in the process of re-writing Scope, so until then, be aware of bugs!
+> If I ever decide to come back to this project, I will re-write it. Maybe even from scratch.
 
 *Scope* is an interpreted, object oriented programming language that I am in the process of creating.
 
