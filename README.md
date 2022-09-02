@@ -1,9 +1,10 @@
+# This is the old, interpreted verison of Scope. [Click here](https://github.com/ScopeLang/Scope) for the new verison (which is better).
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 <img src="img/Logo.svg" alt="Scope Logo"/>
-
-> **Warning**
->
-> What started off as a small project has become something bloated and badly-written.
-> If I ever decide to come back to this project, I will re-write it. Maybe even from scratch.
 
 *Scope* is an interpreted, object oriented programming language that I am in the process of creating.
 
